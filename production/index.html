@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ru" data-theme="production">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a09">
+<title>Продакшен REVOLVER — YouTube, подкасты и музыка под ключ, Новосибирск</title>
+<meta name="description" content="Продюсирование YouTube-каналов и шоу, кейсы с миллионами просмотров. Разговорный канал от 70 000 ₽, шоу от 150 000 ₽. Новосибирск.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Продакшен REVOLVER — YouTube, подкасты и музыка под ключ, Новосибирск">
+<meta property="og:description" content="Продюсирование YouTube-каналов и шоу, кейсы с миллионами просмотров. Разговорный канал от 70 000 ₽, шоу от 150 000 ₽. Новосибирск.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/spray-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css?v=4">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"REVOLVER · REVOLVER SOUND · REVOLVER PODCAST","description":"Студия звукозаписи и видеопавильон для подкастов, Live-сессий и Shorts.","address":{"@type":"PostalAddress","streetAddress":"ул. Фрунзе, 49","addressLocality":"Новосибирск","addressCountry":"RU"},"openingHours":"Mo-Su 00:00-23:59","priceRange":"900–150000 ₽"}</script>
+</head>
+<body>
+<a class="skip" href="#main">К содержанию</a>
+<div class="progress" id="progress"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<canvas id="spray" aria-hidden="true"></canvas>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-cyl" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2.6"><circle cx="24" cy="11" r="5.5"/><circle cx="35.3" cy="17.5" r="5.5"/><circle cx="35.3" cy="30.5" r="5.5"/><circle cx="24" cy="37" r="5.5"/><circle cx="12.7" cy="30.5" r="5.5"/><circle cx="12.7" cy="17.5" r="5.5"/></g></symbol>
+    <symbol id="i-cross" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><circle cx="50" cy="50" r="30"/><circle cx="50" cy="50" r="4" fill="currentColor"/><path d="M50 4v26M50 70v26M4 50h26M70 50h26"/></symbol>
+    <symbol id="i-splat" viewBox="0 0 200 200"><g fill="currentColor"><path d="M100 22c14 6 12 26 24 34 14 8 38-2 48 12 8 12-6 24-4 38 2 14 22 24 14 38-8 12-28 6-38 14-12 8-10 30-26 32-14 2-20-16-32-22-14-6-36 6-46-6-10-12 6-28 2-42-4-14-26-20-20-34 6-12 26-8 36-16 12-8 8-32 22-36 7-2 15 0 20 .0z"/><circle cx="26" cy="40" r="7"/><circle cx="176" cy="40" r="5"/><circle cx="184" cy="150" r="8"/><circle cx="16" cy="150" r="5"/><circle cx="60" cy="188" r="4"/><circle cx="150" cy="190" r="6"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c28-6 52 6 58 28 6 20-10 34-24 26-12-7-6-26 10-26 20 0 28 22 28 38"/><path d="M82 94l14 14 14-16"/></symbol>
+  </defs>
+</svg>
+
+<header class="hdr">
+  <div class="wrap">
+    <a class="brand" href="../" aria-label="REVOLVER — на главную">
+      <svg class="cyl" aria-hidden="true"><use href="#i-cyl"/></svg>
+      <span><b>REVOLVER</b><small>SOUND · PODCAST · NSK</small></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Основная навигация"><a href="../sound/">Звукозапись</a><a href="../podcast/">Подкасты</a><a href="../production/" class="on" aria-current="page">Продакшен</a><a href="../#tour">3D-тур</a></nav>
+    <a class="btn sm" href="#book" data-book>Забронировать</a>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="nav"><i></i><i></i><i></i></button>
+  </div>
+</header>
+
+<main id="main">
+<section class="phero" data-acc="red">
+  <div class="phero-bg"><img src="../assets/img/interview.webp" alt="Съёмка интервью в павильоне REVOLVER PODCAST"></div>
+  <span class="drip" style="left:12%;top:0;height:90px;animation-delay:.6s" aria-hidden="true"></span>
+  <span class="drip" style="right:18%;top:0;height:130px;width:12px;animation-delay:2.6s;background:var(--lime)" aria-hidden="true"></span>
+  <div class="wrap">
+    <p class="crumbs"><a href="../">Главная</a> / Продакшен</p>
+    <span class="kick">ПРОДАКШЕН · ЭКСПЕРТЫ · БРЕНДЫ · АРТИСТЫ</span>
+    <h1>Продюсируем<br><em>YouTube</em> и музыку</h1>
+    <p class="lead">Находим тему, герою — формат, а выпуску — причину, чтобы его открыли. Снимаем на своей площадке и упаковываем под YouTube, VK Видео, Rutube и Дзен. Свет и картинку курирует команда VOLNA film.</p>
+    <div class="cta" style="margin-top:30px"><a class="btn red" href="#book" data-book data-service="YouTube: пилотный выпуск">Обсудить пилот</a><a class="btn ghost" href="#cases">Смотреть кейсы</a></div>
+  </div>
+</section><section class="sec" id="cases" data-acc="red"><div class="wrap">
+  <span class="kick rv">YouTube</span>
+  <h2 class="h2 rv d1">Каналы и выпуски,<br>которые <em>работают.</em></h2>
+  <p class="lead rv d2">Видео загружается только по нажатию. YouTube в России может требовать VPN — рядом всегда есть прямая ссылка.</p>
+  <div class="ytgrid"><article class="ytc rv d0"><div class="video-stage" data-yt-id="Gm8-ZmQf0nU" data-yt-title="После этого случая я поверил в МИСТИКУ!"><img src="../assets/yt/Gm8-ZmQf0nU.jpg" alt="Превью выпуска «После этого случая я поверил в МИСТИКУ!»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: После этого случая я поверил в МИСТИКУ!"><span>▶</span>Смотреть</button></div>
+<div class="ytb"><span class="caption">Авторский канал · длинный формат</span><h3>«Эксперт по шнуркам» — истории одного человека стали каналом с 26,6 млн просмотров</h3><p>Велосипедист-кругосветчик рассказывает истории из поездок. Длинный выпуск набрал более 2 млн просмотров и почти 220 тыс. часов просмотра.</p><p class="ystat">26,6+ млн просмотров · 980+ тыс. часов просмотра · 61+ тыс. подписчиков</p><a class="olink" href="https://youtu.be/Gm8-ZmQf0nU" target="_blank" rel="noopener">Смотреть на YouTube ↗</a></div></article>
+<article class="ytc rv d1"><div class="video-stage" data-yt-id="ADKbN_Wm_Rc" data-yt-title="Чем ателье лучше производства?"><img src="../assets/yt/ADKbN_Wm_Rc.jpg" alt="Превью выпуска «Чем ателье лучше производства?»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: Чем ателье лучше производства?"><span>▶</span>Смотреть</button></div>
+<div class="ytb"><span class="caption">Интервью с непубличным предпринимателем</span><h3>SNEGOVIK PRODUCTION — интересный разговор с непубличным предпринимателем</h3><p>Вместо интервью «о пути предпринимателя» — один конкретный вопрос, на который у героя есть ответ из практики. Short из этого выпуска набрал более 4 млн просмотров.</p><p class="ystat">17+ млн просмотров · 190+ тыс. часов просмотра · 22,6+ тыс. подписчиков</p><a class="olink" href="https://youtu.be/ADKbN_Wm_Rc" target="_blank" rel="noopener">Смотреть на YouTube ↗</a></div></article>
+<article class="ytc rv d2"><div class="video-stage" data-yt-id="xIGH-3r54MQ" data-yt-title="Как изменился бизнес в России за 40 лет? Владимир Мартыненков"><img src="../assets/yt/xIGH-3r54MQ.jpg" alt="Превью выпуска «Как изменился бизнес в России за 40 лет? Владимир Мартыненков»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: Как изменился бизнес в России за 40 лет? Владимир Мартыненков"><span>▶</span>Смотреть</button></div>
+<div class="ytb"><span class="caption">Деловое интервью · девелопмент</span><h3>Как изменился бизнес в России за 40 лет?</h3><p>Разговор с основателем группы компаний «Мета»: от первых предпринимательских решений до девелопмента. Компания раскрывается через решения человека.</p><p class="ystat">Выпуск опубликован на канале «Завтраки Бизнес Сибирь»</p><a class="olink" href="https://youtu.be/xIGH-3r54MQ" target="_blank" rel="noopener">Смотреть на YouTube ↗</a></div></article>
+<article class="ytc rv d0"><div class="video-stage" data-yt-id="DFQLBI6_p50" data-yt-title="Как мы построили дом мечты? Post and Beam: сибирский эксперимент"><img src="../assets/yt/DFQLBI6_p50.jpg" alt="Превью выпуска «Как мы построили дом мечты? Post and Beam: сибирский эксперимент»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: Как мы построили дом мечты? Post and Beam: сибирский эксперимент"><span>▶</span>Смотреть</button></div>
+<div class="ytb"><span class="caption">Экспертный рум-тур · строительство</span><h3>Как мы построили дом мечты?</h3><p>Рум-тур с основателем «Старко» по собственному дому: зелёная кровля, планировка и детали конструкции — повод объяснить, как мыслит строитель.</p><p class="ystat">Экспертный рум-тур</p><a class="olink" href="https://youtu.be/DFQLBI6_p50" target="_blank" rel="noopener">Смотреть на YouTube ↗</a></div></article>
+</div>
+</div></section>
+<section class="sec wall" id="events" data-acc="red"><div class="wrap">
+  <span class="kick rv">Мероприятия</span>
+  <h2 class="h2 rv d1">Организуем <em>тусы</em> и <span class="tag">концерты.</span></h2>
+  <p class="lead rv d2">Бизнес-события, концерты и банкеты под ключ: площадка, звук, свет, видео, программа. Выбери формат — расскажем, что входит.</p>
+  <div class="evtypes rv"><article><b>Бизнес</b><span>Презентации, корпоративы, запуски, нетворкинг</span><button class="chip" type="button" data-book data-service="Мероприятие: бизнес">Обсудить<span>↗</span></button></article><article><b>Концерты</b><span>Сет-листы, звук и свет, трансляция, запись</span><button class="chip" type="button" data-book data-service="Мероприятие: концерт">Обсудить<span>↗</span></button></article><article><b>Банкеты</b><span>Музыка, ведущие, диджеи, атмосфера</span><button class="chip" type="button" data-book data-service="Мероприятие: банкет">Обсудить<span>↗</span></button></article></div>
+  <article class="evt rv">
+    <div class="evt-screen"><canvas class="static-cv"></canvas><b>В МОНТАЖЕ</b><span>ВИДЕО СКОРО</span></div>
+    <div class="evt-body"><span class="caption">Мероприятие · хип-хоп</span><h3>Хип-хоп туса в Аэропорту</h3>
+      <p>Ролик с мероприятия сейчас в монтаже. Скоро покажем, как это было: сцена, звук, люди и атмосфера.</p>
+      <div class="phbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <button class="btn red sm" type="button" data-book data-service="Мероприятие: концерт">Хочу такую тусу</button></div>
+  </article>
+</div></section><section class="sec wall" id="tracks" data-acc="lime"><div class="wrap">
+  <span class="kick rv">Музыка</span>
+  <h2 class="h2 rv d1">Кейсы по <em>трекам.</em></h2>
+  <p class="lead rv d2">Первые релизы со студии скоро появятся здесь: треки, клипы, Live и вертикальные ролики.</p>
+  <div class="phgrid"><article class="phc rv d0"><span class="soon">СКОРО</span><h3>Кейс: трек + клип</h3><p>Здесь появится история релиза: от записи в REVOLVER SOUND до клипа и Reels.</p><div class="phbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article><article class="phc rv d1"><span class="soon">СКОРО</span><h3>Кейс: Live-сессия</h3><p>Живое выступление в павильоне и мультитрек через стену. Видео и чистый звук.</p><div class="phbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article><article class="phc rv d2"><span class="soon">СКОРО</span><h3>Кейс: альбом / EP</h3><p>Серия треков, обложки и вертикали. Что сделали и какой получился результат.</p><div class="phbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article></div>
+</div></section>
+<section class="sec" id="packages" style="background:#0b0e0c" data-acc="red"><div class="wrap">
+  <span class="kick rv">Пакеты</span>
+  <h2 class="h2 rv d1">Два пакета <em>продюсирования.</em></h2>
+  <div class="cards two-c">
+    <article class="card rv"><span class="t">ФОРМАТ «ГОВОРЯЩАЯ ГОЛОВА»</span><h3>Разговорный канал</h3><p class="d">Эксперт, основатель или ведущий в кадре: придумываем рубрики и темы, снимаем и упаковываем выпуски.</p><div class="pr">от 70 000 ₽</div><p class="nt">Итог зависит от числа выпусков и объёма работ</p><ul><li>Разбор задачи, аудитории и героя</li><li>Формат, рубрики и темы выпусков</li><li>Съёмка в студии или выезд</li><li>Монтаж, обложки, названия, описания</li><li>Shorts из выпусков и разбор результата</li></ul><a class="btn ghost" href="#book" data-book data-service="YouTube: продюсирование разговорного канала">Обсудить канал</a></article>
+    <article class="card hit rv d1"><span class="t">ШОУ</span><h3>Продюсирование шоу</h3><p class="d">Серия с гостями и героями: придумываем формат, делаем пилот и ведём регулярный выход.</p><div class="pr">от 150 000 ₽</div><p class="nt">Итог зависит от формата, числа выпусков и сложности съёмки</p><ul><li>Концепция шоу, ведущий, структура</li><li>Подбор гостей, сценарный план</li><li>Пилотный выпуск и разбор результата</li><li>Съёмка, монтаж, графика, звук, обложки</li><li>Регулярный выход и упаковка для платформ</li></ul><a class="btn red" href="#book" data-book data-service="YouTube: продюсирование шоу">Обсудить шоу</a></article>
+  </div>
+  <p class="note rv">Окончательную стоимость называем после обсуждения задачи и пилотного выпуска. Записать выпуск на площадке можно по <a href="../podcast/#prices" style="border-bottom:2px solid var(--red)">готовым тарифам павильона</a>.</p>
+  <p class="volna rv" style="color:var(--ink);margin-top:34px">Корпоративное видео для заводов, застройщиков и госсектора, клипы и фестивальное кино — <a href="https://marchen.ru" target="_blank" rel="noopener" style="border-bottom:2px solid var(--lime)">VOLNA film · marchen.ru ↗</a></p>
+</div></section><div class="static" aria-hidden="true"><canvas></canvas><span>NO SIGNAL ● REC</span></div>
+<section class="sec book" id="book" data-acc="lime">
+  <div class="wrap book-grid">
+    <div>
+      <span class="kick rv">Бронь</span>
+      <h2 class="h2 rv d1">Выбери <span>слот.</span><br>Заходи <em>вниз.</em></h2>
+      <p class="lead rv d2">Расскажи, что хочешь записать или снять. Подскажем, сколько заложить времени. Без обязательств — можно просто приехать на экскурсию (15 минут).</p>
+      <p class="rv d3 who-reply" id="whoReply">Заявка уйдёт в Telegram: <b id="whoName">—</b></p>
+    </div>
+    <form class="form rv d2" id="form" novalidate data-default="production">
+      <div class="attach" id="attach" hidden></div>
+      <label class="fld"><span>Услуга</span><select id="fService"></select></label>
+      <div class="two">
+        <label class="fld"><span>Имя и контакт</span><input id="fContact" required autocomplete="name" placeholder="Имя, @telegram или телефон"></label>
+        <label class="fld"><span>Желаемая дата</span><input id="fDate" type="date"></label>
+      </div>
+      <label class="fld"><span>Что хочешь сделать</span><textarea id="fMsg" placeholder="Тема, жанр, сколько человек, нужна ли съёмка…"></textarea></label>
+      <div class="acts"><button class="btn" type="submit">Отправить заявку</button><button class="btn ghost" type="button" id="fCopy">Скопировать</button></div>
+      <p class="fn" id="fNote">Откроется черновик в Telegram — останется нажать «Отправить». Дату подтвердит администратор.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-big" aria-hidden="true">REVOLVER</div>
+    <div class="ftr-row">
+      <span><svg class="cyl" style="width:26px;height:26px;display:inline-block;vertical-align:middle;margin-right:10px"><use href="#i-cyl"/></svg>REVOLVER SOUND · REVOLVER PODCAST<br>Новосибирск, ул. Фрунзе, 49 (подвал)</span>
+      <nav style="display:flex;gap:22px;flex-wrap:wrap"><a href="../sound/">Звукозапись</a><a href="../podcast/">Подкасты</a><a href="../production/">Продакшен</a><a href="../3d/index.html">3D-тур</a><a href="#book">Бронь</a></nav>
+      <span>Картинку курирует <a href="https://marchen.ru" target="_blank" rel="noopener" style="color:var(--lime)">VOLNA film</a></span>
+    </div>
+    <small>© 2026 REVOLVER. Цены ориентировочные, итоговую смету подтверждает администратор. Дистрибуция — через выбранного дистрибьютора, размещение не гарантируется.</small>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Просмотр фото"><button class="x" aria-label="Закрыть">×</button><button class="pv" aria-label="Назад">‹</button><img id="lbImg" alt=""><button class="nx" aria-label="Вперёд">›</button></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="../assets/site.js?v=4"></script>
+</body>
+</html>

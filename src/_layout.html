@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru" data-theme="{{theme}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a09">
+<title>{{title}}</title>
+<meta name="description" content="{{desc}}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{desc}}">
+<link rel="icon" href="{{b}}assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="{{b}}assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{b}}assets/fonts/spray-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{b}}assets/site.css?v=4">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"REVOLVER · REVOLVER SOUND · REVOLVER PODCAST","description":"Студия звукозаписи и видеопавильон для подкастов, Live-сессий и Shorts.","address":{"@type":"PostalAddress","streetAddress":"ул. Фрунзе, 49","addressLocality":"Новосибирск","addressCountry":"RU"},"openingHours":"Mo-Su 00:00-23:59","priceRange":"900–150000 ₽"}</script>
+</head>
+<body>
+<a class="skip" href="#main">К содержанию</a>
+<div class="progress" id="progress"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<canvas id="spray" aria-hidden="true"></canvas>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-cyl" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2.6"><circle cx="24" cy="11" r="5.5"/><circle cx="35.3" cy="17.5" r="5.5"/><circle cx="35.3" cy="30.5" r="5.5"/><circle cx="24" cy="37" r="5.5"/><circle cx="12.7" cy="30.5" r="5.5"/><circle cx="12.7" cy="17.5" r="5.5"/></g></symbol>
+    <symbol id="i-cross" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><circle cx="50" cy="50" r="30"/><circle cx="50" cy="50" r="4" fill="currentColor"/><path d="M50 4v26M50 70v26M4 50h26M70 50h26"/></symbol>
+    <symbol id="i-splat" viewBox="0 0 200 200"><g fill="currentColor"><path d="M100 22c14 6 12 26 24 34 14 8 38-2 48 12 8 12-6 24-4 38 2 14 22 24 14 38-8 12-28 6-38 14-12 8-10 30-26 32-14 2-20-16-32-22-14-6-36 6-46-6-10-12 6-28 2-42-4-14-26-20-20-34 6-12 26-8 36-16 12-8 8-32 22-36 7-2 15 0 20 .0z"/><circle cx="26" cy="40" r="7"/><circle cx="176" cy="40" r="5"/><circle cx="184" cy="150" r="8"/><circle cx="16" cy="150" r="5"/><circle cx="60" cy="188" r="4"/><circle cx="150" cy="190" r="6"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c28-6 52 6 58 28 6 20-10 34-24 26-12-7-6-26 10-26 20 0 28 22 28 38"/><path d="M82 94l14 14 14-16"/></symbol>
+  </defs>
+</svg>
+
+<header class="hdr">
+  <div class="wrap">
+    <a class="brand" href="{{r}}" aria-label="REVOLVER — на главную">
+      <svg class="cyl" aria-hidden="true"><use href="#i-cyl"/></svg>
+      <span><b>REVOLVER</b><small>SOUND · PODCAST · NSK</small></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Основная навигация">{{nav}}</nav>
+    <a class="btn sm" href="#book" data-book>Забронировать</a>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="nav"><i></i><i></i><i></i></button>
+  </div>
+</header>
+
+<main id="main">
+{{body}}
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-big" aria-hidden="true">REVOLVER</div>
+    <div class="ftr-row">
+      <span><svg class="cyl" style="width:26px;height:26px;display:inline-block;vertical-align:middle;margin-right:10px"><use href="#i-cyl"/></svg>REVOLVER SOUND · REVOLVER PODCAST<br>Новосибирск, ул. Фрунзе, 49 (подвал)</span>
+      <nav style="display:flex;gap:22px;flex-wrap:wrap"><a href="{{b}}sound/">Звукозапись</a><a href="{{b}}podcast/">Подкасты</a><a href="{{b}}production/">Продакшен</a><a href="{{b}}3d/index.html">3D-тур</a><a href="#book">Бронь</a></nav>
+      <span>Картинку курирует <a href="https://marchen.ru" target="_blank" rel="noopener" style="color:var(--lime)">VOLNA film</a></span>
+    </div>
+    <small>© 2026 REVOLVER. Цены ориентировочные, итоговую смету подтверждает администратор. Дистрибуция — через выбранного дистрибьютора, размещение не гарантируется.</small>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Просмотр фото"><button class="x" aria-label="Закрыть">×</button><button class="pv" aria-label="Назад">‹</button><img id="lbImg" alt=""><button class="nx" aria-label="Вперёд">›</button></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="{{b}}assets/site.js?v=4"></script>
+</body>
+</html>

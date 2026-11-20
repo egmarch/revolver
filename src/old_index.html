@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a09">
+<title>REVOLVER — звукозапись и подкаст-студия в Новосибирске, Фрунзе 49</title>
+<meta name="description" content="Две студии в одном подвале: звукозапись REVOLVER и видеопавильон REVOLVR PODCAST. Запись треков, подкасты, Live-сессии, Shorts. Съёмка сегодня — выпуск завтра. Новосибирск, ул. Фрунзе, 49.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="REVOLVER · REVOLVR PODCAST — звук и кадр в одном подвале">
+<meta property="og:description" content="Запись треков, подкасты, Live-сессии и Shorts. Выпуск за 24 часа. Новосибирск, Фрунзе 49.">
+<meta property="og:image" content="assets/img/hall-wide-2.webp">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/spray-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"REVOLVER · REVOLVR PODCAST","description":"Студия звукозаписи и видеопавильон для подкастов, Live-сессий и Shorts.","address":{"@type":"PostalAddress","streetAddress":"ул. Фрунзе, 49","addressLocality":"Новосибирск","addressCountry":"RU"},"openingHours":"Mo-Su 00:00-23:59","priceRange":"900–28000 ₽"}</script>
+</head>
+<body>
+<a class="skip" href="#main">К содержанию</a>
+<div class="progress" id="progress"></div>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="spray" aria-hidden="true"></canvas>
+
+<!-- SVG набор -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-cyl" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2.6"><circle cx="24" cy="11" r="5.5"/><circle cx="35.3" cy="17.5" r="5.5"/><circle cx="35.3" cy="30.5" r="5.5"/><circle cx="24" cy="37" r="5.5"/><circle cx="12.7" cy="30.5" r="5.5"/><circle cx="12.7" cy="17.5" r="5.5"/></g></symbol>
+    <symbol id="i-cross" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><circle cx="50" cy="50" r="30"/><circle cx="50" cy="50" r="4" fill="currentColor"/><path d="M50 4v26M50 70v26M4 50h26M70 50h26"/></symbol>
+    <symbol id="i-splat" viewBox="0 0 200 200"><g fill="currentColor"><path d="M100 22c14 6 12 26 24 34 14 8 38-2 48 12 8 12-6 24-4 38 2 14 22 24 14 38-8 12-28 6-38 14-12 8-10 30-26 32-14 2-20-16-32-22-14-6-36 6-46-6-10-12 6-28 2-42-4-14-26-20-20-34 6-12 26-8 36-16 12-8 8-32 22-36 7-2 15 0 20 .0z"/><circle cx="26" cy="40" r="7"/><circle cx="176" cy="40" r="5"/><circle cx="184" cy="150" r="8"/><circle cx="16" cy="150" r="5"/><circle cx="60" cy="188" r="4"/><circle cx="150" cy="190" r="6"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c28-6 52 6 58 28 6 20-10 34-24 26-12-7-6-26 10-26 20 0 28 22 28 38"/><path d="M82 94l14 14 14-16"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 40 60" fill="currentColor"><path d="M24 0 4 34h12L10 60 36 22H22z"/></symbol>
+  </defs>
+</svg>
+
+<header class="hdr">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="REVOLVER — наверх">
+      <svg class="cyl" aria-hidden="true"><use href="#i-cyl"/></svg>
+      <span><b>REVOLVER</b><small>SOUND · PODCAST · NSK</small></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Основная навигация">
+      <a href="#studios">Студии</a>
+      <a href="#tour">3D-тур</a>
+      <a href="#prices">Цены</a>
+      <a href="#frames">Кадры</a>
+      <a href="#find">Как найти</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <a class="btn sm" href="#book" data-book>Забронировать</a>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="nav"><i></i><i></i><i></i></button>
+  </div>
+</header>
+
+<main id="main">
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-ghost" aria-hidden="true">REVOLVER</div>
+  <span class="drip" style="left:47%;top:0;height:120px;animation-delay:.4s" aria-hidden="true"></span>
+  <span class="drip" style="left:38%;top:0;height:70px;width:7px;animation-delay:2.2s;background:var(--lime)" aria-hidden="true"></span>
+  <span class="drip" style="right:12%;top:0;height:150px;width:12px;animation-delay:3.5s" aria-hidden="true"></span>
+  <svg class="hero-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="stamp"><i></i> Фрунзе 49 · подвал · 24/7 по записи</span>
+      <h1>
+        <span>Пишем звук.</span>
+        <span class="l2">Снимаем<svg class="scrawl" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M4 18C60 6 120 26 190 14S330 8 396 16"/></svg></span>
+        <span class="l3">разговор.</span>
+      </h1>
+      <p class="lead">Две студии в одном подвале в Новосибирске: тон-ателье <b>REVOLVER</b> и видеопавильон <b>REVOLVR PODCAST</b> с ЭЛТ, граффити и ретро-стеллажами. Снял сегодня — <b>выпуск и Shorts завтра</b>.</p>
+      <div class="cta">
+        <a class="btn" href="3d/index.html">Спуститься в 3D <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg></a>
+        <a class="btn ghost" href="#book" data-book>Забронировать слот</a>
+      </div>
+      <div class="hero-note"><span><b>12 900 ₽</b> трек + 5 сниппетов</span><span><b>17 000 ₽</b> выпуск за 24 часа</span><span><b>от 1 500 ₽/ч</b> запись голоса</span></div>
+    </div>
+
+    <div class="crt-wrap">
+      <div class="crt">
+        <div class="crt-top"><span>REVOLVR / TELEVISION</span><b>REC <span data-tc>00:14:28:09</span></b></div>
+        <div class="screen">
+          <img id="crtImg" src="assets/img/hall-wide-2.webp" alt="Общий план видеопавильона REVOLVR PODCAST" width="1700" height="1133">
+          <span class="ch" id="crtCh">CH 01</span><span class="tc" aria-hidden="true">CAM A</span>
+        </div>
+        <div class="crt-ctl">
+          <span>ПЕРЕКЛЮЧИ КАНАЛ</span>
+          <button aria-pressed="true" data-cam="hall-wide-2" data-alt="Общий план видеопавильона">01 ОБЩИЙ</button>
+          <button aria-pressed="false" data-cam="host-mic-1" data-alt="Ведущий за микрофоном">02 ВЕДУЩИЙ</button>
+          <button aria-pressed="false" data-cam="vocal-2" data-alt="Артист в тон-ателье REVOLVER">03 ВОКАЛ</button>
+        </div>
+      </div>
+      <span class="sticker st-nbt">No boring talks</span>
+      <svg class="sticker st-cross" aria-hidden="true"><use href="#i-cross"/></svg>
+      <span class="sticker st-tag" aria-hidden="true">говори громче!</span>
+    </div>
+  </div>
+</section>
+
+<div class="tapes" aria-hidden="true">
+  <div class="tape a"><span>REC</span><span>Звукозапись</span><span>Подкасты</span><span>Live-сессии</span><span>Shorts · Reels</span><span>24/7 по записи</span><span>REC</span><span>Звукозапись</span><span>Подкасты</span><span>Live-сессии</span><span>Shorts · Reels</span><span>24/7 по записи</span></div>
+  <div class="tape b"><span>Фрунзе 49</span><span>Вход — вниз по лестнице</span><span>No boring talks</span><span>Выпуск за 24 часа</span><span>Фрунзе 49</span><span>Вход — вниз по лестнице</span><span>No boring talks</span><span>Выпуск за 24 часа</span></div>
+</div>
+
+<!-- ============ STUDIOS ============ -->
+<section class="sec" id="studios">
+  <div class="wrap">
+    <span class="kick rv">01 / Две двери</span>
+    <h2 class="h2 rv d1">Один подвал.<br><em>Два</em> <span class="tag">характера.</span></h2>
+    <p class="lead rv d2">Записал голос в чёрной тихой комнате — перешёл через стену в зал с ковром, ЭЛТ и светом и снял сниппеты на новый трек. Без пересылки проектов пяти подрядчикам.</p>
+    <div class="doors">
+      <article class="door s rv" data-tilt>
+        <div class="door-img"><img src="assets/img/vocal-2.webp" alt="Артист записывает вокал в студии REVOLVER" loading="lazy"></div>
+        <svg class="splat" aria-hidden="true"><use href="#i-splat"/></svg>
+        <span class="num">01</span><span class="chip">18 М² · 3×6</span>
+        <div class="door-in">
+          <h3><small>ЗВУКОЗАПИСЬ / DJ / РЕЛИЗ</small>REVOLVER</h3>
+          <p>Акустически подготовленное тон-ателье. Вокал, рэп, речь, инструменты, сведение и мастеринг, DJ-школа и ночной стрим-рум.</p>
+          <ul><li>Запись со звукорежиссёром</li><li>Мониторинг и talkback</li><li>Сведение + мастер</li></ul>
+          <div class="row"><div class="price">от 1 500 ₽<small>/ час</small></div><a class="btn sm" href="#prices" data-tab="sound">Цены и пакеты</a></div>
+        </div>
+      </article>
+      <article class="door p rv d2" data-tilt>
+        <div class="door-img"><img src="assets/img/hall-wide-3.webp" alt="Видеопавильон REVOLVR PODCAST со стеллажом и ковром" loading="lazy"></div>
+        <svg class="splat" aria-hidden="true"><use href="#i-splat"/></svg>
+        <span class="num">02</span><span class="chip">30 М² · 6×5</span>
+        <div class="door-in">
+          <h3><small>ПОДКАСТЫ / LIVE / SHORTS</small>REVOLVR PODCAST</h3>
+          <p>Видеопавильон с характером: граффити-ковёр, ретро-стенд, ЭЛТ с лайв-фидом с камер, три камеры 4K и киношный свет. Выпуск за 24 часа.</p>
+          <ul><li>3 камеры 4K</li><li>ЭЛТ в кадре</li><li>Монтаж + 5 Shorts</li></ul>
+          <div class="row"><div class="price">от 2 700 ₽<small>/ час · выпуск 17 000 ₽</small></div><a class="btn sm amber" href="#prices" data-tab="podcast">Цены и пакеты</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3D TOUR ============ -->
+<section class="tour sec" id="tour" style="padding:clamp(80px,10vw,140px) 0">
+  <div class="tour-bg"><img src="assets/img/enter-stairs.webp" alt="" loading="lazy"></div>
+  <div class="wrap">
+    <div>
+      <span class="kick rv" style="--acc:var(--lime)">02 / Интерактивный режим</span>
+      <h2 class="h2 rv d1" style="--acc:var(--lime)">Спустись <span class="tag">сам.</span></h2>
+      <p class="lead rv d2">3D-копия студии: ночная улица, лестница в подвал, фиолетовый коридор, зал подкаста с граффити-стеной, лаундж и тон-ателье. Ходи по WASD или стиками на телефоне, жми на предметы и бронируй прямо из тура.</p>
+      <div class="cta rv d3" style="margin-top:30px"><a class="btn" href="3d/index.html">Войти в подвал <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg></a><span style="font:600 12px ui-monospace,Consolas,monospace;color:var(--mute)">WASD · мышь · 1–4 телепорт<br>на телефоне — два стика</span></div>
+    </div>
+    <div class="stairs rv d2" aria-hidden="true">
+      <span class="neon">вниз</span>
+      <svg class="arrow"><use href="#i-arrow"/></svg>
+      <i class="stair" style="width:300px;animation-delay:0s;--i:0"></i><i class="stair" style="width:300px;animation-delay:.55s;--i:1"></i><i class="stair" style="width:300px;animation-delay:1.1s;--i:2"></i><i class="stair" style="width:300px;animation-delay:1.65s;--i:3"></i><i class="stair" style="width:300px;animation-delay:2.2s;--i:4"></i><i class="stair" style="width:300px;animation-delay:2.75s;--i:5"></i><i class="stair" style="width:300px;animation-delay:3.3s;--i:6"></i><i class="stair" style="width:300px;animation-delay:3.85s;--i:7"></i><i class="stair" style="width:300px;animation-delay:4.4s;--i:8"></i><i class="stair" style="width:300px;animation-delay:4.95s;--i:9"></i>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PODCAST SPACE ============ -->
+<section class="sec wall" id="pavilion" data-acc="amber">
+  <div class="wrap">
+    <span class="kick rv">03 / REVOLVR PODCAST</span>
+    <h2 class="h2 rv d1">Не фон.<br><em>Часть шоу.</em></h2>
+    <p class="lead rv d2">Ковёр с авторским граффити, ретро-техника, ЭЛТ и чемодан с реквизитными деньгами со съёмок клипа — всё читается в кадре и в боке. Нажимай на точки.</p>
+    <div class="insp rv" id="insp">
+      <div class="insp-photo">
+        <img src="assets/img/hall-wide-1.webp" alt="Видеопавильон REVOLVR PODCAST: ковёр, стеллаж, ЭЛТ, свет и стол" loading="lazy" width="1700" height="1133">
+        <button class="hot on" style="left:9%;top:52%" data-i="0" aria-label="Граффити-ковёр">1</button>
+        <button class="hot" style="left:31%;top:52%" data-i="1" aria-label="ЭЛТ-телевизоры">2</button>
+        <button class="hot" style="left:56%;top:40%" data-i="2" aria-label="Ретро-стеллаж">3</button>
+        <button class="hot" style="left:36%;top:15%" data-i="3" aria-label="Свет">4</button>
+        <button class="hot" style="left:48%;top:78%" data-i="4" aria-label="Стол и микрофоны">5</button>
+      </div>
+      <div class="insp-panel" aria-live="polite">
+        <span class="big" id="inspNum">01</span>
+        <h3 id="inspT"></h3><p id="inspD"></p>
+        <div class="tags"><span id="inspTag"></span></div>
+      </div>
+    </div>
+    <div class="insp-tabs" id="inspTabs" style="border:2px solid var(--line);border-top:0">
+      <button class="on">Ковёр</button><button>ЭЛТ</button><button>Стенд</button><button>Свет</button><button>Стол</button>
+    </div>
+    <div class="strip" aria-label="Детали студии" id="strip">
+      <figure class="pol" style="margin:0" data-lb="detail-suitcase"><img src="assets/img/detail-suitcase.webp" alt="Чемодан с реквизитными деньгами и граффити" loading="lazy"><span>деньги не настоящие</span></figure>
+      <figure class="pol" style="margin:0" data-lb="detail-gasmask"><img src="assets/img/detail-gasmask.webp" alt="Противогаз на стеллаже" loading="lazy"><span>атмосфера</span></figure>
+      <figure class="pol" style="margin:0" data-lb="detail-turntable"><img src="assets/img/detail-turntable.webp" alt="Проигрыватель и микрофоны на журавлях" loading="lazy"><span>винил + 2 микрофона</span></figure>
+      <figure class="pol" style="margin:0" data-lb="detail-ball"><img src="assets/img/detail-ball.webp" alt="Баскетбольный мяч, настолки, книги" loading="lazy"><span>для боке</span></figure>
+      <figure class="pol" style="margin:0" data-lb="detail-guitar"><img src="assets/img/detail-guitar.webp" alt="Гитара и микрофон" loading="lazy"><span>гитара в кадре</span></figure>
+      <figure class="pol" style="margin:0" data-lb="detail-books"><img src="assets/img/detail-books.webp" alt="Книги и бюст с синей подсветкой" loading="lazy"><span>синий неон</span></figure>
+    </div>
+    <div class="cta rv" style="margin-top:20px"><a class="btn amber" href="#prices" data-tab="podcast">Тарифы павильона</a><a class="link" href="#frames">Все кадры →</a></div>
+  </div>
+</section>
+
+<!-- ============ SOUND ============ -->
+<section class="sec" id="sound" data-acc="lime" style="background:#0b0e0c">
+  <div class="wrap sound-grid">
+    <div class="collage rv">
+      <figure class="c1"><img src="assets/img/vocal-1.webp" alt="Вокалист в наушниках у микрофона" loading="lazy"></figure>
+      <figure class="c2"><img src="assets/img/smoke-pop.webp" alt="Поп-фильтр и микрофон в дыму" loading="lazy"></figure>
+      <figure class="c3"><img src="assets/img/control-3.webp" alt="Звукорежиссёр за пультом и артист" loading="lazy"></figure>
+      <span class="tg">REC!</span>
+    </div>
+    <div>
+      <span class="kick rv">04 / REVOLVER</span>
+      <h2 class="h2 rv d1">Комната,<br>где слышно <em>главное.</em></h2>
+      <p class="lead rv d2">Акустически подготовленное тон-ателье 3×6 м. Звукорежиссёр сидит в аппаратной, слышит проблему до того, как она попадёт в мастер, и ведёт тебя по дублям.</p>
+      <div class="flow rv d2">
+        <div class="flow-t"><span>SIGNAL FLOW</span><span>−12 dBFS · OK</span></div>
+        <svg viewBox="0 0 560 90" aria-label="Схема: видеозал, звукоизолированная стена, аппаратная, мастер">
+          <path id="pipePath" class="pipe" d="M40 45H520"/>
+          <rect x="6" y="20" width="68" height="50" fill="none" stroke="#5a655d" stroke-width="2"/><text x="40" y="49" text-anchor="middle">ЗАЛ</text>
+          <rect x="196" y="20" width="68" height="50" fill="none" stroke="#c9f23b" stroke-width="2"/><text x="230" y="49" text-anchor="middle">СТЕНА</text>
+          <rect x="316" y="20" width="76" height="50" fill="none" stroke="#5a655d" stroke-width="2"/><text x="354" y="49" text-anchor="middle">ПУЛЬТ</text>
+          <rect x="486" y="20" width="68" height="50" fill="#c9f23b"/><text x="520" y="49" text-anchor="middle" style="fill:#000">МАСТЕР</text>
+          <g class="dot"><circle r="5"><animateMotion dur="3.2s" repeatCount="indefinite" path="M40 45H520"/></circle><circle r="5" opacity=".6"><animateMotion dur="3.2s" begin="1.07s" repeatCount="indefinite" path="M40 45H520"/></circle><circle r="5" opacity=".35"><animateMotion dur="3.2s" begin="2.14s" repeatCount="indefinite" path="M40 45H520"/></circle></g>
+        </svg>
+        <div class="meters" aria-hidden="true" id="meters"></div>
+      </div>
+      <div class="feat rv d3">
+        <div><b>Запись</b><span>Вокал, рэп, речь, дубляж, аудиоподкасты. Звукорежиссёр на сессии.</span></div>
+        <div><b>Live-мультитрек</b><span>Группа играет в зале — поканальный звук пишется через стену.</span></div>
+        <div><b>DJ и стрим-рум</b><span>Клубные деки, ночные эфиры с мультикамерной картинкой.</span></div>
+        <div><b>Сведение и мастер</b><span>Баланс, плотность, мастеринг под Яндекс Музыку, VK, Spotify.</span></div>
+      </div>
+      <div class="cta rv" style="margin-top:30px"><a class="btn" href="#prices" data-tab="sound">Тарифы звука</a><a class="link" href="#book" data-book data-service="Запись вокала">Запросить дату →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AUDIENCE ============ -->
+<section class="sec wall" id="who" data-acc="red">
+  <div class="wrap">
+    <span class="kick rv">05 / Для кого</span>
+    <h2 class="h2 rv d1">Без галстуков.<br><em>Без</em> <span class="tag">клише.</span></h2>
+    <p class="lead rv d2">Мы не снимаем «успешный успех» на фоне белой стены. Нам важнее характер кадра, живой звук и скорость.</p>
+    <div class="aud rv">
+      <article><span class="n">01</span><h3>Артисты и битмейкеры</h3><p>Рэперы, инди-группы, диджеи. Записать трек, снять Live в духе Tiny Desk, нарезать сниппеты на релиз.</p><em>Live-сессии · разборы треков · клипы за разумные деньги</em></article>
+      <article><span class="n">02</span><h3>Новая волна бизнеса</h3><p>Стартапы, IT, крипто и финтех, креативные продюсеры. Авторское шоу и провокационное интервью без «офисных» поз.</p><em>YouTube-шоу · экспертные Reels · интервью</em></article>
+      <article><span class="n">03</span><h3>Комики и стримеры</h3><p>Разговорные форматы с юмором, прожарки, настолки на камеру, реакции. Три камеры ловят каждую реплику.</p><em>Стендап-шоу · игры · реакции</em></article>
+      <article><span class="n">04</span><h3>Видеографы и команды</h3><p>Арендуйте готовую фактурную локацию со светом под клип, рекламу молодёжных брендов или клиентский подкаст.</p><em>Зал + свет · от 2 700 ₽/ч · свой оператор</em></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICES ============ -->
+<section class="sec" id="prices" style="background:#0b0e0c" data-acc="lime">
+  <div class="wrap">
+    <span class="kick rv">06 / Цены</span>
+    <h2 class="h2 rv d1">Понятно <em>по деньгам.</em></h2>
+    <div class="seg rv" role="tablist" aria-label="Выберите студию" id="seg">
+      <button role="tab" class="on" data-tab="podcast" aria-selected="true">REVOLVR PODCAST</button>
+      <button role="tab" data-tab="sound" aria-selected="false">REVOLVER</button>
+    </div>
+
+    <div class="cards" id="cards-podcast" data-acc="amber">
+      <article class="card rv"><span class="t">ДЛЯ СВОЕЙ КОМАНДЫ</span><h3>Зал + свет</h3><p class="d">Для продакшнов и операторов со своей техникой.</p><div class="pr">2 700 ₽<small> / час</small></div><p class="nt">Минимум 2 часа · от 4 часов — 2 400 ₽/час</p><ul><li>Павильон 30 м² и реквизит</li><li>Постоянный студийный свет</li><li>Ваши камеры на ЭЛТ</li><li>Гримёрная, чай/кофе, админ</li></ul><a class="btn ghost" href="#book" data-book data-service="Аренда зала + свет">Выбрать аренду</a></article>
+      <article class="card hit rv d1"><span class="t">ГОТОВО ЗА 24 ЧАСА</span><h3>Экспресс-мультикам</h3><p class="d">Подкасты, интервью, экспертные шоу.</p><div class="pr">17 000 ₽<small> / выпуск</small></div><p class="nt">1 час записи · 3 камеры + звук</p><ul><li>3 камеры 4K, многоканальный звук</li><li>Склейка по спикерам</li><li>5 Shorts / Reels с субтитрами</li><li>Выпуск на следующий день</li></ul><a class="btn amber" href="#book" data-book data-service="Экспресс-мультикам 24ч">Хочу за 24 часа</a></article>
+      <article class="card rv d2"><span class="t">МАКСИМУМ ПОД КЛЮЧ</span><h3>Продюсерский</h3><p class="d">YouTube, бренды, музыкальные Live.</p><div class="pr">28 000 ₽<small> / выпуск</small></div><p class="nt">До 1,5 часов записи</p><ul><li>Всё из «Экспресса»</li><li>Смысловая чистка, интро, моушн</li><li>Цвет в кинопрофиле VOLNA film</li><li>10 Shorts, обложка, SEO-описание</li></ul><a class="btn ghost" href="#book" data-book data-service="Продюсерский пакет">Сделать под ключ</a></article>
+      <article class="card rv"><span class="t">РАЗОВАЯ СЪЁМКА</span><h3>Подкаст под ключ</h3><p class="d">Расширенная сессия, два техника, полный монтаж.</p><div class="pr">40 000 ₽<small> / 2 часа</small></div><p class="nt">1 выпуск · 5 Shorts</p><ul><li>2 оператора-техника</li><li>Мультикам-монтаж, цвет, титры</li><li>Кликабельное превью</li></ul><a class="btn ghost" href="#book" data-book data-service="Подкаст под ключ — 2 часа">Обсудить подкаст</a></article>
+      <article class="card rv d1"><span class="t">КОНТЕНТ-СИСТЕМА</span><h3>YouTube под ключ</h3><p class="d">Регулярный канал без найма своей команды.</p><div class="pr">85 000 ₽<small> / месяц</small></div><p class="nt">4 выпуска и 15 Shorts</p><ul><li>4 YouTube-обложки</li><li>Помощь с темами и структурой</li><li>3 камеры, премиум-свет</li></ul><a class="btn ghost" href="#book" data-book data-service="YouTube под ключ">Собрать канал</a></article>
+      <article class="card rv d2"><span class="t">15 РОЛИКОВ В МЕСЯЦ</span><h3>Поток Shorts</h3><p class="d">Вертикальный контент из одной смены.</p><div class="pr">50 000 ₽<small> / месяц</small></div><p class="nt">Смена до 4 часов</p><ul><li>Сценарии и покадровый план</li><li>Монтаж, чистка речи, субтитры</li><li>Названия, SEO, теги</li></ul><a class="btn ghost" href="#book" data-book data-service="Shorts / Reels на месяц">Нужны вертикали</a></article>
+    </div>
+
+    <div class="cards" id="cards-sound" hidden data-acc="lime">
+      <article class="card rv"><span class="t">БАЗОВАЯ СЕССИЯ</span><h3>Запись голоса</h3><p class="d">Рэп, вокал, бэки, озвучка, аудиоподкасты.</p><div class="pr">1 500 ₽<small> / час</small></div><p class="nt">Пакет 5 часов — 6 500 ₽ · без инженера от 900 ₽/ч</p><ul><li>Звукорежиссёр на сессии</li><li>Помощь с подачей и таймингом</li><li>Демо-сведение сразу после записи</li><li>Исходники сессии</li></ul><a class="btn ghost" href="#book" data-book data-service="Запись вокала">Запросить дату</a></article>
+      <article class="card hit rv d1"><span class="t">ЗВУК + ВИДЕО</span><h3>Трек + 5 сниппетов</h3><p class="d">Готовая дорожка и вертикальный контент к релизу.</p><div class="pr">12 900 ₽<small> / пакет</small></div><p class="nt">Видео — до 24 часов после исходников</p><ul><li>2 часа записи вокала</li><li>Сведение и мастеринг</li><li>1 час съёмки в PODCAST</li><li>5 готовых Reels / Shorts</li></ul><a class="btn" href="#book" data-book data-service="Комбо: трек + 5 сниппетов">Забрать комбо</a></article>
+      <article class="card rv d2"><span class="t">POST</span><h3>Сведение и мастер</h3><p class="d">Баланс, пространство, современное звучание.</p><div class="pr">от 5 000 ₽<small> / трек</small></div><p class="nt">Зависит от числа дорожек и состояния исходников</p><ul><li>Баланс, эквализация, динамика</li><li>Саунд-дизайн по задаче</li><li>Ручной тюн вокала — по запросу</li><li>Мастер под все площадки</li></ul><a class="btn ghost" href="#book" data-book data-service="Сведение и мастеринг">Оценить мой трек</a></article>
+      <article class="card rv"><span class="t">ИНСТРУМЕНТЫ / LIVE</span><h3>Live-мультитрек</h3><p class="d">Гитары, синты, поканальная запись выступления.</p><div class="pr">от 2 000 ₽<small> / час</small></div><p class="nt">Сетап — по техническому райдеру</p><ul><li>Линейная и микрофонная запись</li><li>Мультитрек в DAW</li><li>Видео в PODCAST — опционально</li></ul><a class="btn ghost" href="#book" data-book data-service="Запись инструментов / Live-мультитрек">Обсудить Live</a></article>
+      <article class="card rv d1"><span class="t">DJ / STREAM</span><h3>DJ-школа и стрим-рум</h3><p class="d">Практика, промо-миксы, ночные эфиры.</p><div class="pr">по запросу</div><p class="nt">Зависит от длительности и команды</p><ul><li>Клубное DJ-оборудование</li><li>Запись промо-микса</li><li>Мультикамерное видео</li></ul><a class="btn ghost" href="#book" data-book data-service="DJ-школа / стрим-рум">Обсудить DJ-сессию</a></article>
+      <article class="card rv d2"><span class="t">ВЫПУСК</span><h3>Дистрибуция</h3><p class="d">Подготовка и сопровождение релиза.</p><div class="pr">по запросу</div><p class="nt">Через выбранного дистрибьютора</p><ul><li>Проверка мастер-файлов</li><li>Метаданные и права</li><li>Чек-лист обложки</li></ul><a class="btn ghost" href="#book" data-book data-service="Дистрибуция / релизное сопровождение">Обсудить релиз</a></article>
+    </div>
+    <p class="note rv">Мы не обещаем размещение на площадках — модерацию проводят дистрибьютор и сервисы. Работаем с физлицами, ИП и ООО, возможна оплата по счёту. Нестандартный проект (выезд, реклама, сложная графика) считаем после короткого брифа.</p>
+
+    <!-- calculator -->
+    <div class="calc rv" id="calc">
+      <div class="calc-f">
+        <fieldset><legend><b>01</b> Студия</legend>
+          <label class="ch-row"><input type="radio" name="studio" value="podcast" checked><i class="rd"></i><span class="tx"><b>REVOLVR PODCAST</b><small>Видеопавильон: подкасты, Live, Shorts</small></span></label>
+          <label class="ch-row"><input type="radio" name="studio" value="sound"><i class="rd"></i><span class="tx"><b>REVOLVER</b><small>Тон-ателье: запись, сведение, мастер</small></span></label>
+        </fieldset>
+        <fieldset id="fmtBox"><legend><b>02</b> Формат</legend><div id="fmtList"></div></fieldset>
+        <fieldset><legend><b>03</b> Время</legend>
+          <div class="range"><input type="range" id="hrs" min="1" max="8" step="1" value="1" aria-label="Количество часов"><output id="hrsOut">1 час</output></div>
+        </fieldset>
+        <fieldset><legend><b>04</b> Добавить</legend><div id="optList"></div></fieldset>
+      </div>
+      <aside class="est" aria-live="polite">
+        <div class="e1"><span>ПРЕДВАРИТЕЛЬНАЯ СМЕТА</span><button type="button" id="calcReset">СБРОС ↺</button></div>
+        <h3 id="estName">—</h3>
+        <div class="tot" id="estTot">0</div>
+        <div id="estLines"></div>
+        <p class="inc" id="estInc"></p>
+        <p class="hint" id="estHint"></p>
+        <div class="acts"><button class="btn" type="button" id="calcBook">Запросить дату со сметой</button><button class="btn ghost" type="button" id="calcCopy">Скопировать расчёт</button></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FORMATS + 24H ============ -->
+<section class="sec wall" id="formats" data-acc="amber">
+  <div class="wrap">
+    <span class="kick rv">07 / Форматы</span>
+    <h2 class="h2 rv d1">Не ограничивайся <em>одним</em> <span class="tag">разговором.</span></h2>
+    <div class="fmt rv">
+      <article><span class="n">01</span><h3>Подкасты и интервью</h3><p>Для экспертов, предпринимателей, комиков. Оператор и режиссёр не дадут выпуску стать статичной конференцией. От 1 часа записи, 1–4 спикера.</p><em>ВЫПУСК + 5–10 ВЕРТИКАЛЕЙ</em></article>
+      <article><span class="n">02</span><h3>Музыкальные Live</h3><p>Группа играет в зале, звукорежиссёр пишет поканальный мультитрек через стену. Живое видео и чистые исходники для сведения.</p><em>TINY DESK VIBE · ОТ 2 ЧАСОВ</em></article>
+      <article><span class="n">03</span><h3>Пакетная съёмка Shorts</h3><p>Темы и хуки заранее, съёмка блоками, вертикали с субтитрами. 15 роликов из одной смены до 4 часов.</p><em>15 РОЛИКОВ / МЕСЯЦ · 9:16</em></article>
+      <article><span class="n">04</span><h3>YouTube-шоу и креативы</h3><p>Темы, структура, таймкоды, съёмка, смысловая чистка, интро, моушн-плашки, обложки. Для брендов, каналов и запусков.</p><em>ПРОДЮСИРОВАНИЕ · РАЗОВО ИЛИ МЕСЯЦ</em></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec t24" id="t24" data-acc="red">
+  <div class="wrap">
+    <span class="kick rv">08 / Скорость</span>
+    <h2 class="h2 rv d1">Снял сегодня.<br><em>Выпуск завтра.</em></h2>
+    <p class="lead rv d2">Собственный AI-пайплайн собирает черновик мультикама за ~15 минут и нарезает вертикальные ролики. Пока конкуренты думают про монтаж — ты уже публикуешь.</p>
+    <ol class="steps rv d2">
+      <li><span class="tm">ДЕНЬ 0 · ВЕЧЕР</span><h3>Съёмка</h3><p>3 камеры, студийный звук, режиссёр на посте.</p></li>
+      <li><span class="tm">ДЕНЬ 0 · НОЧЬ</span><h3>Сборка</h3><p>Мультикам-склейка по спикерам, чистка звука.</p></li>
+      <li><span class="tm">ДЕНЬ 1 · УТРО</span><h3>Shorts</h3><p>Вертикали с субтитрами и обложки.</p></li>
+      <li><span class="tm">ДЕНЬ 1 · ДЕНЬ</span><h3>Публикуешь</h3><p>Готовый выпуск и 5 Shorts у тебя.</p></li>
+    </ol>
+    <div class="bar rv" id="bar"><i></i></div>
+    <p class="volna rv">Свет, картинку и видеопродакшн на площадке курирует команда <a href="https://marchen.ru" target="_blank" rel="noopener">VOLNA film</a> — создатели музыкальных клипов, фестивального кино и коммерческих проектов.</p>
+  </div>
+</section>
+
+<!-- ============ FRAMES ============ -->
+<section class="sec" id="frames" style="background:#0b0e0c" data-acc="lime">
+  <div class="wrap">
+    <span class="kick rv">09 / Кадры</span>
+    <h2 class="h2 rv d1">Не сток. <em>Настоящий</em> подвал.</h2>
+    <div class="gal rv" id="gal">
+      <button data-lb="interview"><img src="assets/img/interview.webp" alt="Интервью в павильоне" loading="lazy"></button>
+      <button data-lb="vocal-3"><img src="assets/img/vocal-3.webp" alt="Вокалист в наушниках" loading="lazy"></button>
+      <button data-lb="hall-table"><img src="assets/img/hall-table.webp" alt="Стол в павильоне" loading="lazy"></button>
+      <button data-lb="control-1"><img src="assets/img/control-1.webp" alt="Пульт и артист" loading="lazy"></button>
+      <button data-lb="host-1"><img src="assets/img/host-1.webp" alt="Ведущий за микрофоном" loading="lazy"></button>
+      <button data-lb="graffiti-wide"><img src="assets/img/graffiti-wide.webp" alt="Граффити с револьвером на зелёной стене" loading="lazy"></button>
+      <button data-lb="mic-neumann"><img src="assets/img/mic-neumann.webp" alt="Студийный микрофон" loading="lazy"></button>
+      <button data-lb="hall-both"><img src="assets/img/hall-both.webp" alt="Двое за столом, широкий план" loading="lazy"></button>
+      <button data-lb="smoke-mic"><img src="assets/img/smoke-mic.webp" alt="Микрофон в дыму" loading="lazy"></button>
+      <button data-lb="host-mic-2"><img src="assets/img/host-mic-2.webp" alt="Ведущий эмоционально рассказывает" loading="lazy"></button>
+      <button data-lb="vocal-close"><img src="assets/img/vocal-close.webp" alt="Крупный план: наушники и поп-фильтр" loading="lazy"></button>
+      <button data-lb="control-5"><img src="assets/img/control-5.webp" alt="Работа за пультом" loading="lazy"></button>
+      <button data-lb="talk-a"><img src="assets/img/talk-a.webp" alt="Разговор за столом" loading="lazy"></button>
+      <button data-lb="lounge"><img src="assets/img/lounge.webp" alt="Лаундж с белым диваном" loading="lazy"></button>
+      <button data-lb="graffiti-room"><img src="assets/img/graffiti-room.webp" alt="Граффити-стена и стол" loading="lazy"></button>
+      <button data-lb="control-6"><img src="assets/img/control-6.webp" alt="Запись под присмотром звукорежиссёра" loading="lazy"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FIND ============ -->
+<section class="sec wall" id="find" data-acc="violet">
+  <div class="wrap">
+    <span class="kick rv">10 / Как найти</span>
+    <h2 class="h2 rv d1">Фрунзе 49.<br><em>Вниз</em> <span class="tag">по лестнице.</span></h2>
+    <div class="find">
+      <div class="find-sticky rv">
+        <div class="find-photo" id="walkPhoto">
+          <img class="on" src="assets/img/enter-stairs.webp" alt="Лестница вниз вдоль кирпичной стены" loading="lazy">
+          <img src="assets/img/enter-door.webp" alt="Металлическая дверь в кирпичной нише" loading="lazy">
+          <img src="assets/img/enter-wood.webp" alt="Деревянная дверь в тамбуре" loading="lazy">
+          <img src="assets/img/enter-purple.webp" alt="Фиолетовый коридор" loading="lazy">
+          <img src="assets/img/graffiti-door.webp" alt="Дверь с трафаретом на граффити-стене" loading="lazy">
+          <span class="cap" id="walkCap">ШАГ 01</span>
+        </div>
+        <div class="addr">
+          <b>Новосибирск, ул. Фрунзе, 49</b>
+          <span class="hours">ПОДВАЛ · ПО ПРЕДВАРИТЕЛЬНОЙ ЗАПИСИ 24/7</span>
+          <div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="https://yandex.ru/maps/?text=%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%2C%20%D0%A4%D1%80%D1%83%D0%BD%D0%B7%D0%B5%2049">Яндекс Карты</a><a class="btn sm ghost" target="_blank" rel="noopener" href="https://2gis.ru/novosibirsk/search/%D0%A4%D1%80%D1%83%D0%BD%D0%B7%D0%B5%2049">2ГИС</a><a class="btn sm ghost" href="3d/index.html">Пройти в 3D</a></div>
+        </div>
+      </div>
+      <ol class="walk" id="walk">
+        <li class="on" data-s="0"><span class="i">1</span><h3>Найди спуск</h3><p>Лестница ведёт вниз вдоль кирпичной стены здания. Ночью по ней видно только неон и тег на стене — не пугайся, тебе туда.</p></li>
+        <li data-s="1"><span class="i">2</span><h3>Тяжёлая дверь</h3><p>Внизу — коричневая металлическая дверь в кирпичной нише. Тяни на себя.</p></li>
+        <li data-s="2"><span class="i">3</span><h3>Тамбур</h3><p>Небольшой тамбур с деревянной дверью и электрощитом. Ещё одна дверь — и ты почти на месте.</p></li>
+        <li data-s="3"><span class="i">4</span><h3>Фиолетовый коридор</h3><p>Стены в афишах и газетах, свет цвета неона. Здесь заканчивается обычный Новосибирск.</p></li>
+        <li data-s="4"><span class="i">5</span><h3>Дверь в прицеле</h3><p>Зелёная стена с огромным револьвером и дверь со стенсилом — ты на месте. Мы встретим, покажем студии и накроем чай.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq" style="background:#0b0e0c" data-acc="lime">
+  <div class="wrap">
+    <span class="kick rv">11 / Вопросы</span>
+    <h2 class="h2 rv d1">А <em>если…</em></h2>
+    <div class="faq rv">
+      <details><summary>Я никогда не вёл подкаст. Поможете?</summary><div>Да. До съёмки поможем со структурой и таймингом, на площадке подскажем, куда смотреть и как работать с паузами. В продюсерском пакете — ещё и с темами и содержанием.</div></details>
+      <details><summary>Что входит в готовность за 24 часа?</summary><div>В «Экспрессе» — мультикам-склейка выпуска, базовая обработка и 5 вертикальных Shorts/Reels с субтитрами. Срок отсчитывается после получения всех исходников и согласования вводных.</div></details>
+      <details><summary>Можно прийти со своим оператором или звукорежиссёром?</summary><div>Конечно. Для видео выбирай аренду зала со светом: заранее согласуем формат сигнала ваших камер для вывода на ЭЛТ. В звуке студия без нашего инженера — от 900 ₽/час.</div></details>
+      <details><summary>Можно записать трек и сразу снять видео?</summary><div>Да, для этого есть комбо за 12 900 ₽: 2 часа записи, сведение и мастеринг, час съёмки в павильоне и 5 сниппетов.</div></details>
+      <details><summary>Что принести на запись трека?</summary><div>Минус и стемы в WAV (лучше 24 bit), BPM и тональность, если известны, текст и референсы. Не накладывай лимитер и автотюн «на всякий случай». На трек закладывай 1,5–3 часа и приходи за 10–15 минут.</div></details>
+      <details><summary>Можно ночью?</summary><div>Да, студия работает по предварительной записи 24/7. Ночные сессии и DJ-сеты согласуем заранее, чтобы подготовить оборудование и доступ.</div></details>
+      <details><summary>Вы выкладываете трек на площадки?</summary><div>Подготовим и сопроводим загрузку через выбранного дистрибьютора: проверим мастер, метаданные и обложку. Размещение не гарантируем — решение принимают площадки.</div></details>
+      <details><summary>Работаете с юрлицами?</summary><div>Да, с физлицами, ИП и ООО. Возможна оплата по счёту через продакшн. Для регулярных проектов обсудим индивидуальные условия.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOK ============ -->
+<section class="sec book" id="book" data-acc="lime">
+  <div class="wrap book-grid">
+    <div>
+      <span class="kick rv">12 / Бронь</span>
+      <h2 class="h2 rv d1">Выбери <span>слот.</span><br>Заходи <em>вниз.</em></h2>
+      <p class="lead rv d2">Расскажи, что хочешь записать или снять. Подскажем, сколько заложить времени. Без обязательств — сначала можно просто приехать на экскурсию (15 минут).</p>
+      <p class="rv d3" style="margin-top:26px;font:700 12px ui-monospace,Consolas,monospace;color:var(--lime)">НОВОСИБИРСК · ФРУНЗЕ 49 · 24/7 ПО ЗАПИСИ<br><a href="#" id="tgLink" style="border-bottom:2px solid var(--lime)">TELEGRAM ↗</a></p>
+    </div>
+    <form class="form rv d2" id="form" novalidate>
+      <div class="attach" id="attach" hidden></div>
+      <label class="fld"><span>Услуга</span><select id="fService"></select></label>
+      <div class="two">
+        <label class="fld"><span>Как к тебе обращаться и контакт</span><input id="fContact" required autocomplete="name" placeholder="Имя, @telegram или телефон"></label>
+        <label class="fld"><span>Желаемая дата</span><input id="fDate" type="date"></label>
+      </div>
+      <label class="fld"><span>Что хочешь сделать</span><textarea id="fMsg" placeholder="Тема, жанр, сколько человек, нужна ли съёмка…"></textarea></label>
+      <div class="acts"><button class="btn" type="submit">Отправить в Telegram</button><button class="btn ghost" type="button" id="fCopy">Скопировать</button></div>
+      <p class="fn" id="fNote">Откроется черновик заявки в Telegram — останется нажать «Отправить». Дату подтвердит администратор.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-big" aria-hidden="true">REVOLVER</div>
+    <div class="ftr-row">
+      <span><svg class="cyl" style="width:26px;height:26px;display:inline-block;vertical-align:middle;margin-right:10px"><use href="#i-cyl"/></svg>REVOLVER · REVOLVR PODCAST<br>Новосибирск, ул. Фрунзе, 49 (подвал)</span>
+      <nav style="display:flex;gap:22px;flex-wrap:wrap"><a href="#studios">Студии</a><a href="3d/index.html">3D-тур</a><a href="#prices">Цены</a><a href="#find">Как найти</a><a href="#book">Бронь</a></nav>
+      <span>Картинку курирует <a href="https://marchen.ru" target="_blank" rel="noopener" style="color:var(--lime)">VOLNA film</a></span>
+    </div>
+    <small>© 2026 REVOLVER. Цены ориентировочные, итоговую смету подтверждает администратор. Дистрибуция — через выбранного дистрибьютора, размещение не гарантируется.</small>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Просмотр фото"><button class="x" aria-label="Закрыть">×</button><button class="pv" aria-label="Назад">‹</button><img id="lbImg" alt=""><button class="nx" aria-label="Вперёд">›</button></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="assets/site.js"></script>
+</body>
+</html>
