@@ -420,7 +420,33 @@ sound_gal = '''<section class="sec" id="frames" style="background:#0b0e0c" data-
   ''' + gal([('vocal-1', 'Вокалист в наушниках у микрофона'), ('control-1', 'Пульт и артист'), ('mic-neumann', 'Студийный микрофон'), ('smoke-pop', 'Поп-фильтр в дыму'), ('vocal-3', 'Запись вокала'), ('control-5', 'Работа за пультом'), ('smoke-mic', 'Микрофон в дыму'), ('vocal-close', 'Наушники и поп-фильтр'), ('control-3', 'Звукорежиссёр и артист'), ('engineer-2', 'Звукорежиссёр в наушниках'), ('control-6', 'Запись под присмотром звукорежиссёра'), ('vocal-4', 'Вокалист у микрофона')]) + '''
 </div></section>'''
 
-sound_body = sound_hero + newbie + sound_sec + wave + engineer + services + pricesnd + sound_gal + faq([8, 3, 4, 2, 5, 6, 7]) + book('sound')
+
+GEAR_IC = {
+ 'mic':'<rect x="20" y="6" width="16" height="28" rx="8"/><path d="M12 28c0 10 7 16 16 16s16-6 16-16M28 44v8M20 52h16"/><path d="M20 16h16M20 22h16" opacity=".5"/>',
+ 'card':'<rect x="4" y="14" width="48" height="28" rx="4"/><circle cx="16" cy="28" r="6"/><circle cx="34" cy="28" r="3"/><circle cx="44" cy="28" r="3"/><path d="M10 48h36" opacity=".5"/>',
+ 'spk':'<rect x="12" y="4" width="32" height="48" rx="4"/><circle cx="28" cy="18" r="5"/><circle cx="28" cy="36" r="10"/><circle cx="28" cy="36" r="3.5"/>',
+ 'gtr':'<path d="M48 4l4 4-6 6-4-4zM44 12L30 26"/><path d="M26 26c-6-2-12 2-12 8-4 0-8 3-8 8 0 6 6 10 12 8 4-1 6-4 6-8 6 0 10-6 8-12z"/><circle cx="22" cy="38" r="3"/>',
+ 'dj':'<rect x="4" y="8" width="48" height="40" rx="4"/><circle cx="26" cy="28" r="13"/><circle cx="26" cy="28" r="3"/><path d="M26 28l9-6M46 14v26" /><circle cx="46" cy="14" r="2"/>',
+ 'hp':'<path d="M10 34V28a18 18 0 0136 0v6"/><rect x="6" y="32" width="10" height="16" rx="4"/><rect x="40" y="32" width="10" height="16" rx="4"/>',
+ 'pad':'<rect x="4" y="8" width="48" height="40" rx="4"/><rect x="10" y="14" width="10" height="10" rx="2"/><rect x="23" y="14" width="10" height="10" rx="2"/><rect x="36" y="14" width="10" height="10" rx="2"/><rect x="10" y="29" width="10" height="10" rx="2"/><rect x="23" y="29" width="10" height="10" rx="2"/><rect x="36" y="29" width="10" height="10" rx="2"/>',
+ 'key':'<rect x="3" y="14" width="50" height="30" rx="3"/><path d="M11 44V30M19 44V30M27 44V30M35 44V30M43 44V30M9 14v16M17 14v16M33 14v16M41 14v16" /><rect x="8" y="14" width="5" height="16" fill="currentColor"/><rect x="16" y="14" width="5" height="16" fill="currentColor"/><rect x="32" y="14" width="5" height="16" fill="currentColor"/><rect x="40" y="14" width="5" height="16" fill="currentColor"/>',
+}
+GEAR = [
+ ('mic','Микрофоны',['Invotone CM400L','AKG MK519','Shure SM7B (подкастовый)']),
+ ('card','Звуковые карты',['MOTU 828 mk3','Behringer UMC404','Focusrite Scarlett 2i4']),
+ ('spk','Мониторы',['KRK RP5 G5']),
+ ('hp','Наушники',['Sennheiser HD 215','Sennheiser HD 206','Beyerdynamic DT 990','AKG K240']),
+ ('gtr','Гитары',['Cort Les Paul']),
+ ('dj','Проигрыватель для скретчинга',['Vestax PDX-2000 mkII']),
+ ('pad','Драм-машины и пэды',['Akai MPD26','Ableton Launchpad']),
+ ('key','MIDI-клавиатура',['M-Audio KeyRig 49']),
+]
+gear = '<section class="sec" id="gear" data-acc="lime" style="background:#0b0e0c"><div class="wrap"><span class="kick rv">Оборудование</span><h2 class="h2 rv d1">Что стоит <em>в студии</em></h2><p class="lead rv d2">Раскрой категорию — увидишь, на чём пишем и что можно взять в руки.</p><div class="gear rv">'
+for k,t,items in GEAR:
+    gear += '<details><summary><svg class="gi" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%s</svg><span>%s</span><em>%d</em></summary><div>%s</div></details>' % (GEAR_IC[k], t, len(items), ''.join('<b>%s</b>' % i for i in items))
+gear += '</div></div></section>'
+
+sound_body = sound_hero + newbie + sound_sec + wave + engineer + services + gear + pricesnd + sound_gal + faq([8, 3, 4, 2, 5, 6, 7]) + book('sound')
 write('sound/index.html', render('sound', 'sound/', 'Запись вокала и трека в Новосибирске — от 1 500 ₽/час | REVOLVER SOUND',
       'Запись вокала от 1 500 ₽/час, сведение и мастеринг. Первый раз — приходи с черновиком. Трек + фото-обложка + сниппет + Reels — 13 900 ₽. Новосибирск, Фрунзе, 49.', sound_body, '../', '../'))
 
@@ -510,10 +536,23 @@ pod_gal = '''<section class="sec" id="frames" style="background:#0b0e0c" data-ac
 </div></section>'''
 
 pod_hero = phero('amber', 'REVOLVER PODCAST · 30 М² · 6×5', 'Видео&shy;павильон<br><em>для подкастов</em>',
-                 'Сняли разговор — отдали готовый выпуск и пять коротких. Граффити-ковёр, ретро-стенд, ЭЛТ и киношный свет уже включены: три камеры 4K, студийный звук, монтаж за 24 часа.',
+                 'Сняли разговор — отдали готовый выпуск и пять коротких. Граффити-ковёр, ретро-стенд, ЭЛТ и киношный свет уже включены: три камеры 4K, кинокамера Blackmagic 6K, телесуфлёр, студийный звук, монтаж за 24 часа.',
                  '<a class="btn amber" href="#book" data-book data-service="Экспресс-мультикам 24ч">Снять выпуск</a><a class="btn ghost" href="#prices">Цены</a><a class="link" href="{{b}}3d/index.html">Пройти по студии →</a>',
                  'hall-wide-2', 'Видеопавильон REVOLVER PODCAST', 'Подкасты')
-pod_body = pod_hero + pav + pod_prices + fm + pod_gal + faq([0, 1, 2, 5, 7]) + book('podcast')
+pod_tech = '''<section class="sec" id="tech" style="background:#0b0e0c" data-acc="amber">
+  <div class="wrap">
+    <span class="kick rv">Техника и сервис</span>
+    <h2 class="h2 rv d1">Снимаем <em>как кино.</em> Работаем как в эфире.</h2>
+    <div class="fmt rv">
+      <article><span class="n">01</span><h3>Blackmagic Pocket 6K и кинооптика</h3><p>Снимаем на профессиональную кинокамеру Blackmagic Pocket Cinema Camera 6K с кинообъективами. Картинка с глубиной и мягким фоном, как в кино, а не как у веб-камеры.</p><em>6K · КИНООПТИКА</em></article>
+      <article><span class="n">02</span><h3>Телесуфлёр</h3><p>Текст бежит перед объективом, а ты смотришь прямо в камеру и не заглядываешь в бумажку. Самый частый запрос для обращений, рекламы и экспертных роликов.</p><em>ТЕКСТ ПРЯМО В КАМЕРУ</em></article>
+      <article><span class="n">03</span><h3>Экран для заказчика</h3><p>Выводим картинку с камер на большой экран прямо во время съёмки. Видишь кадр и свет сразу и можешь сказать «поправим» до того, как всё снято.</p><em>СМОТРИШЬ КАДР ВЖИВУЮ</em></article>
+      <article><span class="n">04</span><h3>Быстрый интернет</h3><p>Выделенный быстрый канал для вебинаров, онлайн-эфиров и стримов из студии. Картинка не рассыпается, звук не пропадает.</p><em>ВЕБИНАРЫ · СТРИМЫ</em></article>
+    </div>
+  </div>
+</section>'''
+
+pod_body = pod_hero + pav + pod_tech + pod_prices + fm + pod_gal + faq([0, 1, 2, 5, 7]) + book('podcast')
 write('podcast/index.html', render('podcast', 'podcast/', 'Студия подкастов в Новосибирске — выпуск за 24 часа, 17 000 ₽ | REVOLVER PODCAST',
       'Съёмка подкастов, интервью, Live и Shorts. 3 камеры 4K, ЭЛТ, граффити. Выпуск за 24 часа — 17 000 ₽. Аренда зала — 2 700 ₽/ч. Фрунзе, 49.', pod_body, '../', '../'))
 
