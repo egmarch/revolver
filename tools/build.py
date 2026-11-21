@@ -523,11 +523,15 @@ prod_hero = phero('red', 'ПРОДАКШЕН · МУЗЫКА · МЕРОПРИЯ
                   '<a class="btn red" href="#book" data-book data-service="Гострайтинг: песня на заказ">Написать про трек</a><a class="btn ghost" href="#events">Мероприятия</a><a class="link" href="#youtube">YouTube — у VOLNA film →</a>',
                   'smoke-mic', 'Студийный микрофон в дыму', 'Продакшен')
 
-youtube_volna = '''<section class="sec" id="youtube" style="background:#0b0e0c" data-acc="red"><div class="wrap">
-  <span class="kick rv">YouTube</span>
-  <h2 class="h2 rv d1">YouTube-продюсирование — <em>это VOLNA film.</em></h2>
-  <p class="lead rv d2">Каналы, шоу и выпуски для экспертов и компаний делает наш партнёр — продакшен VOLNA film из Новосибирска. Кейсы с открытой статистикой, пакеты и цены — на их странице.</p>
-  <div class="cta rv d3" style="margin-top:30px"><a class="btn red" href="https://marchen.ru/youtube/%s" target="_blank" rel="noopener">Страница YouTube-продюсирования ↗</a><a class="link" href="{{b}}podcast/#prices">Записать выпуск у нас — REVOLVER PODCAST →</a></div>
+youtube_volna = '''<section class="sec" id="youtube" style="background:#0b0e0c;padding:clamp(50px,6vw,80px) 0" data-acc="red"><div class="wrap yt1">
+  <article class="ytc rv"><div class="video-stage" data-yt-id="Gm8-ZmQf0nU" data-yt-title="После этого случая я поверил в МИСТИКУ!"><img src="{{b}}assets/yt/Gm8-ZmQf0nU.jpg" alt="Превью выпуска «После этого случая я поверил в МИСТИКУ!»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: После этого случая я поверил в МИСТИКУ!"><span>▶</span>Смотреть</button></div>
+    <div class="ytb"><span class="caption">Авторский канал · длинный формат</span><h3>«Эксперт по шнуркам»: выпуск набрал более 2 млн просмотров</h3><p class="ystat">Канал: 25,9 млн просмотров · 61,3 тыс. подписчиков<small>данные канала на ноябрь 2026</small></p><div class="ylinks"><a class="olink" href="https://youtu.be/Gm8-ZmQf0nU" target="_blank" rel="noopener">Смотреть на YouTube ↗</a><a class="olink" href="https://www.youtube.com/@expertposhnurkam" target="_blank" rel="noopener">Канал и статистика ↗</a></div></div></article>
+  <div class="rv d1">
+    <span class="kick">YouTube</span>
+    <h2 class="h2 sm">YouTube-продюсирование делает VOLNA film.</h2>
+    <p class="lead" style="font-size:16px">Каналы и шоу для экспертов и компаний — наш партнёр. Кейсы, пакеты и цены на их странице.</p>
+    <a class="btn red sm" style="margin-top:22px" href="https://marchen.ru/youtube/%s" target="_blank" rel="noopener">Перейти к VOLNA film ↗</a>
+  </div>
 </div></section>''' % UTM_VOLNA
 
 prod_body = prod_hero + '''<section class="sec wall" id="tracks" data-acc="lime"><div class="wrap">

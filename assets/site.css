@@ -614,3 +614,7 @@ img{-webkit-user-drag:none;user-select:none}
 .rp{font:800 24px var(--d);letter-spacing:-.04em;color:var(--acc);white-space:nowrap}.rp small{font:700 12px var(--b);color:var(--mute);letter-spacing:0}
 @media(max-width:860px){.rw{grid-template-columns:1fr auto}.rw .btn{grid-column:1/-1}}
 .book .h2{font-size:clamp(32px,4.6vw,60px);line-height:1.02}.book .h2 span{-webkit-text-stroke:1.5px var(--lime)}
+
+.yt1{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,4vw,60px);align-items:center}
+.h2.sm{font-size:clamp(26px,3vw,40px);margin:14px 0 14px}
+@media(max-width:1100px){.yt1{grid-template-columns:1fr}}
