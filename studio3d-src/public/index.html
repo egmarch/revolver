@@ -126,6 +126,18 @@ body.touch #zones button{min-width:0;padding:0 9px;height:34px;font-size:11.5px}
 body.touch #zones button span{display:none}
 @media (max-width:720px){#zone{font-size:11.5px;padding:7px 10px}#minimap{width:80px;height:83px}#help{display:none}#zones button span{display:none}}
 @media (max-height:480px){.stick{width:110px;height:110px;bottom:56px}#minimap{display:none}#card img{height:110px}}
+#endcard{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 62px);transform:translate(-50%,20px);z-index:20;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:16px;background:rgba(7,8,12,.9);border:1px solid rgba(255,255,255,.18);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;max-width:calc(100vw - 24px);font-size:14px}
+#endcard.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+#endcard .btn{min-height:38px;padding:0 16px;font-size:13px;white-space:nowrap}
+#endcard button{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;font-size:18px;line-height:1}
+.btn.big{min-height:54px;padding:0 28px;font-size:16px}
+#pause .row .btn{margin:4px}
+#topright .row{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 28px)}
+@media (orientation:portrait){body.touch #endcard{bottom:auto;top:calc(env(safe-area-inset-top) + 262px)}body.touch #wpn{top:150px}}
+@media (orientation:landscape){body.touch #wpn{top:auto;bottom:calc(env(safe-area-inset-bottom) + 52px);left:50%;right:auto;transform:translateX(-50%);flex-direction:row;align-items:center}body.touch #endcard{bottom:auto;top:56px}}
+html{overflow:hidden;height:100%;position:fixed;width:100%}
+#actBtn{bottom:calc(env(safe-area-inset-bottom) + 262px)}
+#rotate{bottom:calc(env(safe-area-inset-bottom) + 350px)}
 </style>
 </head>
 <body>
@@ -135,12 +147,12 @@ body.touch #zones button span{display:none}
   <div class="box">
     <div class="eyebrow">Зайди внутрь до того, как приедешь</div>
     <h1><span>REVOLVER</span><br>3D-тур по студиям</h1>
-    <p class="lead">Можно пройти, посмотреть и оставить свой тег на стене. Спустись по лестнице, поверни направо — и ты в тамбуре, дальше зал REVOLVER PODCAST, лаундж и комната звукозаписи REVOLVER SOUND.</p>
+    <p class="lead">Можно просто пройти и посмотреть. Или оставить тег на стене.</p>
     <div class="keys">
       <div><b>W A S D</b> / стрелки — ходьба<br><b>Shift</b> — бег, <b>Пробел</b> — прыжок</div>
       <div><b>Мышь</b> — обзор, <b>ЛКМ</b> — рисовать<br><b>E</b> — осмотреть</div>
       <div><b>C</b> — цвет краски<br><b>X</b> — стереть всё</div>
-      <div><b>1 2 3 4</b> — Улица, Зал, Лаундж, Студия<br><b>Esc</b> — меню</div>
+      <div><b>1 2 3</b> — Улица, Зал, Студия звука<br><b>Esc</b> — меню</div>
       <div class="t">Касание: левый стик — ходьба, правый — обзор, кнопки «Прыжок», «Рисовать», «Открыть»</div>
     </div>
     <button id="go" disabled>Загрузка…</button>
@@ -157,6 +169,7 @@ body.touch #zones button span{display:none}
     <canvas id="minimap" width="208" height="216"></canvas>
     <div class="row">
       <button class="pill" id="snd" title="Звук">🔇</button>
+      <a class="pill" href="../index.html?service=pack#book" id="hours">Свободные часы</a>
       <a class="pill" href="../index.html" id="exit">Выйти на сайт</a>
     </div>
   </div>
@@ -166,10 +179,9 @@ body.touch #zones button span{display:none}
   <div id="zones">
     <button data-z="1"><b>1</b><span>Улица</span></button>
     <button data-z="2"><b>2</b><span>Зал</span></button>
-    <button data-z="3"><b>3</b><span>Лаундж</span></button>
-    <button data-z="4"><b>4</b><span>Студия</span></button>
+    <button data-z="3"><b>3</b><span>Студия звука</span></button>
   </div>
-  <div id="help"><b>WASD</b> ходьба · <b>Пробел</b> прыжок · <b>ЛКМ</b> рисовать · <b>C</b> цвет · <b>X</b> стереть · <b>E</b> осмотреть · <b>1–4</b> зоны</div>
+  <div id="help"><b>WASD</b> ходьба · <b>Пробел</b> прыжок · <b>ЛКМ</b> рисовать · <b>C</b> цвет · <b>X</b> стереть · <b>E</b> осмотреть · <b>1–3</b> зоны</div>
   <div id="wpn"><div id="palette"></div><div id="ammo"><b>Спрей</b><span>Баллончик</span></div></div>
   <div id="toast"></div>
 </div>
@@ -204,11 +216,13 @@ body.touch #zones button span{display:none}
     <h2>Пауза</h2>
     <div style="color:#a7a39a;font-size:14px;line-height:1.6">Нажми «Продолжить», чтобы вернуться.<br>Ходьба — WASD, <b>Пробел</b> — прыжок, <b>ЛКМ</b> — рисовать<br><b>C</b> — цвет, <b>X</b> — стереть, <b>E</b> — осмотреть</div>
     <div class="row">
-      <button class="btn main" id="resume">Продолжить</button>
+      <a class="btn main big" href="../index.html?service=pack#book">Узнать свободные часы</a>
+      <button class="btn" id="resume">Продолжить</button>
       <a class="btn" href="../index.html">Выйти на сайт</a>
     </div>
   </div>
 </div>
+<div id="endcard"><span>Понравилось?</span><a class="btn main" href="../index.html?service=pack#book">Узнать свободные часы</a><button id="endClose" aria-label="Закрыть">×</button></div>
 <div id="fade"></div>
 <noscript><p style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#07080c;margin:0">Для 3D-тура нужен JavaScript. <a href="../index.html">На сайт</a></p></noscript>
 <script src="tour.js"></script>

@@ -9,14 +9,18 @@
 <link rel="canonical" href="{{canon}}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{canon}}">
-<meta property="og:image" content="https://{{domain}}/assets/img/hall-wide-2.webp">
+<meta property="og:image" content="https://{{domain}}/assets/og/{{og}}.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://{{domain}}/assets/og/{{og}}.jpg">
 <meta property="og:title" content="{{title}}">
 <meta property="og:description" content="{{desc}}">
 <link rel="icon" href="{{b}}assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="{{b}}assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{b}}assets/fonts/spray-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{b}}assets/site.css?v=5">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"REVOLVER · REVOLVER SOUND · REVOLVER PODCAST","description":"Студия звукозаписи и видеопавильон для подкастов, Live-сессий и Shorts.","url":"https://{{domain}}/","address":{"@type":"PostalAddress","streetAddress":"ул. Фрунзе, 49","addressLocality":"Новосибирск","addressCountry":"RU"},"openingHours":"Mo-Su 00:00-23:59","priceRange":"900–150000 ₽"}</script>
+<link rel="stylesheet" href="{{b}}assets/site.css?v=6">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"REVOLVER · REVOLVER SOUND · REVOLVER PODCAST","description":"Студия звукозаписи и видеопавильон для подкастов, Live-сессий и Shorts.","url":"https://{{domain}}/","address":{"@type":"PostalAddress","streetAddress":"ул. Фрунзе, 49","addressLocality":"Новосибирск","addressCountry":"RU"},"priceRange":"900–150000 ₽"}</script>
 </head>
 <body>
 <a class="skip" href="#main">К содержанию</a>
@@ -58,12 +62,13 @@
       <nav style="display:flex;gap:22px;flex-wrap:wrap"><a href="{{b}}sound/">Звукозапись</a><a href="{{b}}podcast/">Подкасты</a><a href="{{b}}production/">Продакшен</a><a href="{{b}}3d/index.html">3D-тур</a><a href="#book">Написать</a></nav>
       <span>Картинку курирует <a href="https://marchen.ru" target="_blank" rel="noopener" style="color:var(--lime)">VOLNA film</a></span>
     </div>
+    <p class="ftr-tg">Написать в Telegram: <a href="https://t.me/CS10ten" target="_blank" rel="noopener">звукозапись · @CS10ten</a> · <a href="https://t.me/Egmarch" target="_blank" rel="noopener">подкасты и продакшен · @Egmarch</a><br>Работаем по предварительной записи.</p>
     <small>© 2026 REVOLVER. Цены ориентировочные, итоговую смету подтверждает администратор. Дистрибуция — через выбранного дистрибьютора, размещение не гарантируется.</small>
   </div>
 </footer>
 
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Просмотр фото"><button class="x" aria-label="Закрыть">×</button><button class="pv" aria-label="Назад">‹</button><img id="lbImg" alt=""><button class="nx" aria-label="Вперёд">›</button></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="{{b}}assets/site.js?v=5"></script>
+<script src="{{b}}assets/site.js?v=6"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@ def render(page, path, title, desc, body, base, root):
     nav = ''.join('<a href="{b}{h}"{c}>{t}</a>'.format(b=base, h=h, t=t, c=' class="on" aria-current="page"' if k == page else '') for k, h, t in NAV)
     nav += '<a href="{r}#tour">3D-тур</a>'.format(r=root)
     theme = page if page in ('sound', 'podcast', 'production') else ''
-    out = (LAYOUT.replace('{{theme}}', theme).replace('{{nav}}', nav).replace('{{title}}', title).replace('{{desc}}', desc)
+    out = (LAYOUT.replace('{{og}}', page).replace('{{theme}}', theme).replace('{{nav}}', nav).replace('{{title}}', title).replace('{{desc}}', desc)
            .replace('{{canon}}', 'https://%s/%s' % (DOMAIN, path)).replace('{{domain}}', DOMAIN).replace('{{body}}', body))
     STATIC = '<div class="static" aria-hidden="true"><canvas></canvas><span>NO SIGNAL ● REC</span></div>\n'
     out = out.replace('<section class="sec book"', STATIC + '<section class="sec book"').replace('<section class="sec" id="faq"', STATIC + '<section class="sec" id="faq"')
@@ -40,7 +40,7 @@ FAQ = [
     ('Я никогда не вёл подкаст. Поможете?', 'Да. До съёмки поможем со структурой и таймингом, на площадке подскажем, куда смотреть и как работать с паузами. В продюсерском пакете — ещё и с темами и содержанием.'),
     ('Что входит в готовность за 24 часа?', 'В «Экспрессе» — мультикам-склейка выпуска, базовая обработка и 5 вертикальных Shorts/Reels с субтитрами. Срок отсчитывается после получения всех исходников и согласования вводных.'),
     ('Можно прийти со своим оператором или звукорежиссёром?', 'Конечно. Для видео выбирай аренду зала со светом: заранее согласуем формат сигнала ваших камер для вывода на ЭЛТ. В звуке студия без нашего инженера — от 900 ₽/час.'),
-    ('Можно записать трек и сразу снять ролик?', 'Да. В пакете за 13 900 ₽ — запись и сведение трека, обложка, сниппет и Reels к релизу. Видео снимаем в соседнем зале.'),
+    ('Можно записать трек и сразу снять ролик?', 'Да. В пакете за 13 900 ₽: 2 часа записи и сведение трека, фото-обложка, сниппет (15–30 секунд) и Reels с монтажом. Видео снимаем в соседнем зале.'),
     ('Что принести на запись трека?', 'Минус и стемы в WAV (лучше 24 bit), BPM и тональность, если известны, текст и референсы. Не накладывай лимитер и автотюн «на всякий случай». На трек закладывай 1,5–3 часа и приходи за 10–15 минут.'),
     ('Можно записаться ночью?', 'Пишем и ночью — если договорились заранее. Ночные сессии согласуем заранее, чтобы подготовить оборудование и доступ.'),
     ('Вы выкладываете трек на площадки?', 'Подготовим и сопроводим загрузку через выбранного дистрибьютора: проверим мастер, метаданные и обложку. Размещение не гарантируем — решение принимают площадки.'),
@@ -55,7 +55,7 @@ def faq(idx):
             '<span class="kick rv">Вопросы</span><h2 class="h2 rv d1">А <em>если…</em></h2><div class="faq rv">%s</div></div></section>' % items)
 
 
-def book(default=''):
+def _book_raw(default=''):
     return '''<section class="sec book" id="book" data-acc="lime">
   <div class="wrap book-grid">
     <div>
@@ -63,6 +63,7 @@ def book(default=''):
       <h2 class="h2 rv d1">Напиши — <span>ответим</span> в течение дня.</h2>
       <p class="lead rv d2">Расскажи, что хочешь записать или снять, и куда ответить. Можно просто спросить про свободные часы или скинуть демо — послушаем и скажем, с чего начать.</p>
       <p class="rv d3 who-reply" id="whoReply">Заявка уйдёт в Telegram: <b id="whoName">—</b></p>
+      {{direct}}
     </div>
     <form class="form rv d2" id="form" novalidate data-default="%s">
       <div class="attach" id="attach" hidden></div>
@@ -86,6 +87,20 @@ def book(default=''):
     </form>
   </div>
 </section>''' % default
+
+
+TG_SOUND, TG_MAIN = 'CS10ten', 'Egmarch'
+
+
+def direct_block(default):
+    snd = '<a class="tgl" href="https://t.me/%s" target="_blank" rel="noopener"><b>Написать в Telegram</b><span>Костя · звукозапись · @%s</span></a>' % (TG_SOUND, TG_SOUND)
+    mn = '<a class="tgl" href="https://t.me/%s" target="_blank" rel="noopener"><b>Написать в Telegram</b><span>Подкасты и продакшен · @%s</span></a>' % (TG_MAIN, TG_MAIN)
+    first, second = (snd, mn) if default == 'sound' else (mn, snd)
+    return '<div class="direct rv d3"><p>Форма не открылась или удобнее напрямую? Напиши сразу:</p>' + first + second + '</div>'
+
+
+def book(default=''):
+    return _book_raw(default).replace('{{direct}}', direct_block(default))
 
 
 def calc(studio):
@@ -153,7 +168,7 @@ hero = '''<section class="hero" id="top">
         <a class="btn" href="{{b}}3d/index.html">Пройти по студии <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="btn ghost" href="#book" data-book>Узнать свободные часы</a>
       </div>
-      <div class="hero-note"><span><b>13 900 ₽</b> трек + обложка + сниппет + Reels</span><span><b>17 000 ₽</b> выпуск подкаста за 24 часа</span><span><b>от 70 000 ₽</b> продюсирование YouTube</span></div>
+      <div class="hero-note"><span><b>13 900 ₽</b> трек + обложка + сниппет + Reels</span><span><b>17 000 ₽</b> выпуск подкаста за 24 часа</span><span><b>от 70 000 ₽</b> YouTube — зависит от числа выпусков</span></div>
     </div>
     <div class="crt-wrap">
       <div class="crt">
@@ -190,7 +205,7 @@ offers = '''<section class="sec" id="offers" data-acc="lime">
         <span class="otag">REVOLVER SOUND</span>
         <h3>Трек + обложка<br>+ сниппет + Reels</h3>
         <div class="oprice">13 900 ₽</div>
-        <ul><li>Запишем голос со звукорежиссёром</li><li>Сведём и сделаем мастеринг</li><li>Нарисуем обложку</li><li>Снимем сниппет и Reels к релизу</li></ul>
+        <ul><li>2 часа записи со звукорежиссёром</li><li>Сведение и мастеринг</li><li>Фото-обложка из студии</li><li>Сниппет 15–30 секунд и Reels с монтажом</li></ul>
         <a class="btn" href="#book" data-book data-service="%s">Записать трек</a>
         <a class="olink" href="{{b}}sound/">Про студию звука →</a>
       </article>
@@ -255,7 +270,7 @@ tour = '''<section class="tour sec" id="tour" style="padding:clamp(80px,10vw,140
       <span class="kick rv" style="--acc:var(--lime)">3D-тур</span>
       <h2 class="h2 rv d1" style="--acc:var(--lime)">Зайди и <span class="tag">посмотри.</span></h2>
       <p class="lead rv d2">Зайди внутрь до того, как приедешь: ночная улица, лестница, тамбур, зал подкаста и студия звука. Можно пройти, посмотреть и оставить свой тег на стене. Ходить — WASD и мышь, на телефоне — два стика.</p>
-      <div class="cta rv d3" style="margin-top:30px"><a class="btn" href="{{b}}3d/index.html">Войти <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><span style="font:600 12px ui-monospace,Consolas,monospace;color:var(--mute)">WASD · мышь · 1–4 перейти в зону<br>на телефоне — два стика</span></div>
+      <div class="cta rv d3" style="margin-top:30px"><a class="btn" href="{{b}}3d/index.html">Войти <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><span style="font:600 12px ui-monospace,Consolas,monospace;color:var(--mute)">WASD · мышь · 1–3 перейти в зону<br>на телефоне — два стика</span></div>
     </div>
     <div class="stairs rv d2" aria-hidden="true">
       <span class="neon">вниз</span>
@@ -296,7 +311,7 @@ find = '''<section class="sec wall" id="find" data-acc="violet">
 </section>'''
 
 home_body = hero + offers + studios + tour + who + find + faq(range(len(FAQ))) + book()
-write('index.html', render('home', '', 'REVOLVER — звукозапись и подкасты в Новосибирске, Фрунзе 49',
+write('index.html', render('home', '', 'REVOLVER — студия звукозаписи и подкастов в Новосибирске, Фрунзе 49',
       'Запиши трек, сними ролик в соседнем зале. REVOLVER SOUND — звукозапись, REVOLVER PODCAST — видеопавильон. Трек + обложка + сниппет + Reels — 13 900 ₽. Новосибирск, Фрунзе, 49.', home_body, '', './'))
 
 # ================= ЗВУК =================
@@ -373,7 +388,7 @@ pricesnd = '''<section class="sec" id="prices" data-acc="lime">
       <article class="pk rv">
         <span class="t">ТОЛЬКО ЗАПИСЬ</span><h3>Запись голоса</h3>
         <div class="pr">1 500 ₽<small> / час</small></div>
-        <p class="nt">Пакет на 5 часов — 6 500 ₽. Без нашего звукорежиссёра — от 900 ₽/час.</p>
+        <p class="nt"><b class="save">5 часов — 6 500 ₽ вместо 7 500 ₽: экономия 1 000 ₽.</b> Без нашего звукорежиссёра — от 900 ₽/час.</p>
         <div class="get"><b>Что получишь на выходе</b><span>Чистые дорожки сессии и черновое сведение — чтобы послушать дома и решить, что делать дальше.</span></div>
         <ul><li>Звукорежиссёр на сессии</li><li>Несколько дублей и помощь с подачей</li><li>Исходники записи</li><li>Демо-сведение сразу после записи</li></ul>
         <a class="btn ghost" href="#book" data-book data-service="Запись вокала">Спросить про день</a>
@@ -382,8 +397,8 @@ pricesnd = '''<section class="sec" id="prices" data-acc="lime">
         <span class="t">ГОТОВЫЙ РЕЛИЗ</span><h3>Трек + обложка + сниппет + Reels</h3>
         <div class="pr">13 900 ₽<small> / релиз</small></div>
         <p class="nt">Одна цена за весь набор. Видео снимаем в соседнем зале.</p>
-        <div class="get"><b>Что получишь на выходе</b><span>Сведённый трек с мастерингом, обложку, сниппет и Reels — всё готово к публикации.</span></div>
-        <ul><li>Запись голоса со звукорежиссёром</li><li>Сведение и мастеринг</li><li>Обложка трека</li><li>Сниппет и Reels для соцсетей</li></ul>
+        <div class="get"><b>Что получишь на выходе</b><span>Сведённый трек, фото-обложку, сниппет и Reels. Сниппет — короткий кусок трека (15–30 секунд) с видео из студии. Reels — отдельный вертикальный ролик с монтажом и субтитрами под твой трек.</span></div>
+        <ul><li>2 часа записи со звукорежиссёром</li><li>Сведение и мастеринг</li><li>Фото-обложка: снимаем тебя в студии и оформляем</li><li>Сниппет 15–30 секунд</li><li>Reels с монтажом и субтитрами</li></ul>
         <a class="btn" href="#book" data-book data-service="%s">Записать трек</a>
       </article>
     </div>
@@ -403,8 +418,8 @@ sound_gal = '''<section class="sec" id="frames" style="background:#0b0e0c" data-
 </div></section>'''
 
 sound_body = sound_hero + newbie + sound_sec + wave + engineer + services + pricesnd + sound_gal + faq([8, 3, 4, 2, 5, 6, 7]) + book('sound')
-write('sound/index.html', render('sound', 'sound/', 'REVOLVER SOUND — студия звукозаписи в Новосибирске, Фрунзе 49',
-      'Запись вокала и инструментов, сведение и мастеринг. Первый раз — приходи с черновиком. Трек + обложка + сниппет + Reels — 13 900 ₽. Новосибирск, Фрунзе, 49.', sound_body, '../', '../'))
+write('sound/index.html', render('sound', 'sound/', 'Запись вокала и трека в Новосибирске — от 1 500 ₽/час | REVOLVER SOUND',
+      'Запись вокала от 1 500 ₽/час, сведение и мастеринг. Первый раз — приходи с черновиком. Трек + фото-обложка + сниппет + Reels — 13 900 ₽. Новосибирск, Фрунзе, 49.', sound_body, '../', '../'))
 
 # ================= ПОДКАСТЫ =================
 pav = '''<section class="sec wall" id="studio" data-acc="amber">
@@ -436,13 +451,16 @@ pav = '''<section class="sec wall" id="studio" data-acc="amber">
   </div>
 </section>'''
 
-pod_cards = '''<div class="cards" id="cards-podcast" data-acc="amber">
-      <article class="card rv"><span class="t">ДЛЯ СВОЕЙ КОМАНДЫ</span><h3>Зал + свет</h3><p class="d">Для продакшнов и операторов со своей техникой.</p><div class="pr">2 700 ₽<small> / час</small></div><p class="nt">Минимум 2 часа · от 4 часов — 2 400 ₽/час</p><ul><li>Павильон 30 м² и реквизит</li><li>Постоянный студийный свет</li><li>Ваши камеры на ЭЛТ</li><li>Гримёрная, чай/кофе, администратор</li></ul><a class="btn ghost" href="#book" data-book data-service="Аренда зала + свет">Узнать свободные часы</a></article>
-      <article class="card hit rv d1"><span class="t">ГОТОВО ЗА 24 ЧАСА</span><h3>Экспресс-мультикам</h3><p class="d">Сняли разговор — отдали готовый выпуск и пять коротких.</p><div class="pr">17 000 ₽<small> / выпуск</small></div><p class="nt">1 час записи · 3 камеры + звук</p><ul><li>3 камеры 4K, многоканальный звук</li><li>Склейка по спикерам</li><li>5 Shorts / Reels с субтитрами</li><li>Выпуск — на следующий день</li></ul><a class="btn amber" href="#book" data-book data-service="Экспресс-мультикам 24ч">Снять выпуск</a></article>
-      <article class="card rv d2"><span class="t">РАСШИРЕННЫЙ</span><h3>Продюсерский пакет</h3><p class="d">Для YouTube, брендов и музыкальных Live.</p><div class="pr">28 000 ₽<small> / выпуск</small></div><p class="nt">До 1,5 часов записи</p><ul><li>Всё из «Экспресса»</li><li>Смысловая чистка, интро, моушн</li><li>Цвет в кинопрофиле VOLNA film</li><li>10 Shorts, обложка, SEO-описание</li></ul><a class="btn ghost" href="#book" data-book data-service="Продюсерский пакет">Написать про выпуск</a></article>
-      <article class="card rv"><span class="t">РАЗОВАЯ СЪЁМКА</span><h3>Подкаст на 2 часа</h3><p class="d">Расширенная сессия, два техника, полный монтаж.</p><div class="pr">40 000 ₽<small> / 2 часа</small></div><p class="nt">1 выпуск · 5 Shorts</p><ul><li>2 оператора-техника</li><li>Мультикам-монтаж, цвет, титры</li><li>Кликабельное превью</li></ul><a class="btn ghost" href="#book" data-book data-service="Подкаст на 2 часа — полный выпуск">Написать про выпуск</a></article>
-      <article class="card rv d1"><span class="t">РЕГУЛЯРНЫЙ КАНАЛ</span><h3>YouTube на месяц</h3><p class="d">Регулярный канал без найма своей команды.</p><div class="pr">85 000 ₽<small> / месяц</small></div><p class="nt">4 выпуска и 15 Shorts</p><ul><li>4 YouTube-обложки</li><li>Помощь с темами и структурой</li><li>3 камеры, премиум-свет</li></ul><a class="btn ghost" href="#book" data-book data-service="YouTube на месяц">Написать про канал</a></article>
-      <article class="card rv d2"><span class="t">15 РОЛИКОВ В МЕСЯЦ</span><h3>Поток Shorts</h3><p class="d">Вертикальные ролики из одной смены.</p><div class="pr">50 000 ₽<small> / месяц</small></div><p class="nt">Смена до 4 часов</p><ul><li>Сценарии и покадровый план</li><li>Монтаж, чистка речи, субтитры</li><li>Названия, SEO, теги</li></ul><a class="btn ghost" href="#book" data-book data-service="Shorts / Reels на месяц">Спросить про ролики</a></article>
+pod_cards = '''<div class="cards two-c" id="cards-podcast" data-acc="amber">
+      <article class="card hit rv"><span class="t">РЕШЕНИЕ 1 · ГОТОВО ЗА 24 ЧАСА</span><h3>Снять выпуск</h3><p class="d">Сняли разговор — отдали готовый выпуск и пять коротких.</p><div class="pr">17 000 ₽<small> / выпуск</small></div><p class="nt">1 час записи · 3 камеры + звук</p><ul><li>3 камеры 4K, многоканальный звук</li><li>Склейка по спикерам</li><li>5 Shorts / Reels с субтитрами</li><li>Выпуск — на следующий день</li></ul><a class="btn amber" href="#book" data-book data-service="Экспресс-мультикам 24ч">Снять выпуск</a></article>
+      <article class="card rv d1"><span class="t">РЕШЕНИЕ 2 · РЕГУЛЯРНЫЙ КАНАЛ</span><h3>Канал на месяц</h3><p class="d">Регулярный канал без найма своей команды.</p><div class="pr">85 000 ₽<small> / месяц</small></div><p class="nt">4 выпуска и 15 Shorts</p><ul><li>4 YouTube-обложки</li><li>Помощь с темами и структурой</li><li>3 камеры, премиум-свет</li></ul><a class="btn ghost" href="#book" data-book data-service="YouTube на месяц">Написать про канал</a></article>
+    </div>
+    <h3 class="rows-h rv">Другие варианты</h3>
+    <div class="rows rv">
+      <div class="rw"><div><b>Зал + свет для своей команды</b><span>Павильон 30 м², свет, реквизит, ваши камеры на ЭЛТ. Минимум 2 часа, от 4 часов — 2 400 ₽/час.</span></div><div class="rp">2 700 ₽<small>/ час</small></div><a class="btn sm ghost" href="#book" data-book data-service="Аренда зала + свет">Узнать свободные часы</a></div>
+      <div class="rw"><div><b>Продюсерский пакет</b><span>До 1,5 часов записи, смысловая чистка, интро, цвет, 10 Shorts, обложка и описание.</span></div><div class="rp">28 000 ₽<small>/ выпуск</small></div><a class="btn sm ghost" href="#book" data-book data-service="Продюсерский пакет">Написать про выпуск</a></div>
+      <div class="rw"><div><b>Подкаст на 2 часа</b><span>Расширенная сессия, два техника, мультикам-монтаж, цвет, титры, 5 Shorts.</span></div><div class="rp">40 000 ₽<small>/ 2 часа</small></div><a class="btn sm ghost" href="#book" data-book data-service="Подкаст на 2 часа — полный выпуск">Написать про выпуск</a></div>
+      <div class="rw"><div><b>Поток Shorts</b><span>15 вертикальных роликов из одной смены до 4 часов: сценарии, монтаж, субтитры.</span></div><div class="rp">50 000 ₽<small>/ месяц</small></div><a class="btn sm ghost" href="#book" data-book data-service="Shorts / Reels на месяц">Спросить про ролики</a></div>
     </div>'''
 
 pod_prices = '''<section class="sec" id="prices" style="background:#0b0e0c" data-acc="amber">
@@ -493,19 +511,19 @@ pod_hero = phero('amber', 'REVOLVER PODCAST · 30 М² · 6×5', 'Видео&shy
                  '<a class="btn amber" href="#book" data-book data-service="Экспресс-мультикам 24ч">Снять выпуск</a><a class="btn ghost" href="#prices">Цены</a><a class="link" href="{{b}}3d/index.html">Пройти по студии →</a>',
                  'hall-wide-2', 'Видеопавильон REVOLVER PODCAST', 'Подкасты')
 pod_body = pod_hero + pav + pod_prices + fm + pod_gal + faq([0, 1, 2, 5, 7]) + book('podcast')
-write('podcast/index.html', render('podcast', 'podcast/', 'REVOLVER PODCAST — студия подкастов и видеопавильон в Новосибирске',
+write('podcast/index.html', render('podcast', 'podcast/', 'Студия подкастов в Новосибирске — выпуск за 24 часа, 17 000 ₽ | REVOLVER PODCAST',
       'Съёмка подкастов, интервью, Live и Shorts. 3 камеры 4K, ЭЛТ, граффити. Выпуск за 24 часа — 17 000 ₽. Аренда зала — 2 700 ₽/ч. Фрунзе, 49.', pod_body, '../', '../'))
 
 # ================= ПРОДАКШЕН =================
 YT = [
     ('Gm8-ZmQf0nU', 'После этого случая я поверил в МИСТИКУ!', 'Авторский канал · длинный формат',
-     '«Эксперт по шнуркам» — истории одного человека стали каналом с 26,6 млн просмотров',
-     'Велосипедист-кругосветчик рассказывает истории из поездок. Длинный выпуск набрал более 2 млн просмотров и почти 220 тыс. часов просмотра.',
-     '26,6+ млн просмотров · 980+ тыс. часов просмотра · 61+ тыс. подписчиков', 'https://youtu.be/Gm8-ZmQf0nU', 'https://www.youtube.com/@expertposhnurkam'),
+     '«Эксперт по шнуркам» — истории одного человека стали каналом с 25,9 млн просмотров',
+     'Велосипедист-кругосветчик рассказывает истории из поездок. Длинный выпуск набрал более 2 млн просмотров.',
+     '25,9 млн просмотров · 61,3 тыс. подписчиков', 'https://youtu.be/Gm8-ZmQf0nU', 'https://www.youtube.com/@expertposhnurkam'),
     ('ADKbN_Wm_Rc', 'Чем ателье лучше производства?', 'Интервью с непубличным предпринимателем',
      'SNEGOVIK PRODUCTION — интересный разговор с непубличным предпринимателем',
      'Вместо интервью «о пути предпринимателя» — один конкретный вопрос, на который у героя есть ответ из практики. Short из этого выпуска набрал более 4 млн просмотров.',
-     '17+ млн просмотров · 190+ тыс. часов просмотра · 22,6+ тыс. подписчиков', 'https://youtu.be/ADKbN_Wm_Rc', 'https://www.youtube.com/@SNEGOVIKPRODUCTION'),
+     '15,9 млн просмотров · 22,6 тыс. подписчиков', 'https://youtu.be/ADKbN_Wm_Rc', 'https://www.youtube.com/@SNEGOVIKPRODUCTION'),
     ('xIGH-3r54MQ', 'Как изменился бизнес в России за 40 лет? Владимир Мартыненков', 'Деловое интервью · девелопмент',
      'Как изменился бизнес в России за 40 лет?',
      'Разговор с основателем группы компаний «Мета»: от первых предпринимательских решений до девелопмента. Компания раскрывается через решения человека.',
@@ -518,6 +536,10 @@ YT = [
 yt_cards = ''
 for k, (vid, t, cap, h3, txt, stat, url, ch) in enumerate(YT):
     chl = ('<a class="olink" href="%s" target="_blank" rel="noopener">Канал и статистика ↗</a>' % ch) if ch else ''
+    if vid == 'ADKbN_Wm_Rc':
+        chl += '<a class="olink" href="https://youtube.com/shorts/eyhMDLc9AWw" target="_blank" rel="noopener">Short, 4 млн ↗</a>'
+    if 'подписчиков' in stat:
+        stat += '<small>данные канала на ноябрь 2026</small>'
     yt_cards += '''<article class="ytc rv d%d"><div class="video-stage" data-yt-id="%s" data-yt-title="%s"><img src="{{b}}assets/yt/%s.jpg" alt="Превью выпуска «%s»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: %s"><span>▶</span>Смотреть</button></div>
 <div class="ytb"><span class="caption">%s</span><h3>%s</h3><p>%s</p><p class="ystat">%s</p><div class="ylinks"><a class="olink" href="%s" target="_blank" rel="noopener">Смотреть на YouTube ↗</a>%s</div></div></article>
 ''' % (k % 3, vid, t, vid, t, t, cap, h3, txt, stat, url, chl)
@@ -532,7 +554,7 @@ prod_hero = phero('red', 'ПРОДАКШЕН · ЭКСПЕРТЫ · БРЕНДЫ
 prod_body = prod_hero + '''<section class="sec" id="cases" data-acc="red"><div class="wrap">
   <span class="kick rv">YouTube</span>
   <h2 class="h2 rv d1">Каналы и выпуски,<br>которые <em>работают.</em></h2>
-  <p class="lead rv d2">Видео загружается только по нажатию. Цифры — из статистики каналов: открыть канал можно по ссылке рядом. YouTube в России может требовать VPN.</p>
+  <p class="lead rv d2">Видео загружается только по нажатию. Цифры — из публичной статистики каналов, открыть канал можно по ссылке рядом с каждым кейсом.</p>
   <div class="ytgrid">''' + yt_cards + '''</div>
 </div></section>
 ''' + events + '''
@@ -552,7 +574,7 @@ prod_body = prod_hero + '''<section class="sec" id="cases" data-acc="red"><div c
   <p class="note rv">Окончательную стоимость называем после обсуждения задачи и пилотного выпуска. Записать выпуск на площадке можно по <a href="{{b}}podcast/#prices" style="border-bottom:2px solid var(--red)">готовым тарифам павильона</a>.</p>
   <p class="volna rv" style="color:var(--ink);margin-top:34px">Корпоративное видео для заводов, застройщиков и госсектора, клипы и фестивальное кино — <a href="https://marchen.ru" target="_blank" rel="noopener" style="border-bottom:2px solid var(--lime)">VOLNA film · marchen.ru ↗</a></p>
 </div></section>''' + book('production')
-write('production/index.html', render('production', 'production/', 'Продакшен REVOLVER — YouTube, подкасты и музыка в Новосибирске',
+write('production/index.html', render('production', 'production/', 'Продюсирование YouTube-каналов в Новосибирске — от 70 000 ₽ | REVOLVER',
       'Продюсирование YouTube-каналов и шоу, кейсы с открытой статистикой. Разговорный канал от 70 000 ₽, шоу от 150 000 ₽. Мероприятия и музыка. Новосибирск.', prod_body, '../', '../'))
 
 # ---------- служебные файлы ----------

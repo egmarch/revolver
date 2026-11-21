@@ -110,7 +110,7 @@ addEventListener('keydown', (e) => {
     if (e.code === 'KeyC') weapons.cycleColor();
     if (e.code === 'KeyX') weapons.clear();
   }
-  if (/^Digit[1-4]$/.test(e.code) && !e.repeat) teleport(+e.code.slice(5));
+  if (/^Digit[1-3]$/.test(e.code) && !e.repeat) teleport(+e.code.slice(5));
 });
 addEventListener('keyup', (e) => {
   if (KEYMAP[e.code]) input.keys[KEYMAP[e.code]] = false;
@@ -358,12 +358,14 @@ function teleport(n) {
 }
 document.querySelectorAll('#zones button').forEach(b => b.addEventListener('click', () => { teleport(+b.dataset.z); b.blur(); }));
 function markZoneBtn() {
-  const map = { street: 1, entry: 1, hall: 2, lounge: 3, studio: 4 };
+  const map = { street: 1, entry: 1, hall: 2, studio: 3 };
   document.querySelectorAll('#zones button').forEach(b => b.classList.toggle('on', +b.dataset.z === map[state.zone]));
 }
 
 function setZone(z, snap) {
+  const prevZone = state.zone;
   state.zone = z;
+  if (z === 'studio' && prevZone !== 'studio' && state.started && !state.endShown) { state.endShown = true; setTimeout(showEnd, 1500); }
   world.setVisibility(z); if (weapons) weapons.invalidate();
   world.setZoneLights(z, snap);
   const [n, s] = ZONE_NAMES[z];
@@ -373,6 +375,8 @@ function setZone(z, snap) {
 
 // ------------------------------------------------------------------
 // пауза / старт
+function showEnd() { if (!state.cardOpen && !state.paused) $('#endcard').classList.add('on'); }
+$('#endClose').addEventListener('click', () => $('#endcard').classList.remove('on'));
 function showPause(v) { $('#pause').classList.toggle('hidden', !v); state.paused = v; }
 $('#resume').addEventListener('click', () => {
   showPause(false);
@@ -384,7 +388,7 @@ $('#go').addEventListener('click', () => {
   $('#splash').classList.add('hidden');
   $('#hud').classList.remove('hidden');
   if (isTouch) $('#touch').classList.remove('hidden');
-  state.started = true; document.body.classList.add('started');
+  state.started = true; document.body.classList.add('started'); setTimeout(() => document.body.classList.remove('started'), 6000);
   if (!isTouch) { lockPointer(); }
   const fs = qs.get('fs') === '1';
   if (fs && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { });
@@ -481,10 +485,9 @@ function drawMapBase() {
   rect(-3.4, 5.6, -2.0, 7.1, 'rgba(120,120,130,.45)', '#8a8f9a');     // площадка
   rect(-3.4, 2.2, -0.2, 5.4, 'rgba(150,60,200,.55)', '#c070ff');      // тамбур
   rect(0, 0, 6, 5, 'rgba(40,150,70,.55)', '#35e06b');                  // зал
-  rect(6, 0, 9, 5, 'rgba(200,190,160,.4)', '#d7ceb0');                 // лаундж
-  rect(9, -1, 12, 5, 'rgba(60,100,220,.55)', '#6a95ff');               // студия
+  rect(6, -1, 9, 5, 'rgba(60,100,220,.55)', '#6a95ff');               // студия
   c.fillStyle = '#fff'; c.font = '600 15px Manrope, Arial, sans-serif'; c.textAlign = 'center';
-  [['ул.', 5.8, 11], ['зал', 3, 2.7], ['лаундж', 7.5, 2.7], ['звук', 10.5, 2.0], ['тамб.', -1.8, 3.8]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
+  [['ул.', 5.8, 11], ['зал', 3, 2.7], ['звук', 7.5, 2.0], ['тамб.', -1.8, 3.8]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
 }
 function drawMap() {
   mmx.drawImage(mapBase, 0, 0);
@@ -587,7 +590,7 @@ const tourApi = {
   sprayAt: (ox, oy, oz, dx, dy, dz, n) => { const V = THREE.Vector3; return ox === undefined ? weapons.sprayAt(undefined, undefined, 1) : weapons.sprayAt(new V(ox, oy, oz), new V(dx, dy, dz).normalize(), n || 1); },
   fireAt: (ox, oy, oz, dx, dy, dz) => { const V = THREE.Vector3; weapons.S.cd = 0; if (weapons.S.weapon !== 0) weapons.switchWeapon(0); return weapons.fire(new V(ox, oy, oz), new V(dx, dy, dz).normalize()); },
   get weapons() { return weapons; }, jump,
-  pickRevolver, interact, closeCard, hotspots: () => world.hotspots.map(h => h.id), open: (id) => openCard(world.hotspots.find(h => h.id === id)),
+  showEnd, pickRevolver, interact, closeCard, hotspots: () => world.hotspots.map(h => h.id), open: (id) => openCard(world.hotspots.find(h => h.id === id)),
   fixed: () => { fixedQuality = true; }
 };
 

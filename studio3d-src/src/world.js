@@ -26,9 +26,7 @@ export const WALK = [
   [-0.6, 0.6, 3.25, 3.65],      // дверь тамбур-зал
   [0.3, 5.7, 0.3, 4.7],         // зал
   [5.5, 6.5, 3.25, 3.65],       // дверь зал-лаундж
-  [6.4, 8.6, 0.3, 4.7],         // лаундж
-  [8.5, 9.6, 3.25, 3.65],       // дверь лаундж-студия
-  [9.4, 11.7, -0.7, 4.7]        // студия
+  [6.4, 8.7, -0.7, 4.7]         // студия звука (одна комната)
 ];
 // препятствия (сырые прямоугольники x0,x1,z0,z1)
 export const OBST = [
@@ -44,19 +42,15 @@ export const OBST = [
   [0.1, 0.8, 0.1, 0.9],      // пальма у стеллажа
   [0.1, 0.8, 4.1, 4.9],      // пальма
   [1.0, 2.9, 4.2, 5.0],      // чёрный диван
-  [6.8, 8.7, 0.1, 1.1],      // диван
-  [7.05, 8.15, 1.7, 2.5],    // журнальный стол
-  [8.3, 8.9, 3.9, 4.9],      // тумба
-  [9.1, 10.05, 0.1, 2.4],    // пульт
-  [10.1, 10.9, 0.5, 1.5],    // кресло оператора
-  [10.85, 11.35, 2.45, 2.95] // стойка микрофона
+  [6.1, 7.05, 0.1, 2.4],     // пульт
+  [7.1, 7.9, 0.5, 1.5],      // кресло оператора
+  [8.05, 8.55, 3.85, 4.35]   // стойка микрофона
 ];
 
 const ZONE_NAMES = {
   street: ['Улица · Фрунзе 49', 'Ночь. Вход — вниз по лестнице'],
   entry: ['Тамбур', 'Направо дверь в студию, прямо — школа диджеев (ремонт)'],
   hall: ['REVOLVER PODCAST · 30 м²', 'Зал для видеоподкастов'],
-  lounge: ['Лаундж', 'Диван, постеры и звукоизоляция'],
   studio: ['REVOLVER SOUND · 18 м²', 'Комната звукозаписи']
 };
 export { ZONE_NAMES };
@@ -65,15 +59,13 @@ export function zoneAt(x, z) {
   if (z > 5.3 && x > -1.9) return 'street';
   if (x < -0.1) return 'entry';
   if (x < 6.0) return 'hall';
-  if (x < 9.0) return 'lounge';
   return 'studio';
 }
 
 export const TELEPORTS = {
   1: { x: 5.8, z: 8.25, yaw: 1.07, pitch: -0.18 },
   2: { x: 3.6, z: 4.62, yaw: 0.12, pitch: -0.02 },
-  3: { x: 7.5, z: 4.5, yaw: 0.08, pitch: -0.1 },
-  4: { x: 10.7, z: 4.5, yaw: 0.28, pitch: -0.1 }
+  3: { x: 7.4, z: 4.7, yaw: 0.2, pitch: -0.1 }
 };
 
 const LIGHTS = {
@@ -101,28 +93,19 @@ const LIGHTS = {
     { p: [1.5, 2.4, 4.0], c: 0xffffff, i: 4, d: 6 },
     { p: [0.4, 2.0, 3.45], c: 0xd070ff, i: 2, d: 4 }
   ],
-  lounge: [
-    { p: [7.5, 2.3, 1.8], c: 0xffd9a8, i: 14, d: 8 },
-    { p: [7.6, 2.2, 3.8], c: 0xfff0e0, i: 10, d: 6 },
-    { p: [6.4, 1.5, 3.4], c: 0x35e06b, i: 5, d: 4 },
-    { p: [8.6, 1.6, 2.2], c: 0x4a9bff, i: 4, d: 5 },
-    { p: [7.5, 0.5, 1.0], c: 0xff8a50, i: 2, d: 3 },
-    { p: [4.8, 1.8, 3.4], c: 0xdfe8ff, i: 2, d: 5 }
-  ],
   studio: [
-    { p: [10.0, 1.7, 1.3], c: 0x5aa0ff, i: 16, d: 6 },
-    { p: [10.9, 2.4, 2.8], c: 0xcfe0ff, i: 18, d: 7 },
-    { p: [11.3, 1.4, 0.4], c: 0x3a58ff, i: 9, d: 5 },
-    { p: [10.4, 2.5, 4.2], c: 0x9ab8ff, i: 12, d: 7 },
-    { p: [9.6, 1.4, 3.8], c: 0xff9a60, i: 2.5, d: 3 },
-    { p: [11.5, 1.0, 2.0], c: 0xff2b2b, i: 3, d: 3 }
+    { p: [7.0, 1.7, 1.3], c: 0x5aa0ff, i: 16, d: 6 },
+    { p: [7.9, 2.4, 2.8], c: 0xcfe0ff, i: 18, d: 7 },
+    { p: [8.3, 1.4, 0.4], c: 0x3a58ff, i: 9, d: 5 },
+    { p: [7.4, 2.5, 4.2], c: 0x9ab8ff, i: 12, d: 7 },
+    { p: [6.6, 1.4, 3.8], c: 0xff9a60, i: 2.5, d: 3 },
+    { p: [8.5, 1.0, 2.0], c: 0xff2b2b, i: 3, d: 3 }
   ]
 };
 const FOG = {
   street: [0x0b1020, 0.022, 0.8],
   entry: [0x120a1a, 0.05, 0.55],
   hall: [0x05060a, 0.05, 0.5],
-  lounge: [0x06070a, 0.055, 0.5],
   studio: [0x03040a, 0.055, 0.45]
 };
 
@@ -133,7 +116,7 @@ export function buildWorld(opts = {}) {
   scene.fog = new THREE.FogExp2(0x0b1020, 0.022);
 
   const G = {};
-  ['street', 'stairs', 'entry', 'hall', 'lounge', 'studio'].forEach(n => { G[n] = new THREE.Group(); G[n].name = n; scene.add(G[n]); });
+  ['street', 'stairs', 'entry', 'hall', 'studio'].forEach(n => { G[n] = new THREE.Group(); G[n].name = n; scene.add(G[n]); });
 
   // ---------- материалы ----------
   const M = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85, metalness: 0 }, o));
@@ -722,65 +705,10 @@ export function buildWorld(opts = {}) {
   SPH(H, 0.05, emi(0xff2a2a, 1.8), 5.8, 2.35, 3.45); glowSprite(H, 0xff2020, 0.7, 5.8, 2.35, 3.45, 0.6);
 
   // ======================================================
-  //  ЛАУНДЖ
-  // ======================================================
-  const L = G.lounge;
-  texBox(L, 6.1, -0.1, 0, 8.9, 0, 5, mat.blueCarpet, 1.0);
-  texBox(L, 6.1, wy, 0, 8.9, wy + 0.1, 5, mat.ceil, 1);
-  // стены
-  const lw = M(0x1a1b22, { roughness: 1 });
-  texBox(L, 6.1, 0, -0.2, 8.9, wy + 0.1, 0, lw, 1);
-  texBox(L, 6.1, 0, 5.0, 8.9, wy + 0.1, 5.2, lw, 1);
-  // стена между лаунджем и студией (x 8.9..9.1), проём двери z 3..3.9 и окно z 0.5..1.9
-  texBox(L, 8.9, 0, 0, 9.1, wy + 0.1, 0.5, mat.black, 1);
-  texBox(L, 8.9, 0, 0.5, 9.1, 1.0, 1.9, mat.black, 1);
-  texBox(L, 8.9, 1.9, 0.5, 9.1, wy + 0.1, 1.9, mat.black, 1);
-  texBox(L, 8.9, 0, 1.9, 9.1, wy + 0.1, 3.0, mat.black, 1);
-  texBox(L, 8.9, 0, 3.9, 9.1, wy + 0.1, 5.0, mat.black, 1);
-  texBox(L, 8.9, 2.1, 3.0, 9.1, wy + 0.1, 3.9, mat.black, 1);
-  plane(L, 1.4, 0.9, mat.glass, 9.0, 1.45, 1.2, '-x');
-  B(L, 0.14, 0.05, 1.5, mat.black, 9.0, 0.98, 1.2); B(L, 0.14, 0.05, 1.5, mat.black, 9.0, 1.92, 1.2);
-  // акустический поролон вокруг проёма со стороны лаунджа и вдоль стены
-  plane(L, 2.0, 2.4, mat.foam, 8.88, 1.3, 4.45, '-x', [3, 3.6]);
-  plane(L, 1.0, 2.0, mat.foam, 6.12, 1.2, 4.5, '+x', [1.5, 3]);
-  plane(L, 1.0, 2.0, mat.foam, 6.12, 1.2, 2.2, '+x', [1.5, 3]);
-  // диван
-  const sofa = new THREE.Group(); sofa.position.set(7.7, 0, 0.55); L.add(sofa);
-  B(sofa, 1.8, 0.4, 0.8, mat.cream, 0, 0.3, 0); B(sofa, 1.8, 0.5, 0.2, mat.cream, 0, 0.7, -0.3);
-  B(sofa, 0.2, 0.3, 0.82, mat.cream, -0.9, 0.55, 0); B(sofa, 0.2, 0.3, 0.82, mat.cream, 0.9, 0.55, 0);
-  B(sofa, 0.8, 0.14, 0.7, mat.cream, -0.4, 0.55, 0.05); B(sofa, 0.8, 0.14, 0.7, mat.cream, 0.4, 0.55, 0.05);
-  // журнальный стол
-  const ct = new THREE.Group(); ct.position.set(7.6, 0, 2.1); L.add(ct);
-  B(ct, 1.0, 0.04, 0.7, mat.white, 0, 0.43, 0);
-  [[-0.45, -0.3], [0.45, -0.3], [-0.45, 0.3], [0.45, 0.3]].forEach(([a, b]) => B(ct, 0.05, 0.42, 0.05, mat.white, a, 0.21, b));
-  B(ct, 0.9, 0.03, 0.6, mat.white, 0, 0.12, 0);
-  for (let i = 0; i < 6; i++) B(ct, 0.2 + (i % 3) * 0.05, 0.01, 0.15, M([0xc23a2a, 0xe8e1c8, 0x333, 0x2a7a4a][i % 4]), -0.3 + i * 0.12, 0.455 + i * 0.001, -0.1 + (i % 2) * 0.2, i * 0.5);
-  B(ct, 0.25, 0.02, 0.15, mat.black, 0.3, 0.47, 0.1, 0.3); CYL(ct, 0.03, 0.03, 0.1, M(0xdddddd), -0.35, 0.5, 0.2, 10);
-  // оранжевая тумба
-  const ts = new THREE.Group(); ts.position.set(8.6, 0, 4.4); L.add(ts);
-  B(ts, 0.5, 0.55, 0.4, M(0xb8651f, { roughness: 0.6 }), 0, 0.28, 0); B(ts, 0.14, 0.12, 0.05, mat.steel, 0, 0.36, 0.2);
-  SPH(ts, 0.1, M(0x6a8aa8, { roughness: 0.1, transparent: true, opacity: 0.7 }), 0, 0.68, 0);
-  // постеры
-  [[0, 7.0, 0.05, '+z'], [1, 8.1, 0.05, '+z'], [2, 8.87, 2.0, '-x'], [3, 6.9, 4.95, '-z']].forEach(([k, px, pz, f]) => {
-    const pc = TX.cv(256, 384); ART.drawPoster(pc, k);
-    const pt = TX.toTex(pc);
-    const g = new THREE.Group(); g.position.set(px, 1.6, pz); g.rotation.set(...FACE[f]); L.add(g);
-    B(g, 0.66, 0.96, 0.03, M(0x111113), 0, 0, 0);
-    plane(g, 0.58, 0.88, new THREE.MeshStandardMaterial({ map: pt, emissive: 0xffffff, emissiveMap: pt, emissiveIntensity: 0.35, roughness: 0.8 }), 0, 0, 0.02, '+z');
-  });
-  // неон-кольцо «ON AIR»
-  const naC = TX.cv(512, 128); ART.drawNeonText(naC, 'ON AIR', '#ff2a2a', `700 80px ${ART.FONT_HEAD}`);
-  plane(L, 1.1, 0.28, new THREE.MeshBasicMaterial({ map: TX.toTex(naC), transparent: true, toneMapped: false, depthWrite: false }), 7.7, 2.35, 0.05, '+z');
-  glowSprite(L, 0xff2a2a, 2.0, 7.7, 2.35, 0.2, 0.35);
-  // лампа торшер
-  CYL(L, 0.02, 0.02, 1.4, mat.black, 6.5, 0.7, 0.5, 8); SPH(L, 0.18, emi(0xffd9a8, 1.0), 6.5, 1.5, 0.5, 1, 0.8, 1); glowSprite(L, 0xffc890, 1.5, 6.5, 1.5, 0.5, 0.5);
-  // ковёр-прямоугольник
-  plane(L, 2.2, 1.6, M(0x1c1c28, { roughness: 1 }), 7.6, 0.012, 2.1, '+y');
-
-  // ======================================================
   //  СТУДИЯ ЗВУКА
   // ======================================================
   const U = G.studio;
+  U.position.x = -3;   // единая комната звукозаписи: x 6.1..9.0, z -1..5 (3 x 6 м)
   const blackWall = M(0x08080b, { roughness: 1 });
   texBox(U, 9.1, -0.1, -1, 12, 0, 5, mat.blueCarpet, 1.0);
   texBox(U, 9.1, wy, -1, 12, wy + 0.1, 5, mat.ceil, 1);
@@ -788,7 +716,8 @@ export function buildWorld(opts = {}) {
   texBox(U, 12, 0, -1.2, 12.2, wy + 0.1, 5.2, blackWall, 1);   // восток
   texBox(U, 9.1, 0, 5.0, 12.2, wy + 0.1, 5.2, blackWall, 1);   // юг
   // поролон на западной стене (звукоизоляция), на восточной и северной — панели
-  plane(U, 2.0, 2.4, mat.foam, 9.12, 1.3, 4.45, '+x', [3, 3.6]);
+  plane(U, 1.0, 2.4, mat.foam, 9.12, 1.3, 4.45, '+x', [1.5, 3.6]);
+  texBox(U, 8.9, 0, -1.2, 9.1, wy + 0.1, 0, blackWall, 1);   // угол у стены зала
   plane(U, 1.0, 2.4, mat.foam, 9.12, 1.3, 2.4, '+x', [1.5, 3.6]);
   plane(U, 2.4, 1.6, mat.foam, 11.98, 1.3, 1.2, '-x', [3.5, 2.5]);
   plane(U, 2.4, 1.6, mat.foam, 11.98, 1.3, 3.8, '-x', [3.5, 2.5]);
@@ -830,7 +759,7 @@ export function buildWorld(opts = {}) {
   B(ch, 0.5, 0.1, 0.5, M(0x15161a, { roughness: 0.5 }), 0, 0.5, 0); B(ch, 0.5, 0.65, 0.1, M(0x8a867a, { roughness: 0.6 }), 0, 0.9, -0.24);
   B(ch, 0.5, 0.2, 0.12, M(0x15161a), 0, 1.3, -0.24); CYL(ch, 0.03, 0.03, 0.4, mat.darkSteel, 0, 0.25, 0, 8); B(ch, 0.5, 0.04, 0.04, mat.darkSteel, 0, 0.04, 0); B(ch, 0.04, 0.04, 0.5, mat.darkSteel, 0, 0.04, 0);
   // вокальная зона
-  const vox = new THREE.Group(); vox.position.set(11.1, 0, 2.7); U.add(vox);
+  const vox = new THREE.Group(); vox.position.set(11.3, 0, 4.1); U.add(vox);
   for (let i = 0; i < 3; i++) { const a = i * 2.094; B(vox, 0.03, 0.03, 0.4, mat.black, Math.cos(a) * 0.17, 0.04, Math.sin(a) * 0.17, -a + Math.PI / 2); }
   CYL(vox, 0.018, 0.018, 1.45, mat.black, 0, 0.75, 0, 8);
   B(vox, 0.02, 0.02, 0.35, mat.black, 0.0, 1.5, -0.14);
@@ -857,9 +786,6 @@ export function buildWorld(opts = {}) {
   glowSprite(U, 0x3a66ff, 5, 10.8, 2.5, 2.0, 0.12);
   // красная REC лампочка
   SPH(U, 0.05, emi(0xff2a2a, 1.8), 11.95, 2.3, 3.6); glowSprite(U, 0xff2020, 0.8, 11.9, 2.3, 3.6, 0.6);
-  // дверь в студию
-  const sdM = M(0x15151a, { roughness: 0.8 });
-  const sdoor = addDoor(U, { axis: 'x', hx: 9.0, hz: 3.9, w: 0.9, h: 2.1, t: 0.07, open: -Math.PI / 2 * 0.95, mats: [mat.foam, sdM, sdM, sdM, sdM, sdM], cx: 9.0, cz: 3.45 });
 
   // ======================================================
   //  СВЕТ
@@ -876,7 +802,7 @@ export function buildWorld(opts = {}) {
     lightState.zone = zone;
     lightState.target = LIGHTS[zone];
     lightState.fog = FOG[zone];
-    lightState.amb = { street: 0.8, entry: 0.3, hall: 0.3, lounge: 0.6, studio: 0.85 }[zone];
+    lightState.amb = { street: 0.8, entry: 0.3, hall: 0.3, studio: 0.85 }[zone];
     if (snap) applyLights(1);
   }
   const tmpC = new THREE.Color();
@@ -898,9 +824,8 @@ export function buildWorld(opts = {}) {
   const VIS = {
     street: ['street', 'stairs', 'entry'],
     entry: ['street', 'stairs', 'entry', 'hall'],
-    hall: ['entry', 'hall', 'lounge'],
-    lounge: ['hall', 'lounge', 'studio'],
-    studio: ['lounge', 'studio', 'hall']
+    hall: ['entry', 'hall', 'studio'],
+    studio: ['hall', 'studio']
   };
   function setVisibility(zone) {
     const v = VIS[zone];
@@ -915,15 +840,14 @@ export function buildWorld(opts = {}) {
     { id: 'crt', zone: 'hall', pos: [1.4, 0.75, 0.9], title: 'Старые телевизоры в кадре', text: 'На экранах идёт картинка с камер студии: зелёный фосфор, шум, таймкод REC. Такой фон оживляет кадр.', img: 'hall-wide-1', service: 'podcast-express' },
     { id: 'suitcase', zone: 'hall', pos: [5.45, 0.85, 1.4], title: 'Чемодан', text: 'Чемодан «заряжен на деньги». Реквизит можно переставить под тему выпуска.', img: 'detail-suitcase', service: 'rent' },
     { id: 'retro', zone: 'hall', pos: [3.4, 1.0, 0.45], title: 'Стеллаж с инструментами и техникой', text: 'Три гитары, синтезатор, проигрыватель, магнитофоны и книги. Всё настоящее, без бутафории — это ретро-эстетика в кадре.', img: 'detail-turntable', service: 'rent' },
-    { id: 'mural', zone: 'hall', pos: [5.9, 1.5, 1.4], title: 'Граффити-стена', text: 'Большой чёрно-белый рисунок на зелёной стене — фирменный фон студии. Рядом дверь в лаундж и комнату звукозаписи.', img: 'hall-wide-2', service: 'rent' },
+    { id: 'mural', zone: 'hall', pos: [5.9, 1.5, 1.4], title: 'Граффити-стена', text: 'Большой чёрно-белый рисунок на зелёной стене — фирменный фон студии. Рядом дверь в комнату звукозаписи.', img: 'hall-wide-2', service: 'rent' },
     { id: 'light', zone: 'hall', pos: [1.1, 2.3, 3.1], title: 'Свет RGB', text: 'Цвет света подбираем под настроение выпуска. Два больших софтбокса и панель сверху дают мягкую картинку.', img: 'hall-wide-3', service: 'podcast-express' },
     { id: 'table', zone: 'hall', pos: [3.0, 0.9, 2.0], title: 'Стол и три микрофона', text: 'Три микрофона на журавлях, три камеры 4K, запись в мультикам. Садись за стол — проверим звук.', img: 'hall-table', service: 'podcast-express' },
     { id: 'sofa', zone: 'hall', pos: [1.95, 0.8, 4.4], title: 'Чёрный кожаный диван', text: 'Диван между входом и дверью в звукозапись. Можно посидеть, пока мы готовим свет и звук.', img: 'hall-both', service: 'rent' },
-    { id: 'lounge', zone: 'lounge', pos: [7.7, 0.9, 0.7], title: 'Лаундж', text: 'Белый кожаный диван и тишина перед записью. Тут можно подождать или обсудить сценарий.', img: 'talk-a', service: 'pack' },
-    { id: 'console', zone: 'studio', pos: [9.55, 1.1, 1.2], title: 'Тот же фрагмент после сведения', text: 'Звукорежиссёр сводит голос за пультом. Сравни с записью до обработки.', img: 'engineer-1', service: 'sound-vocal', audio: 'demo-after.mp3' },
-    { id: 'vocal', zone: 'studio', pos: [11.1, 1.45, 2.4], title: 'Голос до обработки', text: 'Комната небольшая — поэтому голос в ней плотный, а не гулкий. Послушай запись до обработки.', img: 'mic-neumann', service: 'sound-vocal', audio: 'demo-before.mp3' },
-    { id: 'wall', zone: 'studio', pos: [9.2, 1.4, 2.6], title: 'Звукоизолированная стена', text: 'Между залом и студией — звукоизоляция. Можно писать подкаст и голос одновременно, не мешая друг другу. Пакет «Трек + обложка + сниппет + Reels — 13 900 ₽».', img: 'vocal-2', service: 'pack' },
-    { id: 'revolver', zone: 'studio', pos: [9.72, 0.9, 0.62], title: 'Револьвер на столе', text: '', img: null, service: null, pickup: true },
+    { id: 'console', zone: 'studio', pos: [6.55, 1.1, 1.2], title: 'Тот же фрагмент после сведения', text: 'Звукорежиссёр сидит в той же комнате, что и исполнитель, — без стеклянной стены между вами. Сравни с записью до обработки.', img: 'engineer-1', service: 'sound-vocal', audio: 'demo-after.mp3' },
+    { id: 'vocal', zone: 'studio', pos: [8.3, 1.45, 4.1], title: 'Голос до обработки', text: 'Комната небольшая — поэтому голос в ней плотный, а не гулкий. Послушай запись до обработки.', img: 'mic-neumann', service: 'sound-vocal', audio: 'demo-before.mp3' },
+    { id: 'wall', zone: 'studio', pos: [6.2, 1.4, 4.45], title: 'Звукоизолированная стена', text: 'Между залом и комнатой звукозаписи — звукоизоляция. Можно писать подкаст и голос одновременно, не мешая друг другу. Пакет «Трек + обложка + сниппет + Reels — 13 900 ₽».', img: 'vocal-2', service: 'pack' },
+    { id: 'revolver', zone: 'studio', pos: [6.72, 0.9, 0.62], title: 'Револьвер на столе', text: '', img: null, service: null, pickup: true },
     { id: 'dj', zone: 'entry', pos: [-2.3, 1.5, 2.3], title: 'Школа диджеев — идёт ремонт', text: 'Здесь только начали ремонт, дверь закрыта. Тебе — направо, в студию.', img: null, service: null },
     { id: 'sign', zone: 'street', pos: [6.6, 6.1, 5.8], title: 'REVOLVER PODCAST · REVOLVER SOUND', text: 'Студии на Фрунзе, 49: видеоподкасты и запись голоса. Вход по лестнице вниз, потом направо.', img: 'hall-both', service: 'pack' }
   ].map(h => Object.assign(h, { pos: new THREE.Vector3(...h.pos), href: h.service ? BOOK(h.service) : null }));
