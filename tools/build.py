@@ -131,16 +131,18 @@ def calc(studio):
     </div>''' % (studio, p, s)
 
 
-def phero(acc, kick, h1, lead, ctas, img, alt, crumbs, side=''):
+def phero(acc, kick, h1, lead, ctas, img, alt, crumbs, side='', art=''):
     inner = '<div><p class="crumbs"><a href="{{r}}">Главная</a> / %s</p><span class="kick">%s</span><h1>%s</h1><p class="lead">%s</p><div class="cta" style="margin-top:30px">%s</div></div>' % (crumbs, kick, h1, lead, ctas)
     if side:
         inner = '<div class="phero-grid">' + inner + side + '</div>'
-    return '''<section class="phero" data-acc="%s">
+    artblock = ('<div class="phero-art" aria-hidden="true"><img src="{{b}}assets/img/%s.webp" alt=""></div><span class="marker-tag" aria-hidden="true">твой звук!</span>' % art) if art else ''
+    return '''<section class="phero%s" data-acc="%s">
   <div class="phero-bg"><img src="{{b}}assets/img/%s.webp" alt="%s"></div>
+  %s
   <span class="drip" style="left:12%%;top:0;height:90px;animation-delay:.6s" aria-hidden="true"></span>
   <span class="drip" style="right:18%%;top:0;height:130px;width:12px;animation-delay:2.6s" aria-hidden="true"></span>
   <div class="wrap">%s</div>
-</section>''' % (acc, img, alt, inner)
+</section>''' % (' has-art' if art else '', acc, img, alt, artblock, inner)
 
 
 def listen_track(title, note):
@@ -324,7 +326,7 @@ listen = ('<aside class="listen" id="listen"><div class="listen-h"><b>Послу
 sound_hero = phero('lime', 'REVOLVER SOUND · 18 М² · 3×6', 'Студия<br><em>звукозаписи</em>',
                    'Запишем голос, сведём и отдадим файлы. Первый раз? Приходи с черновиком — разберёмся.',
                    '<a class="btn" href="#book" data-book data-service="Запись вокала">Узнать свободные часы</a><a class="btn ghost" href="#book" data-book data-kind="demo">Скинуть демо</a><a class="link" href="#listen">Послушать записи ↓</a>',
-                   'vocal-2', 'Артист у микрофона в студии REVOLVER SOUND', 'Звукозапись', listen)
+                   'vocal-2', 'Артист у микрофона в студии REVOLVER SOUND', 'Звукозапись', listen, 'artists')
 
 newbie = '''<section class="sec" id="first" data-acc="lime" style="padding:clamp(50px,6vw,80px) 0;background:#0b0e0c"><div class="wrap newbie">
   <figure class="rv"><img src="{{b}}assets/img/control-3.webp" alt="Звукорежиссёр и артист за пультом во время записи" loading="lazy"><figcaption>Из реальной сессии</figcaption></figure>
