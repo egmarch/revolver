@@ -4,6 +4,7 @@
 import io, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UTM_VOLNA = '?utm_source=revolvernsk&utm_medium=referral'
 DOMAIN = 'revolvernsk.ru'
 PACK = 'Трек + обложка + сниппет + Reels — 13 900 ₽'
 LAYOUT = io.open(os.path.join(ROOT, 'src', '_layout.html'), encoding='utf8').read()
@@ -95,7 +96,7 @@ TG_SOUND, TG_MAIN = 'CS10ten', 'Egmarch'
 def direct_block(default):
     snd = '<a class="tgl" href="https://t.me/%s" target="_blank" rel="noopener"><b>Написать в Telegram</b><span>Костя · звукозапись · @%s</span></a>' % (TG_SOUND, TG_SOUND)
     mn = '<a class="tgl" href="https://t.me/%s" target="_blank" rel="noopener"><b>Написать в Telegram</b><span>Подкасты и продакшен · @%s</span></a>' % (TG_MAIN, TG_MAIN)
-    first, second = (snd, mn) if default == 'sound' else (mn, snd)
+    first, second = (snd, mn) if default in ('sound', 'production') else (mn, snd)
     return '<div class="direct rv d3"><p>Форма не открылась или удобнее напрямую? Напиши сразу:</p>' + first + second + '</div>'
 
 
@@ -168,7 +169,7 @@ hero = '''<section class="hero" id="top">
         <a class="btn" href="{{b}}3d/index.html">Пройти по студии <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="btn ghost" href="#book" data-book>Узнать свободные часы</a>
       </div>
-      <div class="hero-note"><span><b>13 900 ₽</b> трек + обложка + сниппет + Reels</span><span><b>17 000 ₽</b> выпуск подкаста за 24 часа</span><span><b>от 70 000 ₽</b> YouTube — зависит от числа выпусков</span></div>
+      <div class="hero-note"><span><b>13 900 ₽</b> трек + обложка + сниппет + Reels</span><span><b>17 000 ₽</b> выпуск подкаста за 24 часа</span><span><b>1 500 ₽/час</b> запись голоса</span></div>
     </div>
     <div class="crt-wrap">
       <div class="crt">
@@ -219,12 +220,12 @@ offers = '''<section class="sec" id="offers" data-acc="lime">
       </article>
       <article class="offer o3 rv d2" data-tilt>
         <span class="otag">ПРОДАКШЕН</span>
-        <h3>Выпуски<br>для YouTube</h3>
-        <div class="oprice">от 70 000 ₽</div>
-        <p class="onote">Цена зависит от числа выпусков и объёма работ.</p>
-        <ul><li>Формат, рубрики и темы</li><li>Съёмка, монтаж, обложки</li><li>Shorts из каждого выпуска</li><li>Разбор результата</li></ul>
-        <a class="btn red" href="#book" data-book data-service="YouTube: продюсирование разговорного канала">Написать про выпуск</a>
-        <a class="olink" href="{{b}}production/">Кейсы и пакеты →</a>
+        <h3>Песня, релиз<br>или событие</h3>
+        <div class="oprice">по запросу</div>
+        <p class="onote">Цена зависит от задачи и объёма работ.</p>
+        <ul><li>Песня или аранжировка на заказ</li><li>Дистрибуция и продвижение релиза</li><li>Концерты, банкеты и бизнес-события</li></ul>
+        <a class="btn red" href="#book" data-book data-service="Гострайтинг: песня на заказ">Написать про проект</a>
+        <a class="olink" href="{{b}}production/">Подробнее →</a>
       </article>
     </div>
     <p class="note rv">Цены ориентировочные: итоговую смету подтверждает администратор после короткого разговора.</p>
@@ -515,67 +516,29 @@ write('podcast/index.html', render('podcast', 'podcast/', 'Студия подк
       'Съёмка подкастов, интервью, Live и Shorts. 3 камеры 4K, ЭЛТ, граффити. Выпуск за 24 часа — 17 000 ₽. Аренда зала — 2 700 ₽/ч. Фрунзе, 49.', pod_body, '../', '../'))
 
 # ================= ПРОДАКШЕН =================
-YT = [
-    ('Gm8-ZmQf0nU', 'После этого случая я поверил в МИСТИКУ!', 'Авторский канал · длинный формат',
-     '«Эксперт по шнуркам» — истории одного человека стали каналом с 25,9 млн просмотров',
-     'Велосипедист-кругосветчик рассказывает истории из поездок. Длинный выпуск набрал более 2 млн просмотров.',
-     '25,9 млн просмотров · 61,3 тыс. подписчиков', 'https://youtu.be/Gm8-ZmQf0nU', 'https://www.youtube.com/@expertposhnurkam'),
-    ('ADKbN_Wm_Rc', 'Чем ателье лучше производства?', 'Интервью с непубличным предпринимателем',
-     'SNEGOVIK PRODUCTION — интересный разговор с непубличным предпринимателем',
-     'Вместо интервью «о пути предпринимателя» — один конкретный вопрос, на который у героя есть ответ из практики. Short из этого выпуска набрал более 4 млн просмотров.',
-     '15,9 млн просмотров · 22,6 тыс. подписчиков', 'https://youtu.be/ADKbN_Wm_Rc', 'https://www.youtube.com/@SNEGOVIKPRODUCTION'),
-    ('xIGH-3r54MQ', 'Как изменился бизнес в России за 40 лет? Владимир Мартыненков', 'Деловое интервью · девелопмент',
-     'Как изменился бизнес в России за 40 лет?',
-     'Разговор с основателем группы компаний «Мета»: от первых предпринимательских решений до девелопмента. Компания раскрывается через решения человека.',
-     'Выпуск опубликован на канале «Завтраки Бизнес Сибирь»', 'https://youtu.be/xIGH-3r54MQ', ''),
-    ('DFQLBI6_p50', 'Как мы построили дом мечты? Post and Beam: сибирский эксперимент', 'Экспертный рум-тур · строительство',
-     'Как мы построили дом мечты?',
-     'Рум-тур с основателем «Старко» по собственному дому: зелёная кровля, планировка и детали конструкции — повод объяснить, как мыслит строитель.',
-     'Экспертный рум-тур', 'https://youtu.be/DFQLBI6_p50', ''),
-]
-yt_cards = ''
-for k, (vid, t, cap, h3, txt, stat, url, ch) in enumerate(YT):
-    chl = ('<a class="olink" href="%s" target="_blank" rel="noopener">Канал и статистика ↗</a>' % ch) if ch else ''
-    if vid == 'ADKbN_Wm_Rc':
-        chl += '<a class="olink" href="https://youtube.com/shorts/eyhMDLc9AWw" target="_blank" rel="noopener">Short, 4 млн ↗</a>'
-    if 'подписчиков' in stat:
-        stat += '<small>данные канала на ноябрь 2026</small>'
-    yt_cards += '''<article class="ytc rv d%d"><div class="video-stage" data-yt-id="%s" data-yt-title="%s"><img src="{{b}}assets/yt/%s.jpg" alt="Превью выпуска «%s»" loading="lazy"><button class="vplay" type="button" aria-label="Смотреть: %s"><span>▶</span>Смотреть</button></div>
-<div class="ytb"><span class="caption">%s</span><h3>%s</h3><p>%s</p><p class="ystat">%s</p><div class="ylinks"><a class="olink" href="%s" target="_blank" rel="noopener">Смотреть на YouTube ↗</a>%s</div></div></article>
-''' % (k % 3, vid, t, vid, t, t, cap, h3, txt, stat, url, chl)
-
 ph_cards = ''.join('<article class="phc rv d%d"><span class="soon">СКОРО</span><h3>Исполнитель — «Название»</h3><p>Здесь будет реальная работа: что сделала студия и ссылка на трек.</p><div class="phbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>' % k for k in range(3))
 
-prod_hero = phero('red', 'ПРОДАКШЕН · ЭКСПЕРТЫ · БРЕНДЫ · АРТИСТЫ', 'Продюсируем<br><em>YouTube</em> и музыку',
-                  'Находим тему, герою — формат, а выпуску — причину, чтобы его открыли. Снимаем на своей площадке и готовим под YouTube, VK Видео, Rutube и Дзен. Свет и картинку курирует команда VOLNA film.',
-                  '<a class="btn red" href="#book" data-book data-service="YouTube: пилотный выпуск">Написать про пилот</a><a class="btn ghost" href="#cases">Смотреть кейсы</a>',
-                  'interview', 'Съёмка интервью в павильоне REVOLVER PODCAST', 'Продакшен')
+prod_hero = phero('red', 'ПРОДАКШЕН · МУЗЫКА · МЕРОПРИЯТИЯ', 'Продюсируем<br><em>музыку</em> и события',
+                  'Песня или аранжировка на заказ, обложка, дистрибуция и продвижение релиза. А ещё концерты, банкеты и бизнес-события. YouTube-продюсирование делает VOLNA film — ссылка ниже.',
+                  '<a class="btn red" href="#book" data-book data-service="Гострайтинг: песня на заказ">Написать про трек</a><a class="btn ghost" href="#events">Мероприятия</a><a class="link" href="#youtube">YouTube — у VOLNA film →</a>',
+                  'smoke-mic', 'Студийный микрофон в дыму', 'Продакшен')
 
-prod_body = prod_hero + '''<section class="sec" id="cases" data-acc="red"><div class="wrap">
+youtube_volna = '''<section class="sec" id="youtube" style="background:#0b0e0c" data-acc="red"><div class="wrap">
   <span class="kick rv">YouTube</span>
-  <h2 class="h2 rv d1">Каналы и выпуски,<br>которые <em>работают.</em></h2>
-  <p class="lead rv d2">Видео загружается только по нажатию. Цифры — из публичной статистики каналов, открыть канал можно по ссылке рядом с каждым кейсом.</p>
-  <div class="ytgrid">''' + yt_cards + '''</div>
-</div></section>
-''' + events + '''
-<section class="sec wall" id="tracks" data-acc="lime"><div class="wrap">
+  <h2 class="h2 rv d1">YouTube-продюсирование — <em>это VOLNA film.</em></h2>
+  <p class="lead rv d2">Каналы, шоу и выпуски для экспертов и компаний делает наш партнёр — продакшен VOLNA film из Новосибирска. Кейсы с открытой статистикой, пакеты и цены — на их странице.</p>
+  <div class="cta rv d3" style="margin-top:30px"><a class="btn red" href="https://marchen.ru/youtube/%s" target="_blank" rel="noopener">Страница YouTube-продюсирования ↗</a><a class="link" href="{{b}}podcast/#prices">Записать выпуск у нас — REVOLVER PODCAST →</a></div>
+</div></section>''' % UTM_VOLNA
+
+prod_body = prod_hero + '''<section class="sec wall" id="tracks" data-acc="lime"><div class="wrap">
   <span class="kick rv">Музыка</span>
   <h2 class="h2 rv d1">Кейсы по <em>трекам.</em></h2>
   <p class="lead rv d2">Первые релизы со студии скоро появятся здесь: треки, клипы, Live и вертикальные ролики.</p>
   <div class="phgrid">''' + ph_cards + '''</div>
 </div></section>
-<section class="sec" id="packages" style="background:#0b0e0c" data-acc="red"><div class="wrap">
-  <span class="kick rv">Пакеты</span>
-  <h2 class="h2 rv d1">Два пакета <em>продюсирования.</em></h2>
-  <div class="cards two-c">
-    <article class="card rv"><span class="t">ФОРМАТ «ГОВОРЯЩАЯ ГОЛОВА»</span><h3>Разговорный канал</h3><p class="d">Эксперт, основатель или ведущий в кадре: придумываем рубрики и темы, снимаем и оформляем выпуски.</p><div class="pr">от 70 000 ₽</div><p class="nt">Зависит от числа выпусков и объёма работ.</p><ul><li>Разбор задачи, аудитории и героя</li><li>Формат, рубрики и темы выпусков</li><li>Съёмка в студии или выезд</li><li>Монтаж, обложки, названия, описания</li><li>Shorts из выпусков и разбор результата</li></ul><a class="btn ghost" href="#book" data-book data-service="YouTube: продюсирование разговорного канала">Написать про канал</a></article>
-    <article class="card hit rv d1"><span class="t">ШОУ</span><h3>Продюсирование шоу</h3><p class="d">Серия с гостями и героями: придумываем формат, делаем пилот и ведём регулярный выход.</p><div class="pr">от 150 000 ₽</div><p class="nt">Зависит от формата, числа выпусков и сложности съёмки.</p><ul><li>Концепция шоу, ведущий, структура</li><li>Подбор гостей, сценарный план</li><li>Пилотный выпуск и разбор результата</li><li>Съёмка, монтаж, графика, звук, обложки</li><li>Регулярный выход на площадки</li></ul><a class="btn red" href="#book" data-book data-service="YouTube: продюсирование шоу">Написать про шоу</a></article>
-  </div>
-  <p class="note rv">Окончательную стоимость называем после обсуждения задачи и пилотного выпуска. Записать выпуск на площадке можно по <a href="{{b}}podcast/#prices" style="border-bottom:2px solid var(--red)">готовым тарифам павильона</a>.</p>
-  <p class="volna rv" style="color:var(--ink);margin-top:34px">Корпоративное видео для заводов, застройщиков и госсектора, клипы и фестивальное кино — <a href="https://marchen.ru/?utm_source=revolvernsk&utm_medium=referral" target="_blank" rel="noopener" style="border-bottom:2px solid var(--lime)">VOLNA film · marchen.ru ↗</a></p>
-</div></section>''' + book('production')
-write('production/index.html', render('production', 'production/', 'Продюсирование YouTube-каналов в Новосибирске — от 70 000 ₽ | REVOLVER',
-      'Продюсирование YouTube-каналов и шоу, кейсы с открытой статистикой. Разговорный канал от 70 000 ₽, шоу от 150 000 ₽. Мероприятия и музыка. Новосибирск.', prod_body, '../', '../'))
+''' + events + youtube_volna + book('production')
+write('production/index.html', render('production', 'production/', 'Продюсирование музыки и мероприятий в Новосибирске | REVOLVER',
+      'Песни и аранжировки на заказ, дистрибуция и продвижение релизов, концерты, банкеты и бизнес-события. YouTube-продюсирование делает VOLNA film. Новосибирск, Фрунзе, 49.', prod_body, '../', '../'))
 
 # ---------- служебные файлы ----------
 write('CNAME', DOMAIN + '\n')

@@ -113,14 +113,14 @@ const SERVICE_GROUPS = [
     'Мероприятие: бизнес', 'Мероприятие: концерт', 'Мероприятие: банкет',
     'Школа: диджеинг', 'Школа: брейк-данс', 'Школа: рэп', 'Школа: гитара', 'Школа: вокал', 'Школа: сведение и мастеринг']],
   ['REVOLVER PODCAST · видеопавильон', 'main', ['Экспресс-мультикам 24ч', 'Продюсерский пакет', 'Аренда зала + свет', 'Подкаст на 2 часа — полный выпуск', 'Shorts / Reels на месяц', 'Музыкальный Live · видео + мультитрек', 'Экскурсия в павильон · 15 минут']],
-  ['Продакшен', 'main', ['YouTube: пилотный выпуск', 'YouTube: продюсирование разговорного канала', 'YouTube: продюсирование шоу', 'YouTube на месяц', 'Хочу обсудить проект']]
+  ['Другое', 'main', ['YouTube на месяц', 'Хочу обсудить проект']]
 ];
 const tgOf = {}; SERVICE_GROUPS.forEach(g => g[2].forEach(s => tgOf[s] = g[1] === 'sound' ? CONTACTS.sound : CONTACTS.main));
 const WHO = { [CONTACTS.sound]: 'Костя (@' + CONTACTS.sound + ') — звукозапись', [CONTACTS.main]: '@' + CONTACTS.main + ' — подкасты и продакшен' };
 const fService = $('#fService');
 SERVICE_GROUPS.forEach(g => { const og = document.createElement('optgroup'); og.label = g[0]; g[2].forEach(s => og.appendChild(new Option(s, s))); fService.appendChild(og); });
 const defStudio = $('#form').dataset.default;
-fService.value = defStudio === 'podcast' ? 'Экспресс-мультикам 24ч' : defStudio === 'production' ? 'YouTube: пилотный выпуск' : PACK;
+fService.value = defStudio === 'podcast' ? 'Экспресс-мультикам 24ч' : defStudio === 'production' ? 'Гострайтинг: песня на заказ' : PACK;
 function who() { $('#whoName').textContent = WHO[tgOf[fService.value] || CONTACTS.main]; }
 fService.addEventListener('change', who); who();
 
