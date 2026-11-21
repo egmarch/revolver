@@ -510,8 +510,9 @@ function loop(now) {
   if (state.started && !state.paused && !state.cardOpen) {
     // обзор
     if (isTouch && (input.lx || input.ly)) {
-      state.yaw -= input.lx * dt * 2.4;
-      state.pitch = Math.max(-1.3, Math.min(1.3, state.pitch - input.ly * dt * 1.7));
+      const cv = (n) => Math.sign(n) * Math.pow(Math.abs(n), 1.7); // мягкая кривая стика
+      state.yaw -= cv(input.lx) * dt * 1.5;
+      state.pitch = Math.max(-1.3, Math.min(1.3, state.pitch - cv(input.ly) * dt * 1.0));
     }
     // ходьба
     let fx = 0, fz = 0;

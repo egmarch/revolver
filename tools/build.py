@@ -497,7 +497,7 @@ fm = '''<section class="sec wall" id="formats" data-acc="amber">
       <li><span class="tm">ДЕНЬ 1 · ДЕНЬ</span><h3>Публикуешь</h3><p>Готовый выпуск и 5 Shorts у тебя.</p></li>
     </ol>
     <div class="bar rv" id="bar"><i></i></div>
-    <p class="volna rv">Свет и картинку на площадке курирует команда <a href="https://marchen.ru" target="_blank" rel="noopener">VOLNA film</a> — создатели музыкальных клипов, фестивального кино и коммерческих проектов.</p>
+    <p class="volna rv">Свет и картинку на площадке курирует команда <a href="https://marchen.ru/?utm_source=revolvernsk&utm_medium=referral" target="_blank" rel="noopener">VOLNA film</a> — создатели музыкальных клипов, фестивального кино и коммерческих проектов.</p>
   </div>
 </section>'''
 
@@ -572,7 +572,7 @@ prod_body = prod_hero + '''<section class="sec" id="cases" data-acc="red"><div c
     <article class="card hit rv d1"><span class="t">ШОУ</span><h3>Продюсирование шоу</h3><p class="d">Серия с гостями и героями: придумываем формат, делаем пилот и ведём регулярный выход.</p><div class="pr">от 150 000 ₽</div><p class="nt">Зависит от формата, числа выпусков и сложности съёмки.</p><ul><li>Концепция шоу, ведущий, структура</li><li>Подбор гостей, сценарный план</li><li>Пилотный выпуск и разбор результата</li><li>Съёмка, монтаж, графика, звук, обложки</li><li>Регулярный выход на площадки</li></ul><a class="btn red" href="#book" data-book data-service="YouTube: продюсирование шоу">Написать про шоу</a></article>
   </div>
   <p class="note rv">Окончательную стоимость называем после обсуждения задачи и пилотного выпуска. Записать выпуск на площадке можно по <a href="{{b}}podcast/#prices" style="border-bottom:2px solid var(--red)">готовым тарифам павильона</a>.</p>
-  <p class="volna rv" style="color:var(--ink);margin-top:34px">Корпоративное видео для заводов, застройщиков и госсектора, клипы и фестивальное кино — <a href="https://marchen.ru" target="_blank" rel="noopener" style="border-bottom:2px solid var(--lime)">VOLNA film · marchen.ru ↗</a></p>
+  <p class="volna rv" style="color:var(--ink);margin-top:34px">Корпоративное видео для заводов, застройщиков и госсектора, клипы и фестивальное кино — <a href="https://marchen.ru/?utm_source=revolvernsk&utm_medium=referral" target="_blank" rel="noopener" style="border-bottom:2px solid var(--lime)">VOLNA film · marchen.ru ↗</a></p>
 </div></section>''' + book('production')
 write('production/index.html', render('production', 'production/', 'Продюсирование YouTube-каналов в Новосибирске — от 70 000 ₽ | REVOLVER',
       'Продюсирование YouTube-каналов и шоу, кейсы с открытой статистикой. Разговорный канал от 70 000 ₽, шоу от 150 000 ₽. Мероприятия и музыка. Новосибирск.', prod_body, '../', '../'))
