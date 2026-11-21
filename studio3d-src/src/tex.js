@@ -312,3 +312,36 @@ export function leatherCanvas() {
   noise(x, 128, 128, 14, r);
   return c;
 }
+
+export function carpetCanvas() {
+  const c = cv(512, 512), x = c.getContext('2d'), r = rng(44);
+  x.fillStyle = '#8c0f17'; x.fillRect(0, 0, 512, 512);
+  const cell = 128;
+  const dia = (cx, cy, R) => { x.beginPath(); x.moveTo(cx, cy - R); x.lineTo(cx + R, cy); x.lineTo(cx, cy + R); x.lineTo(cx - R, cy); x.closePath(); };
+  // решётка тонких линий
+  x.strokeStyle = 'rgba(40,0,6,.55)'; x.lineWidth = 2;
+  for (let i = -4; i <= 8; i++) {
+    x.beginPath(); x.moveTo(i * cell, 0); x.lineTo(i * cell + 512, 512); x.stroke();
+    x.beginPath(); x.moveTo(i * cell + 512, 0); x.lineTo(i * cell, 512); x.stroke();
+  }
+  for (let j = 0; j <= 4; j++) for (let i = 0; i <= 4; i++) {
+    const cx = i * cell + 64 - 64, cy = j * cell + 64 - 64; // центры в узлах решётки
+    dia(cx, cy, 58); x.fillStyle = '#b3141f'; x.fill(); x.lineWidth = 4; x.strokeStyle = '#ecdcb2'; x.stroke();
+    dia(cx, cy, 40); x.fillStyle = '#5c060e'; x.fill(); x.lineWidth = 2; x.strokeStyle = '#d9c28c'; x.stroke();
+    for (let k = 0; k < 8; k++) {
+      const a = k * Math.PI / 4;
+      x.beginPath(); x.ellipse(cx + Math.cos(a) * 17, cy + Math.sin(a) * 17, 9, 5, a, 0, 7);
+      x.fillStyle = k % 2 ? '#ecdcb2' : '#d9a85a'; x.fill();
+    }
+    x.beginPath(); x.arc(cx, cy, 7, 0, 7); x.fillStyle = '#8c0f17'; x.fill(); x.lineWidth = 2; x.strokeStyle = '#ecdcb2'; x.stroke();
+    // малые ромбы в центрах ячеек
+    const mx = cx + 64, my = cy + 64;
+    dia(mx, my, 20); x.fillStyle = '#ecdcb2'; x.fill();
+    dia(mx, my, 11); x.fillStyle = '#8c0f17'; x.fill();
+    x.beginPath(); x.arc(mx, my, 4, 0, 7); x.fillStyle = '#d9a85a'; x.fill();
+    // точки по бокам
+    [[cx + 64, cy], [cx, cy + 64]].forEach(([px, py]) => { x.beginPath(); x.arc(px, py, 5, 0, 7); x.fillStyle = '#ecdcb2'; x.fill(); });
+  }
+  noise(x, 512, 512, 10, r);
+  return c;
+}

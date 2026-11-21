@@ -125,13 +125,13 @@ export function createWeapons(env) {
   mist.position.set(0, 0.126, -0.1); mist.visible = false; can.add(mist);
 
   const vm = new THREE.Group(); vmScene.add(vm);
-  vm.add(rev); vm.add(can); can.visible = false;
+  vm.add(rev); vm.add(can); rev.visible = false;
   const BASE = { rev: new THREE.Vector3(0.1, -0.095, -0.3), can: new THREE.Vector3(0.1, -0.1, -0.3) };
   rev.scale.setScalar(0.85); can.scale.setScalar(0.8);
   can.rotation.set(-0.35, 0.1, 0); rev.rotation.set(0, 0.06, 0);
 
   // ---------- состояние ----------
-  const S = { weapon: 0, ammo: 6, reload: -1, rec: 0, flash: 0, cd: 0, swap: 1, swapTo: 0, trigger: false, color: 0, sprayT: 0, hold: 0, bobT: 0, sx: 0, sy: 0, lastYaw: 0, lastPitch: 0, lastP: null, dripLen: 0, dripT: 0, spraying: false };
+  const S = { weapon: 1, hasRev: false, ammo: 6, reload: -1, rec: 0, flash: 0, cd: 0, swap: 1, swapTo: 0, trigger: false, color: 0, sprayT: 0, hold: 0, bobT: 0, sx: 0, sy: 0, lastYaw: 0, lastPitch: 0, lastP: null, dripLen: 0, dripT: 0, spraying: false };
   api.S = S;
 
   // ---------- декали ----------
@@ -256,7 +256,7 @@ export function createWeapons(env) {
   }
 
   api.fire = (origin, dir, force) => {
-    if (S.weapon !== 0 || S.swap < 1) return false;
+    if (!S.hasRev || S.weapon !== 0 || S.swap < 1) return false;
     if (S.reload >= 0 || S.cd > 0) return false;
     if (S.ammo <= 0) { audio.click(); api.reload(); return false; }
     S.ammo--; S.rec = 1; S.flash = 0.06; S.cd = 0.3;
@@ -267,8 +267,10 @@ export function createWeapons(env) {
     if (S.ammo === 0) setTimeout(() => api.reload(), 450);
     return true;
   };
-  api.reload = () => { if (S.weapon !== 0 || S.reload >= 0 || S.ammo >= 6) return; S.reload = 0; audio.click(); };
+  api.reload = () => { if (!S.hasRev || S.weapon !== 0 || S.reload >= 0 || S.ammo >= 6) return; S.reload = 0; audio.click(); };
+  api.giveRevolver = () => { S.hasRev = true; S.ammo = 6; api.switchWeapon(0); };
   api.switchWeapon = (to) => {
+    if (!S.hasRev) return;
     const t = to === undefined ? 1 - S.weapon : to;
     if (t === S.weapon && S.swap >= 1) return;
     S.swapTo = t; S.swap = 0; S.reload = -1; S.trigger = false; audio.spray(false);
@@ -306,7 +308,7 @@ export function createWeapons(env) {
   const elAmmo = document.getElementById('ammo'), elPal = document.getElementById('palette');
   function updateHud() {
     if (!elAmmo) return;
-    elAmmo.firstElementChild.textContent = S.weapon === 0 ? (S.reload >= 0 ? '…' : S.ammo) + '/∞' : 'ББ';
+    elAmmo.firstElementChild.textContent = S.weapon === 0 ? (S.reload >= 0 ? '…' : S.ammo) + '/∞' : 'Спрей';
     elAmmo.lastElementChild.textContent = S.weapon === 0 ? 'Револьвер .357' : 'Баллончик';
     elPal.style.display = S.weapon === 1 ? 'flex' : 'none';
     [...elPal.children].forEach((b, i) => b.classList.toggle('on', i === S.color));

@@ -1,25 +1,29 @@
 import * as THREE from 'three';
-import carpetUrl from './tex/carpet.jpg';
 import woodUrl from './tex/wood.jpg';
 import * as TX from './tex.js';
 import * as ART from './art.js';
 
 export const EYE = 1.62;
 export const PLAYER_R = 0.3;
-export const STAIR = { x0: 3.75, x1: 5.25, z0: 14.4, z1: 19.2, n: 16, rise: 3.0 };
+export const STAIR = { x0: -2.0, x1: 2.8, z0: 5.6, z1: 7.1, n: 16, rise: 3.0 };
 
-// --- логика высоты (ступени) ---
+// --- логика высоты (ступени идут вдоль X, вверх на восток) ---
 export function groundY(x, z) {
-  if (z >= STAIR.z1) return 3.0;
-  if (z <= STAIR.z0) return 0;
-  const k = Math.floor((z - STAIR.z0) / ((STAIR.z1 - STAIR.z0) / STAIR.n));
-  return (k + 1) * (STAIR.rise / STAIR.n);
+  if (x >= 2.8 && z >= 5.5) return 3.0;
+  if (z >= 5.5 && z <= 7.2 && x > -2.0 && x < 2.8) {
+    const k = Math.floor((x - STAIR.x0) / ((STAIR.x1 - STAIR.x0) / STAIR.n));
+    return (k + 1) * (STAIR.rise / STAIR.n);
+  }
+  return 0;
 }
 
 // центры допустимых положений (уже отступ от стен)
 export const WALK = [
-  [-3.7, 13.7, 19.5, 24.2],     // тротуар
-  [4.05, 4.95, 4.6, 19.8],      // лестница, тамбур, коридор, дверь в зал
+  [3.1, 7.8, 5.65, 14.55],      // тротуар
+  [-2.9, 3.4, 5.9, 6.8],        // лестница и площадка
+  [-2.95, -2.25, 4.9, 6.2],     // дверь площадка-тамбур
+  [-3.1, -0.5, 2.5, 5.1],       // тамбур
+  [-0.6, 0.6, 3.25, 3.65],      // дверь тамбур-зал
   [0.3, 5.7, 0.3, 4.7],         // зал
   [5.5, 6.5, 3.25, 3.65],       // дверь зал-лаундж
   [6.4, 8.6, 0.3, 4.7],         // лаундж
@@ -30,15 +34,16 @@ export const WALK = [
 export const OBST = [
   [1.9, 5.1, 0.0, 0.7],      // стеллаж
   [1.05, 1.8, 0.1, 0.95],    // ЭЛТ-стойка
-  [2.42, 3.58, 1.3, 4.0],    // стол
-  [1.72, 2.28, 1.72, 2.28],  // кресло
-  [3.72, 4.15, 1.72, 2.28],  // кресло
+  [2.42, 3.58, 0.95, 3.15],  // стол
+  [1.72, 2.28, 1.45, 2.0],   // кресло
+  [3.72, 4.15, 1.45, 2.0],   // кресло
   [5.05, 5.9, 1.0, 1.8],     // столик с чемоданом
   [5.5, 5.95, 1.95, 2.7],    // гитары
-  [5.0, 5.6, 2.45, 3.0],     // пальма
+  [5.2, 5.9, 0.1, 0.9],      // пальма у стеллажа
   [5.1, 5.9, 4.0, 4.9],      // пальма + конус
-  [0.1, 0.8, 0.85, 1.45],    // пальма у ковра
+  [0.1, 0.8, 0.1, 0.9],      // пальма у стеллажа
   [0.1, 0.8, 4.1, 4.9],      // пальма
+  [1.0, 2.9, 4.2, 5.0],      // чёрный диван
   [6.8, 8.7, 0.1, 1.1],      // диван
   [7.05, 8.15, 1.7, 2.5],    // журнальный стол
   [8.3, 8.9, 3.9, 4.9],      // тумба
@@ -48,24 +53,24 @@ export const OBST = [
 ];
 
 const ZONE_NAMES = {
-  street: ['Улица · Фрунзе 49', 'Ночь. Вход в подвал — вниз по лестнице'],
-  entry: ['Вход · тамбур и коридор', 'Металлическая дверь, газеты и фиолетовый свет'],
-  hall: ['REVOLVER PODCAST · 30 м²', 'Видеопавильон для подкастов'],
+  street: ['Улица · Фрунзе 49', 'Ночь. Вход — вниз по лестнице'],
+  entry: ['Тамбур', 'Направо дверь в студию, прямо — школа диджеев (ремонт)'],
+  hall: ['REVOLVER PODCAST · 30 м²', 'Зал для видеоподкастов'],
   lounge: ['Лаундж', 'Диван, постеры и звукоизоляция'],
-  studio: ['REVOLVER SOUND · студия звукозаписи · 18 м²', 'Акустически обработанная комната']
+  studio: ['REVOLVER SOUND · 18 м²', 'Комната звукозаписи']
 };
 export { ZONE_NAMES };
 
 export function zoneAt(x, z) {
-  if (z > 14.4) return 'street';
-  if (x > 3.6 && x < 5.4 && z > 5.2) return 'entry';
+  if (z > 5.3 && x > -1.9) return 'street';
+  if (x < -0.1) return 'entry';
   if (x < 6.0) return 'hall';
   if (x < 9.0) return 'lounge';
   return 'studio';
 }
 
 export const TELEPORTS = {
-  1: { x: 2.6, z: 22.2, yaw: -0.5, pitch: -0.18 },
+  1: { x: 5.8, z: 8.25, yaw: 1.07, pitch: -0.18 },
   2: { x: 3.6, z: 4.62, yaw: 0.12, pitch: -0.02 },
   3: { x: 7.5, z: 4.5, yaw: 0.08, pitch: -0.1 },
   4: { x: 10.7, z: 4.5, yaw: 0.28, pitch: -0.1 }
@@ -73,20 +78,20 @@ export const TELEPORTS = {
 
 const LIGHTS = {
   street: [
-    { p: [9.5, 5.6, 21.2], c: 0xff6a50, i: 22, d: 14 },
-    { p: [5.8, 5.0, 18.6], c: 0xfff1d0, i: 22, d: 12 },
-    { p: [-1.2, 7.6, 22], c: 0xffa550, i: 110, d: 26 },
-    { p: [4.5, 2.4, 15.5], c: 0xbfd2ff, i: 16, d: 8 },
-    { p: [4.5, 4.2, 26], c: 0x6c8cff, i: 50, d: 20 },
-    { p: [4.5, 1.7, 12.2], c: 0xd57bff, i: 4, d: 6 }
+    { p: [6.6, 5.4, 7.0], c: 0xff6a50, i: 22, d: 14 },
+    { p: [3.2, 5.0, 5.95], c: 0xfff1d0, i: 22, d: 12 },
+    { p: [5.6, 7.6, 12.05], c: 0xffa550, i: 110, d: 28 },
+    { p: [-0.9, 2.4, 6.35], c: 0xbfd2ff, i: 16, d: 8 },
+    { p: [9.6, 4.2, 6.35], c: 0x6c8cff, i: 50, d: 20 },
+    { p: [-2.6, 1.7, 5.0], c: 0xd57bff, i: 5, d: 6 }
   ],
   entry: [
-    { p: [4.5, 2.4, 12.0], c: 0xffe3b8, i: 7, d: 6 },
-    { p: [4.5, 2.3, 9.0], c: 0xff2bd6, i: 3, d: 6 },
-    { p: [4.5, 2.3, 6.6], c: 0xb02bff, i: 3, d: 6 },
-    { p: [4.5, 2.2, 14.0], c: 0xbfd2ff, i: 9, d: 6 },
-    { p: [4.5, 2.0, 4.0], c: 0xffffff, i: 2, d: 5 },
-    { p: [4.5, 1.8, 8.0], c: 0xff40ff, i: 1.5, d: 4 }
+    { p: [-1.8, 2.4, 3.8], c: 0xffe3b8, i: 8, d: 6 },
+    { p: [-2.6, 2.3, 6.4], c: 0xbfd2ff, i: 8, d: 6 },
+    { p: [-0.9, 1.8, 3.4], c: 0xd070ff, i: 4, d: 5 },
+    { p: [-3.1, 1.6, 3.0], c: 0xff2bd6, i: 3.5, d: 4 },
+    { p: [-1.2, 2.4, 6.4], c: 0xbfd2ff, i: 4, d: 5 },
+    { p: [0.6, 2.0, 3.45], c: 0xffffff, i: 2, d: 4 }
   ],
   hall: [
     { p: [3.0, 2.5, 2.8], c: 0xdfe8ff, i: 9, d: 9 },
@@ -94,7 +99,7 @@ const LIGHTS = {
     { p: [5.0, 2.3, 2.4], c: 0xe6ffe8, i: 6, d: 6 },
     { p: [0.9, 1.6, 2.4], c: 0xff6a3a, i: 4, d: 4.5 },
     { p: [1.5, 2.4, 4.0], c: 0xffffff, i: 4, d: 6 },
-    { p: [4.5, 2.2, 4.8], c: 0xd070ff, i: 2, d: 4 }
+    { p: [0.4, 2.0, 3.45], c: 0xd070ff, i: 2, d: 4 }
   ],
   lounge: [
     { p: [7.5, 2.3, 1.8], c: 0xffd9a8, i: 14, d: 8 },
@@ -115,7 +120,7 @@ const LIGHTS = {
 };
 const FOG = {
   street: [0x0b1020, 0.022, 0.8],
-  entry: [0x120a1a, 0.045, 0.55],
+  entry: [0x120a1a, 0.05, 0.55],
   hall: [0x05060a, 0.05, 0.5],
   lounge: [0x06070a, 0.055, 0.5],
   studio: [0x03040a, 0.055, 0.45]
@@ -153,7 +158,7 @@ export function buildWorld(opts = {}) {
     grain: TX.toTex(TX.woodGrainCanvas(), rep),
     leather: TX.toTex(TX.leatherCanvas(), rep),
     glow: TX.toTex(TX.glowCanvas()),
-    carpetRed: TX.imgTex(carpetUrl, { repeat: [1, 1], mirror: true }),
+    carpetRed: TX.toTex(TX.carpetCanvas(), rep),
     tableWood: TX.imgTex(woodUrl)
   };
   T.tableWood.wrapS = T.tableWood.wrapT = THREE.ClampToEdgeWrapping;
@@ -252,29 +257,29 @@ export function buildWorld(opts = {}) {
   //  УЛИЦА
   // ======================================================
   const S = G.street;
+  [G.street, G.stairs].forEach(g => { g.rotation.y = Math.PI / 2; g.position.set(-16.4, 0, 10.85); });
   texBox(S, -9, 2.4, 8, 3.75, 3.0, 25, mat.pave, 2);              // левая плита
   texBox(S, 3.75, 2.4, 19.2, 5.25, 3.0, 25, mat.pave, 2);        // перед лестницей
-  texBox(S, 5.25, 2.4, 19.2, 24, 3.0, 25, mat.pave, 2);           // правый тротуар
-  texBox(S, -60, 1.6, 25, 80, 2.9, 80, mat.asphalt, 6);           // проезжая часть
-  texBox(S, -9, 2.4, 24.8, 24, 2.95, 25.2, mat.concrete, 1);      // бордюр
+  texBox(S, -60, 2.8, 25, 80, 2.9, 80, mat.asphalt, 6);           // проезжая часть
+  texBox(S, -9, 2.75, 24.8, 5.4, 2.95, 25.2, mat.concrete, 1);      // бордюр
   // разметка
   const lineM = M(0x9a9a9a, { roughness: 0.6 });
-  for (let i = -8; i < 24; i += 3) plane(S, 1.4, 0.16, lineM, i, 2.915, 31, '+y');
-  for (let i = 0; i < 9; i++) plane(S, 0.5, 5.2, lineM, 1 + i * 0.9, 2.915, 28.0, '+y');
+  for (let i = -8; i < 5; i += 3) plane(S, 1.4, 0.16, lineM, i, 2.915, 31, '+y');
+  for (let i = 0; i < 9; i++) plane(S, 0.5, 5.2, lineM, -3.5 + i * 0.9, 2.915, 28.0, '+y');
   // фасад дома справа
-  texBox(G.stairs, 5.25, 0, 13.2, 6.2, 3.0, 19.2, mat.brick, 2);                    // кирпичная стена лестницы (низ)
-  texBox(S, 5.25, 3.0, 10, 24, 3.45, 19.2, mat.darkSteel, 1);                          // карниз-козырёк
-  texBox(S, 5.25, 3.45, 10, 24, 10.5, 19.2, [mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.facade, mat.concreteDark], [2.4, 2.4]);
+  texBox(G.stairs, 5.25, 0, 13.2, 5.45, 3.0, 13.35, mat.brick, 2);
+  texBox(G.stairs, 5.25, 2.1, 13.35, 5.45, 3.0, 14.25, mat.brick, 2);
+  texBox(G.stairs, 5.25, 0, 14.25, 5.45, 3.0, 19.2, mat.brick, 2);                    // кирпичная стена лестницы (низ)
+  texBox(S, 5.25, 3.0, 10, 24, 3.45, 28, mat.darkSteel, 1);                          // карниз-козырёк
+  texBox(S, 5.25, 3.45, 10, 24, 10.5, 28, [mat.concreteDark, mat.facade, mat.concreteDark, mat.concreteDark, mat.facade, mat.concreteDark], [2.4, 2.4]);
   // низ фасада (витрины) — поверх
-  plane(S, 18.7, 1.9, mat.facade, 14.6, 4.45, 19.21, '+z', [4, 1]);
-  plane(S, 3.5, 1.9, mat.facade, 7.0, 4.45, 19.21, '+z', [1, 1]);
   // вывеска
   const signC = TX.cv(1024, 256); ART.drawSign(signC);
   const signT = TX.toTex(signC);
   const signM = new THREE.MeshBasicMaterial({ map: signT, toneMapped: false });
-  texBox(S, 6.3, 5.3, 19.1, 13.7, 6.9, 19.25, mat.black, 1);
-  plane(S, 7.2, 1.5, signM, 10.0, 6.1, 19.27, '+z');
-  glowSprite(S, 0xff3020, 11, 10.0, 6.1, 19.7, 0.28);
+  texBox(S, 5.05, 5.3, 19.4, 5.25, 6.9, 26.6, mat.black, 1);
+  plane(S, 7.2, 1.5, signM, 5.04, 6.1, 23.0, '-x');
+  glowSprite(S, 0xff3020, 11, 4.4, 6.1, 23.0, 0.28);
   // стрелка вниз
   const arrC = TX.cv(128, 160); ART.drawArrow(arrC);
   const arrM = new THREE.MeshBasicMaterial({ map: TX.toTex(arrC), transparent: true, toneMapped: false, depthWrite: false });
@@ -284,8 +289,8 @@ export function buildWorld(opts = {}) {
   // кронштейн стрелки
   B(S, 0.05, 1.2, 0.05, mat.darkSteel, 4.5, 5.0, 18.8);
   // шар-фонарь
-  SPH(S, 0.32, emi(0xfff3d8, 1.1), 5.75, 5.0, 18.9);
-  glowSprite(S, 0xfff0cc, 3.4, 5.75, 5.0, 18.9, 0.6);
+  SPH(S, 0.32, emi(0xfff3d8, 1.1), 4.9, 5.0, 19.6);
+  glowSprite(S, 0xfff0cc, 3.4, 4.9, 5.0, 19.6, 0.6);
   // левый парапет лестницы
   texBox(G.stairs, 3.45, 0, 13.2, 3.75, 4.0, 19.2, [mat.brick, mat.brick, mat.pave, mat.brick, mat.brick, mat.brick], 2);
   // кондиционер с тегом
@@ -299,8 +304,8 @@ export function buildWorld(opts = {}) {
   for (let x = -3.9; x <= 3.5; x += 1.4) B(S, 0.05, 1.0, 0.05, railM, x, 3.5, 19.25);
   B(S, 7.6, 0.05, 0.05, railM, -0.2, 3.95, 19.25); B(S, 7.6, 0.05, 0.05, railM, -0.2, 3.55, 19.25);
   // ограждение по бордюру
-  for (let x = -8; x <= 23; x += 1.5) B(S, 0.05, 0.95, 0.05, railM, x, 3.47, 24.6);
-  B(S, 32, 0.05, 0.05, railM, 7.5, 3.9, 24.6); B(S, 32, 0.05, 0.05, railM, 7.5, 3.45, 24.6);
+  for (let x = -8; x <= 5.2; x += 1.5) B(S, 0.05, 0.95, 0.05, railM, x, 3.47, 24.6);
+  B(S, 13.2, 0.05, 0.05, railM, -1.4, 3.9, 24.6); B(S, 13.2, 0.05, 0.05, railM, -1.4, 3.45, 24.6);
   // торцевые здания слева и справа
   const bW = M(0xffffff, { map: TX.toTex(TX.windowsCanvas(31, 8, 12), rep), emissive: 0xffffff, roughness: 0.8 });
   bW.emissiveMap = bW.map; bW.emissiveIntensity = 0.65;
@@ -313,7 +318,7 @@ export function buildWorld(opts = {}) {
     texBox(S, bx, 0, bz, bx + bw, bh, bz + 10, [wm, wm, mat.concreteDark, mat.concreteDark, wm, wm], [5, 5]);
   });
   // светофор и знак пешеходного перехода
-  const tl = new THREE.Group(); tl.position.set(7.3, 3.0, 25.5); S.add(tl);
+  const tl = new THREE.Group(); tl.position.set(3.5, 3.0, 25.5); S.add(tl);
   B(tl, 0.12, 3.6, 0.12, mat.darkSteel, 0, 1.8, 0);
   B(tl, 0.36, 1.0, 0.3, mat.black, 0, 3.55, 0);
   SPH(tl, 0.1, emi(0xff2a2a, 1.4), 0, 3.85, 0.17);
@@ -322,9 +327,9 @@ export function buildWorld(opts = {}) {
   glowSprite(tl, 0xff2a2a, 1.3, 0, 3.85, 0.3, 0.8);
   const psC = TX.cv(128, 128); ART.drawTrafficSign(psC);
   plane(tl, 0.7, 0.7, new THREE.MeshBasicMaterial({ map: TX.toTex(psC), toneMapped: false }), 0, 2.4, 0.08, '+z');
-  const tl2 = tl.clone(); tl2.position.set(-1.2, 3.0, 25.5); S.add(tl2);
+  const tl2 = tl.clone(); tl2.position.set(-3.0, 3.0, 25.5); S.add(tl2);
   // уличные фонари
-  [[-1.2, 22], [15, 22.5]].forEach(([lx, lz]) => {
+  [[-1.2, 22], [-4.5, 22.5]].forEach(([lx, lz]) => {
     B(S, 0.12, 7.6, 0.12, mat.darkSteel, lx, 3 + 3.8, lz);
     B(S, 1.2, 0.1, 0.1, mat.darkSteel, lx + 0.5, 10.6, lz);
     B(S, 0.5, 0.12, 0.3, emi(0xffc47a, 1.4), lx + 1.0, 10.5, lz);
@@ -361,9 +366,7 @@ export function buildWorld(opts = {}) {
   // площадка
   texBox(ST, 3.75, -0.2, 13.2, 5.25, 0.0, 14.4, mat.concreteDark, 1);
   // торцевая стена с металлической дверью
-  texBox(ST, 3.45, 0, 13.0, 4.0, 3.5, 13.2, mat.brick, 2);
-  texBox(ST, 5.0, 0, 13.0, 5.6, 3.5, 13.2, mat.brick, 2);
-  texBox(ST, 4.0, 2.1, 13.0, 5.0, 3.5, 13.2, mat.brick, 2);
+  texBox(ST, 3.45, 0, 13.0, 5.45, 3.5, 13.2, mat.brick, 2);
   // козырёк-перекрытие
   texBox(ST, 3.45, 3.0, 13.0, 5.6, 3.5, 15.2, mat.concreteDark, 1);
   // светильник на площадке
@@ -401,67 +404,59 @@ export function buildWorld(opts = {}) {
       const m = new THREE.Mesh(BOXG, mats); m.userData.noPaint = true; m.scale.set(t, h, w); m.position.set(0, h / 2, -w / 2); pivot.add(m);
       if (knob) { SPH(pivot, 0.035, mat.steel, t / 2 + 0.04, 1.0, -w + 0.1); SPH(pivot, 0.035, mat.steel, -t / 2 - 0.04, 1.0, -w + 0.1); }
     }
-    const d = { pivot, cur: 0, target: 0, open, cx, cz };
+    const d = { pivot, cur: 0, target: 0, open, cx, cz, grp: parent };
     doors.push(d); return d;
   }
-  addDoor(ST, { axis: 'z', hx: 4.0, hz: 13.1, w: 1.0, h: 2.1, t: 0.08, open: Math.PI / 2 * 0.92, mats: [mat.darkSteel, mat.darkSteel, mat.darkSteel, mat.darkSteel, mdM, mdM], cx: 4.5, cz: 13.1 });
+  addDoor(ST, { axis: 'x', hx: 5.35, hz: 14.25, w: 0.9, h: 2.1, t: 0.08, open: -Math.PI / 2 * 0.92, mats: [mdM, mdM, mat.darkSteel, mat.darkSteel, mat.darkSteel, mat.darkSteel], cx: 5.35, cz: 13.8 });
   // ручка-скоба
-  B(ST, 0.03, 0.35, 0.03, mat.steel, 4.93, 1.05, 13.18);
+  B(ST, 0.03, 0.03, 0.3, mat.steel, 5.3, 1.05, 13.5);
 
   // ======================================================
-  //  ВХОД: тамбур + коридор
+  //  ТАМБУР (после поворота направо от лестницы)
   // ======================================================
   const E = G.entry;
   const wy = 2.8;
-  // пол/потолок
-  texBox(E, 3.75, -0.1, 5.2, 5.25, 0, 13.0, mat.woodFloor, 1.2);
-  texBox(E, 3.75, wy, 5.2, 5.25, wy + 0.1, 13.0, mat.ceil, 1);
-  // стены коридора (газеты)
   const newsW = mat.news;
-  texBox(E, 3.55, 0, 5.2, 3.75, wy, 10.8, [newsW, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark], 1);
-  texBox(E, 5.25, 0, 5.2, 5.45, wy, 10.8, [mat.concreteDark, newsW, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark], 1);
-  // тамбур (светлый бетон + электрощиток)
-  texBox(E, 3.55, 0, 10.8, 3.75, wy, 13.0, [mat.concrete, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark], 1.5);
-  texBox(E, 5.25, 0, 10.8, 5.45, wy, 13.0, [mat.concreteDark, mat.concrete, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark], 1.5);
-  // дверной проём в стене у деревянной двери
-  texBox(E, 3.75, 0, 10.8, 4.0, wy, 11.0, [mat.concrete, mat.concrete, mat.concrete, mat.concrete, mat.concrete, mat.concrete], 1);
-  texBox(E, 5.0, 0, 10.8, 5.25, wy, 11.0, mat.concrete, 1);
-  texBox(E, 4.0, 2.1, 10.8, 5.0, wy, 11.0, mat.concrete, 1);
-  // стена с белой дверью зала (z 5.0..5.2)
-  texBox(E, 3.75, 0, 5.0, 4.05, wy, 5.2, newsW, 1);
-  texBox(E, 4.95, 0, 5.0, 5.25, wy, 5.2, newsW, 1);
-  texBox(E, 4.05, 2.1, 5.0, 4.95, wy, 5.2, newsW, 1);
-  // южный торец тамбура уже за дверью металл; светильники
-  CYL(E, 0.12, 0.12, 0.05, M(0xffe9c0), 4.5, 2.76, 12.0, 12);
-  SPH(E, 0.09, emi(0xffe3b8, 1.4), 4.5, 2.66, 12.0);
-  glowSprite(E, 0xffd9a0, 1.2, 4.5, 2.6, 12.0, 0.45);
-  // фиолетовые светодиодные ленты
-  [3.8, 5.2].forEach(xx => { B(E, 0.04, 0.04, 5.55, emi(0xd22bff, 1.5), xx, 2.62, 8.0); });
-  [3.8, 5.2].forEach(xx => { B(E, 0.04, 0.04, 5.55, emi(0xff2bd6, 1.2), xx, 0.12, 8.0); });
-  glowSprite(E, 0xd02bff, 4.5, 4.5, 2.4, 6.4, 0.22); glowSprite(E, 0xff2bd6, 4.5, 4.5, 2.4, 9.2, 0.22);
-  // электрощит
-  B(E, 0.06, 0.55, 0.42, M(0x7a8086, { roughness: 0.5, metalness: 0.6 }), 3.8, 1.5, 12.0);
-  B(E, 0.02, 0.2, 0.3, M(0xe0b020), 3.77, 1.6, 12.0);
-  B(E, 0.03, 1.2, 0.03, M(0x111), 3.8, 1.9, 11.4);
-  // постеры в коридоре
-  [[0, 3.77, 7.0, '+x'], [1, 3.77, 8.1, '+x'], [2, 5.23, 6.2, '-x'], [3, 5.23, 9.1, '-x']].forEach(([k, px, pz, f]) => {
-    const pc = TX.cv(256, 384); ART.drawPoster(pc, k);
-    plane(E, 0.5, 0.75, M(0xffffff, { map: TX.toTex(pc), roughness: 0.8 }), px, 1.4 + (k % 2) * 0.15, pz, f);
-  });
-  // деревянная дверь
-  const wdC = TX.cv(256, 512); {
-    const x = wdC.getContext('2d'), r = TX.rng(14);
-    for (let i = 0; i < 6; i++) { const v = r() * 20; x.fillStyle = `rgb(${120 + v},${78 + v * 0.6},${46 + v * 0.4})`; x.fillRect(i * 43, 0, 42, 512); x.fillStyle = 'rgba(0,0,0,.45)'; x.fillRect(i * 43 + 42, 0, 1, 512); }
-    TX.noise(x, 256, 512, 20, r);
-    x.fillStyle = 'rgba(0,0,0,.25)'; x.fillRect(0, 100, 256, 8); x.fillRect(0, 400, 256, 8);
-  }
-  const wdM = M(0xffffff, { map: TX.toTex(wdC), roughness: 0.7 });
-  addDoor(E, { axis: 'z', hx: 4.0, hz: 10.9, w: 1.0, h: 2.1, t: 0.06, open: Math.PI / 2 * 0.95, mats: [M(0x4a3020), M(0x4a3020), M(0x4a3020), M(0x4a3020), wdM, wdM], cx: 4.5, cz: 10.9 });
-  // белая дверь зала
   const wM = M(0xefedf2, { roughness: 0.5 });
-  addDoor(E, { axis: 'z', hx: 4.05, hz: 5.1, w: 0.9, h: 2.1, t: 0.05, open: Math.PI / 2 * 0.95, mats: wM, cx: 4.5, cz: 5.1 });
-  // белая рамка
-  B(E, 0.07, 2.1, 0.22, wM, 4.01, 1.05, 5.1); B(E, 0.07, 2.1, 0.22, wM, 4.99, 1.05, 5.1); B(E, 1.0, 0.07, 0.22, wM, 4.5, 2.13, 5.1);
+  const dk = mat.concreteDark;
+  texBox(E, -3.6, -0.1, 2.0, -0.2, 0, 5.6, mat.woodFloor, 1.2);
+  texBox(E, -3.6, wy, 2.0, -0.2, wy + 0.1, 5.6, mat.ceil, 1);
+  texBox(E, -3.6, 0, 2.0, -3.4, wy, 5.6, [newsW, dk, dk, dk, dk, dk], 1);           // запад
+  texBox(E, -3.6, 0, 2.0, -0.2, wy, 2.2, [dk, dk, dk, dk, newsW, dk], 1);           // север
+  texBox(E, -3.6, 0, 5.4, -3.2, wy, 5.6, [dk, dk, dk, dk, dk, dk], 1);              // юг (слева от двери)
+  // газеты на южной стене тамбура (поверх кирпича лестницы)
+  plane(E, 0.35, 2.8, newsW, -3.225, 1.4, 5.392, '-z', [0.35, 2.8]);
+  plane(E, 1.95, 2.8, newsW, -1.175, 1.4, 5.392, '-z', [1.95, 2.8]);
+  plane(E, 0.9, 0.7, newsW, -2.6, 2.45, 5.392, '-z', [0.9, 0.7]);
+  // дверь школы диджеев: закрыта, ремонт
+  const djx = -2.3;
+  B(E, 1.1, 2.2, 0.06, wM, djx, 1.1, 2.23);
+  B(E, 0.9, 2.1, 0.07, M(0x26323a, { roughness: 0.7 }), djx, 1.05, 2.275);
+  SPH(E, 0.035, mat.steel, djx + 0.32, 1.0, 2.33);
+  const djC = TX.cv(512, 256); ART.drawDjSign(djC);
+  plane(E, 0.5, 0.25, new THREE.MeshStandardMaterial({ map: TX.toTex(djC), roughness: 0.8, emissive: 0xffffff, emissiveMap: TX.toTex(djC), emissiveIntensity: 0.25 }), djx, 1.55, 2.315, '+z');
+  const tapeM = M(0xe8c21a, { roughness: 0.6 });
+  B(E, 1.15, 0.05, 0.01, tapeM, djx, 1.1, 2.322, 0, 0, 0.7); B(E, 1.15, 0.05, 0.01, tapeM, djx, 1.1, 2.324, 0, 0, -0.7);
+  // ведро и плёнка: идёт ремонт
+  CYL(E, 0.14, 0.11, 0.3, M(0xd9d9d4, { roughness: 0.6 }), -1.3, 0.15, 2.5, 14);
+  B(E, 0.5, 0.01, 0.8, M(0xcfd6d8, { roughness: 0.3 }), -1.0, 0.012, 2.9, 0, 0.3);
+  // подпись над дверью в студию
+  const stC = TX.cv(512, 128); ART.drawNeonText(stC, 'REVOLVER PODCAST →', '#ff4b3a', `700 44px ${ART.FONT_HEAD}`);
+  plane(E, 1.4, 0.35, new THREE.MeshBasicMaterial({ map: TX.toTex(stC), transparent: true, toneMapped: false, depthWrite: false }), -0.23, 2.45, 3.45, '-x');
+  glowSprite(E, 0xff4b3a, 1.6, -0.3, 2.45, 3.45, 0.3);
+  // электрощиток и афиши
+  B(E, 0.06, 0.55, 0.42, M(0x7a8086, { roughness: 0.5, metalness: 0.6 }), -3.37, 1.5, 3.6);
+  B(E, 0.02, 0.2, 0.3, M(0xe0b020), -3.34, 1.6, 3.6);
+  [[0, -3.39, 4.5, '+x'], [1, -3.39, 2.8, '+x'], [2, -1.5, 5.37, '-z']].forEach(([k, px, pz, f]) => {
+    const pc = TX.cv(256, 384); ART.drawPoster(pc, k);
+    const pz_ = f === '-z' ? pz : pz; const g = plane(E, 0.5, 0.75, M(0xffffff, { map: TX.toTex(pc), roughness: 0.8 }), px, 1.4, pz_, f);
+  });
+  // лампа
+  CYL(E, 0.12, 0.12, 0.05, M(0xffe9c0), -1.8, 2.76, 3.8, 12);
+  SPH(E, 0.09, emi(0xffe3b8, 1.4), -1.8, 2.66, 3.8);
+  glowSprite(E, 0xffd9a0, 1.4, -1.8, 2.6, 3.8, 0.45);
+  [-3.38, -0.24].forEach(xx => B(E, 0.04, 0.04, 3.2, emi(0xd22bff, 1.5), xx, 2.65, 3.8));
+  glowSprite(E, 0xd02bff, 3.5, -1.8, 2.4, 3.8, 0.18);
 
   // ======================================================
   //  ЗАЛ REVOLVER PODCAST
@@ -473,15 +468,19 @@ export function buildWorld(opts = {}) {
   // северная стена — тёмный бетон/металл
   texBox(H, -0.2, 0, -0.2, 6.1, wy + 0.1, 0, [mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, M(0x0f1013)], 2);
   // западная — красный ковёр
-  texBox(H, -0.2, 0, 0, 0, wy + 0.1, 5, mat.concreteDark, 2);
-  plane(H, 5, 2.8, mat.carpetRed, 0.012, 1.4, 2.5, '+x', [1.6, 1]);
+  const wDz0 = 3.0, wDz1 = 3.9;
+  const wmW = [mat.concreteDark, newsW, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark];
+  texBox(H, -0.2, 0, 0, 0, wy + 0.1, wDz0, wmW, 1);
+  texBox(H, -0.2, 0, wDz1, 0, wy + 0.1, 5, wmW, 1);
+  texBox(H, -0.2, 2.1, wDz0, 0, wy + 0.1, wDz1, wmW, 1);
+  plane(H, 3.0, 2.8, mat.carpetRed, 0.012, 1.4, 1.5, '+x', [3.33, 3.11]);
+  plane(H, 1.1, 2.8, mat.carpetRed, 0.012, 1.4, 4.45, '+x', [1.22, 3.11]);
+  plane(H, 0.9, 0.7, mat.carpetRed, 0.012, 2.45, 3.45, '+x', [1.0, 0.78]);
+  addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: wM, cx: -0.1, cz: 3.45 });
+  B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz0 - 0.03); B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz1 + 0.03); B(H, 0.1, 0.06, 1.0, wM, -0.1, 2.13, 3.45);
   // южная стена с дверью: шторы
-  texBox(H, -0.2, 0, 5.0, 4.05, wy + 0.1, 5.2, mat.concreteDark, 2);
-  texBox(H, 4.95, 0, 5.0, 6.1, wy + 0.1, 5.2, mat.concreteDark, 2);
-  texBox(H, 4.05, 2.1, 5.0, 4.95, wy + 0.1, 5.2, mat.concreteDark, 2);
-  plane(H, 4.05, 2.8, mat.curtain, 2.0, 1.4, 4.97, '-z', [4, 1]);
-  plane(H, 1.05, 2.8, mat.curtain, 5.5, 1.4, 4.97, '-z', [1.5, 1]);
-  plane(H, 0.9, 0.7, mat.curtain, 4.5, 2.45, 4.97, '-z', [1, 1]);
+  texBox(H, -0.2, 0, 5.0, 6.1, wy + 0.1, 5.2, mat.concreteDark, 2);
+  plane(H, 6.0, 2.8, mat.curtain, 3.0, 1.4, 4.97, '-z', [6, 1]);
   // восточная стена (граффити). Тело стены:
   const doorZ0 = 3.0, doorZ1 = 3.9;
   texBox(H, 5.9, 0, 0, 6.1, wy + 0.1, doorZ0, mat.black, 1);
@@ -530,8 +529,9 @@ export function buildWorld(opts = {}) {
   const levels = [0.15, 0.78, 1.38, 1.98];
   levels.forEach(y => B(sh, 3.2, 0.04, 0.5, shMat, 3.5, y, 0.37));
   texBox(sh, 1.9, 0.05, 0.05, 5.1, 2.2, 0.1, M(0x0a1038, { roughness: 1, emissive: 0x0a1c70, emissiveIntensity: 0.3 }), 1);
-  levels.forEach((y, i) => { if (i > 0) B(sh, 3.15, 0.025, 0.025, emi(0x2a56ff, 1.6), 3.5, y - 0.04, 0.6); });
-  glowSprite(sh, 0x3a62ff, 3.2, 3.5, 1.1, 0.7, 0.18);
+  const rgbSegs = [];
+  levels.forEach((y, i) => { if (i > 0) for (let k = 0; k < 8; k++) { const m = emi(0xff0000, 1.7); rgbSegs.push({ m, k: k + i * 2 }); B(sh, 0.4, 0.025, 0.025, m, 2.1 + k * 0.4, y - 0.04, 0.6); } });
+  glowSprite(sh, 0x9a7aff, 3.2, 3.5, 1.1, 0.7, 0.16);
   // ивы-лианы на стойках
   const ivyG = new THREE.IcosahedronGeometry(0.06, 0);
   for (let k = 0; k < (low ? 26 : 60); k++) {
@@ -588,7 +588,14 @@ export function buildWorld(opts = {}) {
   [-0.15, 0.15].forEach(sx => { CYL(bb, 0.06, 0.06, 0.01, M(0x151515), sx, 0, 0.08, 16, Math.PI / 2); });
   B(bb, 0.1, 0.06, 0.012, M(0x222), 0, 0.03, 0.078);
   // скейтборд красный
-  B(sh, 0.62, 0.02, 0.18, M(0xc01e1e, { roughness: 0.5 }), 3.4, 2.04, 0.35, 0.1);
+  { const gl = guitar(sh, 3.9, 0.37, 0, 0xa3281f, 'el', 0); gl.position.y = 2.1; gl.rotation.set(0, 0, Math.PI / 2); gl.rotation.y = 0.05; }
+  guitar(H, 1.78, 0.62, 0.2, 0x1a3a66, 'ac', 0.08);
+  guitar(H, 5.28, 0.62, -0.1, 0xd9a24a, 'ac', -0.08);
+  // синтезатор
+  B(sh, 0.72, 0.05, 0.26, M(0x15171a, { roughness: 0.5 }), 4.55, 0.2, 0.37);
+  B(sh, 0.66, 0.012, 0.1, M(0xf2efe6, { roughness: 0.5 }), 4.55, 0.23, 0.42);
+  for (let q = 0; q < 12; q++) B(sh, 0.025, 0.014, 0.06, mat.black, 4.3 + q * 0.045, 0.235, 0.44);
+  B(sh, 0.66, 0.02, 0.07, mat.darkSteel, 4.55, 0.23, 0.3);
   // противогаз и мелочь на нижних полках
   SPH(sh, 0.08, M(0x151515, { roughness: 0.6 }), 2.8, 1.46, 0.37); SPH(sh, 0.04, mat.black, 2.74, 1.5, 0.45); SPH(sh, 0.04, mat.black, 2.86, 1.5, 0.45);
   B(sh, 0.3, 0.1, 0.22, M(0x222), 3.8, 1.45, 0.37); B(sh, 0.2, 0.08, 0.2, M(0xb03a2a), 4.2, 1.44, 0.37);
@@ -604,14 +611,14 @@ export function buildWorld(opts = {}) {
   const dark = M(0x1c120b, { roughness: 0.6 });
   const topM = new THREE.MeshStandardMaterial({ map: T.tableWood, roughness: 0.55, color: 0x8f7d6c, emissive: 0x2a1608, emissiveMap: T.tableWood, emissiveIntensity: 0.1 });
   {
-    const g = new THREE.BoxGeometry(1.0, 0.07, 2.6);
+    const g = new THREE.BoxGeometry(1.0, 0.07, 2.2);
     const tt = new THREE.Mesh(g, [dark, dark, topM, dark, dark, dark]);
-    tt.position.set(3.0, 0.76, 2.65); tbl.add(tt);
+    tt.position.set(3.0, 0.76, 2.05); tbl.add(tt);
     // подрисовать UV верха: ширина по x, длина по z; текстура 170x640 (длинная вдоль v)
   }
-  [[2.6, 1.55], [3.4, 1.55], [2.6, 3.75], [3.4, 3.75]].forEach(([lx, lz]) => B(tbl, 0.05, 0.72, 0.05, mat.black, lx, 0.36, lz));
+  [[2.6, 1.05], [3.4, 1.05], [2.6, 3.05], [3.4, 3.05]].forEach(([lx, lz]) => B(tbl, 0.05, 0.72, 0.05, mat.black, lx, 0.36, lz));
   // микрофоны на журавлях
-  [[2.65, 1.55, 0.35], [3.35, 1.55, -0.35]].forEach(([mx, mz, lean]) => {
+  [[2.6, 1.0, 0], [3.0, 1.0, 0], [3.4, 1.0, 0]].forEach(([mx, mz, lean]) => {
     B(tbl, 0.07, 0.07, 0.06, mat.black, mx, 0.8, mz);
     B(tbl, 0.025, 0.55, 0.025, mat.black, mx, 1.1, mz);
     B(tbl, 0.025, 0.025, 0.4, mat.black, mx, 1.36, mz + 0.18, 0, 0, 0);
@@ -628,7 +635,14 @@ export function buildWorld(opts = {}) {
     B(c, 0.05, 0.4, 0.05, mat.black, 0, 0.23, 0); B(c, 0.4, 0.03, 0.04, mat.black, 0, 0.03, 0); B(c, 0.04, 0.03, 0.4, mat.black, 0, 0.03, 0);
     [[-0.25, -0.25], [0.25, -0.25], [-0.25, 0.25], [0.25, 0.25]].forEach(([lx, lz]) => B(c, 0.02, 0.43, 0.02, mat.black, lx * 0.8, 0.21, lz * 0.8));
   }
-  chair(2.0, 2.0, Math.PI / 2 - 0.35); chair(4.0, 2.0, -Math.PI / 2 + 0.35);
+  chair(2.0, 1.75, Math.PI / 2 - 0.35); chair(4.0, 1.75, -Math.PI / 2 + 0.35);
+  // чёрный кожаный диван между дверями (южная стена)
+  { const bs = M(0x0f0f12, { roughness: 0.32, metalness: 0.15 });
+    const bsofa = new THREE.Group(); bsofa.position.set(1.95, 0, 4.6); H.add(bsofa);
+    B(bsofa, 1.9, 0.38, 0.8, bs, 0, 0.3, 0); B(bsofa, 1.9, 0.5, 0.18, bs, 0, 0.72, 0.33);
+    B(bsofa, 0.18, 0.3, 0.82, bs, -0.95, 0.55, 0); B(bsofa, 0.18, 0.3, 0.82, bs, 0.95, 0.55, 0);
+    B(bsofa, 0.84, 0.14, 0.64, bs, -0.42, 0.55, -0.03); B(bsofa, 0.84, 0.14, 0.64, bs, 0.42, 0.55, -0.03);
+    [[-0.85, -0.3], [0.85, -0.3], [-0.85, 0.3], [0.85, 0.3]].forEach(([a, b]) => B(bsofa, 0.04, 0.1, 0.04, mat.steel, a, 0.05, b)); }
   // чемодан на столике
   const sc = new THREE.Group(); sc.position.set(5.45, 0, 1.4); H.add(sc);
   [[-0.25, -0.2], [0.25, -0.2], [-0.25, 0.2], [0.25, 0.2]].forEach(([lx, lz]) => B(sc, 0.025, 0.55, 0.025, mat.black, lx, 0.275, lz));
@@ -667,7 +681,7 @@ export function buildWorld(opts = {}) {
     }
     return g;
   }
-  palm(H, 5.35, 2.7, 1.5, 0); palm(H, 5.4, 4.5, 1.4, 1); palm(H, 0.45, 1.15, 1.2, 1); palm(H, 0.45, 4.5, 1.3, 0);
+  palm(H, 5.55, 0.5, 1.5, 0); palm(H, 5.4, 4.5, 1.4, 1); palm(H, 0.5, 0.5, 1.2, 1); palm(H, 0.45, 4.5, 1.3, 0);
   // две «подставки» у пальмы справа
   // софтбоксы (8-угольные)
   const sbMat = [M(0x0c0c0e, { roughness: 0.9 }), M(0x0c0c0e), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: T.softbox, emissiveIntensity: 0.95, map: T.softbox })];
@@ -804,6 +818,13 @@ export function buildWorld(opts = {}) {
   B(desk, 0.18, 0.015, 0.5, mat.black, 9.65, 0.785, 1.15); B(desk, 0.14, 0.04, 0.2, M(0x1a1a22), 9.8, 0.795, 1.8);
   // мониторы студийные (жёлтые)
   [[9.4, 0.3], [9.4, 2.1]].forEach(([a, b]) => { B(desk, 0.24, 0.36, 0.28, mat.black, a, 1.0, b); CYL(desk, 0.085, 0.085, 0.02, M(0xd7a31a, { roughness: 0.5 }), a + 0.12, 1.0, b, 16, 0, Math.PI / 2); });
+  // револьвер на столе (можно подобрать)
+  const revProp = new THREE.Group(); revProp.position.set(9.72, 0.79, 0.62); revProp.rotation.y = 0.5; U.add(revProp);
+  { const st = M(0x9aa3ae, { roughness: 0.4, metalness: 0.5 });
+    B(revProp, 0.28, 0.045, 0.05, st, 0, 0.03, 0); B(revProp, 0.09, 0.07, 0.045, st, -0.14, 0.04, 0);
+    CYL(revProp, 0.032, 0.032, 0.05, st, -0.1, 0.045, 0, 14, Math.PI / 2);
+    B(revProp, 0.05, 0.09, 0.04, M(0x6b3d22, { roughness: 0.6 }), -0.19, -0.01, 0, 0, 0, 0.35);
+    glowSprite(revProp, 0xffd070, 0.7, 0, 0.05, 0, 0.5); }
   // операторское кресло
   const ch = new THREE.Group(); ch.position.set(10.45, 0, 1.0); ch.rotation.y = Math.PI / 2 - 0.4; U.add(ch);
   B(ch, 0.5, 0.1, 0.5, M(0x15161a, { roughness: 0.5 }), 0, 0.5, 0); B(ch, 0.5, 0.65, 0.1, M(0x8a867a, { roughness: 0.6 }), 0, 0.9, -0.24);
@@ -891,18 +912,21 @@ export function buildWorld(opts = {}) {
   // ======================================================
   const BOOK = (s) => `../index.html?service=${s}#book`;
   const hotspots = [
-    { id: 'crt', zone: 'hall', pos: [1.4, 0.75, 0.9], title: 'ЭЛТ-телевизоры: «живой фид»', text: 'Ретро-телевизоры в кадре показывают сигнал с камер студии — зелёный фосфор, шум и таймкод REC. Деталь, которая оживляет задний план подкаста.', img: 'hall-wide-1', service: 'podcast-express' },
-    { id: 'suitcase', zone: 'hall', pos: [5.45, 0.85, 1.4], title: 'Чемодан с «деньгами»', text: 'Реквизит для кадра: старый чемодан с пачками купюр. В студии много такой фактуры — её можно переставлять под тему выпуска или взять в аренду.', img: 'detail-suitcase', service: 'rent' },
-    { id: 'retro', zone: 'hall', pos: [3.4, 1.0, 0.45], title: 'Ретро-техника на стеллаже', text: 'Проигрыватель, бумбокс, магнитофоны, книги, мячи и бюст с синей подсветкой — стальной стеллаж с LED-лентами задаёт характер кадра.', img: 'detail-turntable', service: 'rent' },
-    { id: 'mural', zone: 'hall', pos: [5.9, 1.5, 1.4], title: 'Граффити-револьвер', text: 'Монохромный револьвер с дымом, винилом и нотами на зелёной стене — фирменный фон студии. Рядом — дверь с трафаретом в лаундж.', img: 'graffiti-wide', service: 'rent' },
-    { id: 'light', zone: 'hall', pos: [1.1, 2.3, 3.1], title: 'Свет: софтбоксы и LED-панель', text: 'Два больших восьмиугольных софтбокса и LED-панель под потолком дают мягкий кинематографичный свет. Схему настраиваем под выпуск.', img: 'hall-wide-2', service: 'podcast-express' },
-    { id: 'table', zone: 'hall', pos: [3.0, 0.9, 2.6], title: 'Стол с микрофонами', text: 'Массивный стол из слэба, два кресла и микрофоны на журавлях. Три камеры 4K, мультикам-запись, звук без шумов.', img: 'hall-table', service: 'podcast-express' },
-    { id: 'lounge', zone: 'lounge', pos: [7.7, 0.9, 0.7], title: 'Лаундж', text: 'Белый кожаный диван, постеры и акустический поролон. Здесь ждут гости, обсуждают сценарий и отдыхают между дублями.', img: 'lounge', service: 'combo' },
-    { id: 'console', zone: 'studio', pos: [9.55, 1.1, 1.2], title: 'Пульт со стеклянным окном', text: 'Рабочее место звукорежиссёра: изогнутый монитор, студийные мониторы и окно в стене — вы видите вокалиста, а он вас.', img: 'control-1', service: 'sound-vocal' },
-    { id: 'vocal', zone: 'studio', pos: [11.1, 1.45, 2.4], title: 'Вокальный микрофон', text: 'Конденсаторный микрофон с поп-фильтром, наушники и тёмная акустически обработанная комната — чистая запись вокала и озвучки.', img: 'mic-neumann', service: 'sound-vocal' },
-    { id: 'wall', zone: 'studio', pos: [9.2, 1.4, 2.6], title: 'Звукоизолированная стена', text: 'Между подкаст-залом и студией — звукоизолирующая стена с поролоном. Можно записывать подкаст и вокал одновременно, не мешая друг другу.', img: 'vocal-1', service: 'combo' },
-    { id: 'sign', zone: 'street', pos: [10.0, 6.0, 19.3], title: 'REVOLVER PODCAST · REVOLVER SOUND', text: 'Вход в подвал по лестнице у дома на Фрунзе, 49. Металлическая дверь, тамбур, фиолетовый коридор — и вы в студии.', img: 'enter-stairs', service: 'combo' }
-  ].map(h => Object.assign(h, { pos: new THREE.Vector3(...h.pos), href: BOOK(h.service) }));
+    { id: 'crt', zone: 'hall', pos: [1.4, 0.75, 0.9], title: 'Старые телевизоры в кадре', text: 'На экранах идёт картинка с камер студии: зелёный фосфор, шум, таймкод REC. Такой фон оживляет кадр.', img: 'hall-wide-1', service: 'podcast-express' },
+    { id: 'suitcase', zone: 'hall', pos: [5.45, 0.85, 1.4], title: 'Чемодан', text: 'Чемодан «заряжен на деньги». Реквизит можно переставить под тему выпуска.', img: 'detail-suitcase', service: 'rent' },
+    { id: 'retro', zone: 'hall', pos: [3.4, 1.0, 0.45], title: 'Стеллаж с инструментами и техникой', text: 'Три гитары, синтезатор, проигрыватель, магнитофоны и книги. Всё настоящее, без бутафории — это ретро-эстетика в кадре.', img: 'detail-turntable', service: 'rent' },
+    { id: 'mural', zone: 'hall', pos: [5.9, 1.5, 1.4], title: 'Граффити-стена', text: 'Большой чёрно-белый рисунок на зелёной стене — фирменный фон студии. Рядом дверь в лаундж и комнату звукозаписи.', img: 'hall-wide-2', service: 'rent' },
+    { id: 'light', zone: 'hall', pos: [1.1, 2.3, 3.1], title: 'Свет RGB', text: 'Цвет света подбираем под настроение выпуска. Два больших софтбокса и панель сверху дают мягкую картинку.', img: 'hall-wide-3', service: 'podcast-express' },
+    { id: 'table', zone: 'hall', pos: [3.0, 0.9, 2.0], title: 'Стол и три микрофона', text: 'Три микрофона на журавлях, три камеры 4K, запись в мультикам. Садись за стол — проверим звук.', img: 'hall-table', service: 'podcast-express' },
+    { id: 'sofa', zone: 'hall', pos: [1.95, 0.8, 4.4], title: 'Чёрный кожаный диван', text: 'Диван между входом и дверью в звукозапись. Можно посидеть, пока мы готовим свет и звук.', img: 'hall-both', service: 'rent' },
+    { id: 'lounge', zone: 'lounge', pos: [7.7, 0.9, 0.7], title: 'Лаундж', text: 'Белый кожаный диван и тишина перед записью. Тут можно подождать или обсудить сценарий.', img: 'talk-a', service: 'pack' },
+    { id: 'console', zone: 'studio', pos: [9.55, 1.1, 1.2], title: 'Тот же фрагмент после сведения', text: 'Звукорежиссёр сводит голос за пультом. Сравни с записью до обработки.', img: 'engineer-1', service: 'sound-vocal', audio: 'demo-after.mp3' },
+    { id: 'vocal', zone: 'studio', pos: [11.1, 1.45, 2.4], title: 'Голос до обработки', text: 'Комната небольшая — поэтому голос в ней плотный, а не гулкий. Послушай запись до обработки.', img: 'mic-neumann', service: 'sound-vocal', audio: 'demo-before.mp3' },
+    { id: 'wall', zone: 'studio', pos: [9.2, 1.4, 2.6], title: 'Звукоизолированная стена', text: 'Между залом и студией — звукоизоляция. Можно писать подкаст и голос одновременно, не мешая друг другу. Пакет «Трек + обложка + сниппет + Reels — 13 900 ₽».', img: 'vocal-2', service: 'pack' },
+    { id: 'revolver', zone: 'studio', pos: [9.72, 0.9, 0.62], title: 'Револьвер на столе', text: '', img: null, service: null, pickup: true },
+    { id: 'dj', zone: 'entry', pos: [-2.3, 1.5, 2.3], title: 'Школа диджеев — идёт ремонт', text: 'Здесь только начали ремонт, дверь закрыта. Тебе — направо, в студию.', img: null, service: null },
+    { id: 'sign', zone: 'street', pos: [6.6, 6.1, 5.8], title: 'REVOLVER PODCAST · REVOLVER SOUND', text: 'Студии на Фрунзе, 49: видеоподкасты и запись голоса. Вход по лестнице вниз, потом направо.', img: 'hall-both', service: 'pack' }
+  ].map(h => Object.assign(h, { pos: new THREE.Vector3(...h.pos), href: h.service ? BOOK(h.service) : null }));
 
   // ======================================================
   //  UPDATE
@@ -916,16 +940,21 @@ export function buildWorld(opts = {}) {
     x.fillStyle = 'rgba(255,255,255,.55)'; x.fillRect(0, Math.random() * c.height, c.width, 2);
     x.fillStyle = 'rgba(255,0,60,.25)'; x.fillRect(0, Math.random() * c.height, c.width, 6);
   }
+  const _dv = new THREE.Vector3();
   function update(dt, px, pz, zone) {
     clockT.t += dt;
     const t = clockT.t;
     // двери
     for (const d of doors) {
-      const dist = Math.hypot(px - d.cx, pz - d.cz);
+      d.grp.localToWorld(_dv.set(d.cx, 0, d.cz));
+      const dist = Math.hypot(px - _dv.x, pz - _dv.z);
       d.target = dist < 2.0 ? d.open : 0;
       d.cur += (d.target - d.cur) * Math.min(1, dt * 4.5);
       d.pivot.rotation.y = d.cur;
     }
+    // RGB-подсветка стеллажа
+    for (const sg of rgbSegs) sg.m.color.setHSL(((t * 0.07 + sg.k / 16) % 1), 1, 0.5).multiplyScalar(1.7);
+    LIGHTS.hall[1].c = new THREE.Color().setHSL((t * 0.07) % 1, 1, 0.5).getHex();
     // свет
     applyLights(Math.min(1, dt * 3.2));
     // ЭЛТ
@@ -947,8 +976,9 @@ export function buildWorld(opts = {}) {
     }
   }
 
+  scene.updateMatrixWorld(true);
   return {
     scene, groups: G, hotspots, update, setZoneLights, setVisibility, redrawMural, redrawDoor, redrawSign: () => { ART.drawSign(signC); signT.needsUpdate = true; },
-    doors, lights, amb, glitch: (v) => { glitch = v; }
+    doors, lights, amb, glitch: (v) => { glitch = v; }, hideRevolverProp: () => { revProp.visible = false; }
   };
 }

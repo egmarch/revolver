@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>REVOLVER · 3D-тур по студиям — Фрунзе 49</title>
-<meta name="description" content="Интерактивный 3D-тур: спуск в подвал, подкаст-зал REVOLVER PODCAST и студия звукозаписи REVOLVER SOUND, Новосибирск, ул. Фрунзе 49.">
+<meta name="description" content="Интерактивный 3D-тур по студиям REVOLVER PODCAST и REVOLVER SOUND: зал для видеоподкастов и комната звукозаписи, Новосибирск, ул. Фрунзе 49.">
 <meta name="theme-color" content="#07080c">
 <link rel="icon" href="data:,">
 <style>
@@ -47,7 +47,7 @@ a{color:inherit}
 #zone{position:absolute;left:max(14px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));font-family:Unbounded,sans-serif;font-weight:600;font-size:13px;letter-spacing:.02em;padding:9px 14px;border-radius:12px;background:rgba(7,8,12,.62);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);max-width:min(62vw,420px);pointer-events:none}
 #zone small{display:block;font-family:Manrope,sans-serif;font-weight:500;color:var(--mut);font-size:11px;margin-top:2px;letter-spacing:0}
 #topright{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-#minimap{width:104px;height:180px;border-radius:12px;background:rgba(7,8,12,.62);border:1px solid rgba(255,255,255,.14)}
+#minimap{width:104px;height:108px;border-radius:12px;background:rgba(7,8,12,.62);border:1px solid rgba(255,255,255,.14)}
 .row{display:flex;gap:8px}
 .pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;background:rgba(7,8,12,.66);border:1px solid rgba(255,255,255,.16);font-size:13px;text-decoration:none;backdrop-filter:blur(6px);color:var(--fg)}
 .pill:hover{border-color:var(--red)}
@@ -67,6 +67,10 @@ a{color:inherit}
 #palette button{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.35);padding:0}
 #palette button.on{border-color:#fff;transform:scale(1.2)}
 .tb{position:absolute;pointer-events:auto;touch-action:none;min-width:84px;height:46px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(7,8,12,.6);color:#fff;font-weight:700;font-size:14px}
+#cardAudio{display:flex;align-items:center;gap:12px;margin:0 0 14px;color:#d0ccc2;font-size:14px}
+#toast{position:absolute;left:50%;top:92px;transform:translateX(-50%);max-width:92vw;padding:12px 18px;border-radius:14px;background:rgba(7,8,12,.88);border:1px solid var(--g);text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;font-size:14px;line-height:1.4}
+#toast.on{opacity:1}
+#toast b{display:block;font-family:Unbounded,sans-serif;font-size:15px;margin-bottom:3px;color:var(--g)}
 #btnFire{background:var(--red);border-color:var(--red);right:max(160px,calc(env(safe-area-inset-right) + 160px));bottom:max(110px,calc(env(safe-area-inset-bottom) + 100px))}
 #btnJump{right:max(26px,env(safe-area-inset-right));bottom:max(215px,calc(env(safe-area-inset-bottom) + 205px))}
 #btnSwap{left:max(22px,env(safe-area-inset-left));bottom:max(215px,calc(env(safe-area-inset-bottom) + 205px))}
@@ -116,11 +120,11 @@ body.touch .keys div:not(.t){display:none}
 #zone,#topright,#zones,#help{z-index:3}
 #markers{z-index:1}
 body.touch #help{display:none}
-body.touch #minimap{width:80px;height:138px}
+body.touch #minimap{width:80px;height:83px}
 body.touch #zones{bottom:max(10px,env(safe-area-inset-bottom))}
 body.touch #zones button{min-width:0;padding:0 9px;height:34px;font-size:11.5px}
 body.touch #zones button span{display:none}
-@media (max-width:720px){#zone{font-size:11.5px;padding:7px 10px}#minimap{width:80px;height:138px}#help{display:none}#zones button span{display:none}}
+@media (max-width:720px){#zone{font-size:11.5px;padding:7px 10px}#minimap{width:80px;height:83px}#help{display:none}#zones button span{display:none}}
 @media (max-height:480px){.stick{width:110px;height:110px;bottom:56px}#minimap{display:none}#card img{height:110px}}
 </style>
 </head>
@@ -129,15 +133,15 @@ body.touch #zones button span{display:none}
 
 <div id="splash">
   <div class="box">
-    <div class="eyebrow">Новосибирск · ул. Фрунзе, 49 · подвал</div>
+    <div class="eyebrow">Зайди внутрь до того, как приедешь</div>
     <h1><span>REVOLVER</span><br>3D-тур по студиям</h1>
-    <p class="lead">Спуститесь с ночной улицы в подвал и пройдите весь путь: тамбур, коридор, подкаст-зал REVOLVER PODCAST, лаундж и студия звукозаписи REVOLVER SOUND. По пути можно пострелять и порисовать баллончиком.</p>
+    <p class="lead">Можно пройти, посмотреть и оставить свой тег на стене. Спустись по лестнице, поверни направо — и ты в тамбуре, дальше зал REVOLVER PODCAST, лаундж и комната звукозаписи REVOLVER SOUND.</p>
     <div class="keys">
-      <div><b>W A S D</b> / стрелки — ходьба<br><b>Shift</b> — бег</div>
-      <div><b>Мышь</b> — обзор, <b>ЛКМ</b> — огонь / краска<br><b>E</b> — осмотреть, <b>Пробел</b> — прыжок</div>
-      <div><b>Колесо</b> / <b>Q</b> — револьвер или баллончик<br><b>R</b> — перезарядка, <b>C</b> — цвет, <b>X</b> — стереть</div>
+      <div><b>W A S D</b> / стрелки — ходьба<br><b>Shift</b> — бег, <b>Пробел</b> — прыжок</div>
+      <div><b>Мышь</b> — обзор, <b>ЛКМ</b> — рисовать<br><b>E</b> — осмотреть</div>
+      <div><b>C</b> — цвет краски<br><b>X</b> — стереть всё</div>
       <div><b>1 2 3 4</b> — Улица, Зал, Лаундж, Студия<br><b>Esc</b> — меню</div>
-      <div class="t">Касание: левый стик — ходьба, правый — обзор, кнопки «Прыжок», «Огонь», «Сменить», «Открыть»</div>
+      <div class="t">Касание: левый стик — ходьба, правый — обзор, кнопки «Прыжок», «Рисовать», «Открыть»</div>
     </div>
     <button id="go" disabled>Загрузка…</button>
     <div id="loadbar"><i></i></div>
@@ -150,7 +154,7 @@ body.touch #zones button span{display:none}
 <div id="hud" class="hidden">
   <div id="zone"><span id="zoneName"></span><small id="zoneSub"></small></div>
   <div id="topright">
-    <canvas id="minimap" width="208" height="360"></canvas>
+    <canvas id="minimap" width="208" height="216"></canvas>
     <div class="row">
       <button class="pill" id="snd" title="Звук">🔇</button>
       <a class="pill" href="../index.html" id="exit">Выйти на сайт</a>
@@ -165,8 +169,9 @@ body.touch #zones button span{display:none}
     <button data-z="3"><b>3</b><span>Лаундж</span></button>
     <button data-z="4"><b>4</b><span>Студия</span></button>
   </div>
-  <div id="help"><b>WASD</b> ходьба · <b>Пробел</b> прыжок · <b>ЛКМ</b> огонь/краска · <b>Q</b>/колесо оружие · <b>R</b> перезаряд. · <b>C</b> цвет · <b>X</b> стереть · <b>E</b> осмотр · <b>1–4</b> зоны</div>
-  <div id="wpn"><div id="palette"></div><div id="ammo"><b>6/∞</b><span>Револьвер .357</span></div></div>
+  <div id="help"><b>WASD</b> ходьба · <b>Пробел</b> прыжок · <b>ЛКМ</b> рисовать · <b>C</b> цвет · <b>X</b> стереть · <b>E</b> осмотреть · <b>1–4</b> зоны</div>
+  <div id="wpn"><div id="palette"></div><div id="ammo"><b>Спрей</b><span>Баллончик</span></div></div>
+  <div id="toast"></div>
 </div>
 
 <div id="touch" class="hidden">
@@ -174,9 +179,9 @@ body.touch #zones button span{display:none}
   <div class="stick" id="stickR"><i></i></div>
   <button id="actBtn">Открыть</button>
   <button class="tb" id="btnJump">Прыжок</button>
-  <button class="tb" id="btnFire">Огонь</button>
-  <button class="tb" id="btnSwap">Сменить</button>
-  <button class="tb" id="btnRel">R</button>
+  <button class="tb" id="btnFire">Рисовать</button>
+  <button class="tb hidden" id="btnSwap">Сменить</button>
+  <button class="tb hidden" id="btnRel">R</button>
 </div>
 <div id="rotate">Для удобства поверните телефон горизонтально</div>
 
@@ -186,8 +191,9 @@ body.touch #zones button span{display:none}
   <div class="in">
     <h2 id="cardTitle"></h2>
     <p id="cardText"></p>
+    <div id="cardAudio" class="hidden"><button class="btn main" id="playBtn" style="min-width:56px">▶</button><span id="audioMsg"></span></div>
     <div class="btns">
-      <a class="btn main" id="cardBook" href="../index.html#book">Забронировать</a>
+      <a class="btn main" id="cardBook" href="../index.html#book">Узнать свободные часы</a>
       <button class="btn" id="cardClose">Закрыть</button>
     </div>
   </div>
@@ -196,7 +202,7 @@ body.touch #zones button span{display:none}
 <div id="pause" class="hidden">
   <div class="box">
     <h2>Пауза</h2>
-    <div style="color:#a7a39a;font-size:14px;line-height:1.6">Нажмите «Продолжить», чтобы вернуться в тур.<br><b>Пробел</b> — прыжок · <b>ЛКМ</b> — огонь / краска · <b>Колесо</b>, <b>Q</b> — оружие<br><b>R</b> — перезарядка · <b>C</b> — цвет · <b>X</b> — стереть</div>
+    <div style="color:#a7a39a;font-size:14px;line-height:1.6">Нажми «Продолжить», чтобы вернуться.<br>Ходьба — WASD, <b>Пробел</b> — прыжок, <b>ЛКМ</b> — рисовать<br><b>C</b> — цвет, <b>X</b> — стереть, <b>E</b> — осмотреть</div>
     <div class="row">
       <button class="btn main" id="resume">Продолжить</button>
       <a class="btn" href="../index.html">Выйти на сайт</a>

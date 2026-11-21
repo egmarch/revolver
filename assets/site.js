@@ -105,21 +105,22 @@ $$('[data-yt-id]').forEach(st => {
 });
 
 /* ---- услуги и получатели ---- */
+const PACK = 'Трек + обложка + сниппет + Reels — 13 900 ₽';
 const SERVICE_GROUPS = [
-  ['REVOLVER SOUND · звукозапись', 'sound', ['Трек под ключ: трек + обложка + 3 Reels', 'Запись вокала', 'Комбо: трек + 5 сниппетов', 'Сведение и мастеринг', 'Запись инструментов / Live-мультитрек', 'DJ-школа / стрим-рум', 'Дистрибуция / релизное сопровождение', 'Экскурсия в студию звука · 15 минут',
-    'Гострайтинг: песня на заказ', 'Гострайтинг: трек под ключ', 'Гострайтинг: аранжировка', 'Гострайтинг: стихи на заказ', 'Гострайтинг: рекламный текст',
+  ['REVOLVER SOUND · звукозапись', 'sound', ['Трек + обложка + сниппет + Reels — 13 900 ₽', 'Запись вокала', 'Сведение и мастеринг', 'Запись инструментов / Live-мультитрек', 'Дистрибуция / релизное сопровождение', 'Экскурсия в студию звука · 15 минут',
+    'Гострайтинг: песня на заказ', 'Гострайтинг: трек с нуля', 'Гострайтинг: аранжировка', 'Гострайтинг: стихи на заказ', 'Гострайтинг: рекламный текст',
     'Озвучка / дикторский голос', 'Запись на выезде', 'Аренда оборудования', 'Дизайн обложки', 'Таргет / посевы в плейлисты',
     'Мероприятие: бизнес', 'Мероприятие: концерт', 'Мероприятие: банкет',
     'Школа: диджеинг', 'Школа: брейк-данс', 'Школа: рэп', 'Школа: гитара', 'Школа: вокал', 'Школа: сведение и мастеринг']],
-  ['REVOLVER PODCAST · видеопавильон', 'main', ['Экспресс-мультикам 24ч', 'Продюсерский пакет', 'Аренда зала + свет', 'Подкаст под ключ — 2 часа', 'Shorts / Reels на месяц', 'Музыкальный Live · видео + мультитрек', 'Экскурсия в павильон · 15 минут']],
-  ['Продакшен', 'main', ['YouTube: пилотный выпуск', 'YouTube: продюсирование разговорного канала', 'YouTube: продюсирование шоу', 'YouTube под ключ', 'Хочу обсудить проект']]
+  ['REVOLVER PODCAST · видеопавильон', 'main', ['Экспресс-мультикам 24ч', 'Продюсерский пакет', 'Аренда зала + свет', 'Подкаст на 2 часа — полный выпуск', 'Shorts / Reels на месяц', 'Музыкальный Live · видео + мультитрек', 'Экскурсия в павильон · 15 минут']],
+  ['Продакшен', 'main', ['YouTube: пилотный выпуск', 'YouTube: продюсирование разговорного канала', 'YouTube: продюсирование шоу', 'YouTube на месяц', 'Хочу обсудить проект']]
 ];
 const tgOf = {}; SERVICE_GROUPS.forEach(g => g[2].forEach(s => tgOf[s] = g[1] === 'sound' ? CONTACTS.sound : CONTACTS.main));
 const WHO = { [CONTACTS.sound]: 'Костя (@' + CONTACTS.sound + ') — звукозапись', [CONTACTS.main]: '@' + CONTACTS.main + ' — подкасты и продакшен' };
 const fService = $('#fService');
 SERVICE_GROUPS.forEach(g => { const og = document.createElement('optgroup'); og.label = g[0]; g[2].forEach(s => og.appendChild(new Option(s, s))); fService.appendChild(og); });
 const defStudio = $('#form').dataset.default;
-fService.value = defStudio === 'sound' ? 'Трек под ключ: трек + обложка + 3 Reels' : defStudio === 'podcast' ? 'Экспресс-мультикам 24ч' : defStudio === 'production' ? 'YouTube: пилотный выпуск' : 'Трек под ключ: трек + обложка + 3 Reels';
+fService.value = defStudio === 'podcast' ? 'Экспресс-мультикам 24ч' : defStudio === 'production' ? 'YouTube: пилотный выпуск' : PACK;
 function who() { $('#whoName').textContent = WHO[tgOf[fService.value] || CONTACTS.main]; }
 fService.addEventListener('change', who); who();
 
@@ -129,19 +130,18 @@ const FM = {
   podcast: [
     { id: 'rent', t: 'Только зал + свет', s: 'Для своей съёмочной команды', p: '2 700 ₽/ч', def: 2 },
     { id: 'express', t: 'Экспресс-мультикам 24ч', s: '3 камеры, звук, монтаж + 5 Shorts', p: '17 000 ₽', def: 1 },
-    { id: 'pro', t: 'Продюсерский под ключ', s: 'Расширенный монтаж + 10 Shorts', p: '28 000 ₽', def: 2 },
+    { id: 'pro', t: 'Продюсерский пакет', s: 'Расширенный монтаж + 10 Shorts', p: '28 000 ₽', def: 2 },
     { id: 'live', t: 'Музыкальный Live', s: 'Видео + поканальная запись через стену', p: 'по запросу', def: 2 }
   ],
   sound: [
-    { id: 'turnkey', t: 'Трек под ключ', s: 'Запись + мастер + обложка + 3 Reels', p: 'от 15 000 ₽', def: 2 },
+    { id: 'pack', t: 'Трек + обложка + сниппет + Reels', s: 'Запись, сведение, мастеринг, обложка, сниппет и Reels', p: '13 900 ₽', def: 2 },
     { id: 'vocal', t: 'Только запись вокала / речи', s: 'Со звукорежиссёром', p: '1 500 ₽/ч', def: 2 },
-    { id: 'inst', t: 'Инструменты / Live-мультитрек', s: 'Поканальная запись живой сессии', p: 'от 2 000 ₽/ч', def: 2 },
-    { id: 'combo', t: 'Комбо: трек + 5 сниппетов', s: '2 ч записи + мастер + час съёмки', p: '12 900 ₽', def: 2 }
+    { id: 'inst', t: 'Инструменты / Live-мультитрек', s: 'Поканальная запись живой сессии', p: 'от 2 000 ₽/ч', def: 2 }
   ]
 };
 const OPT = {
-  podcast: [{ id: 'sh', t: '+10 дополнительных Shorts', s: 'Больше вертикального контента', p: '+4 000 ₽' }, { id: 'eng', t: 'Отдельный звукорежиссёр в REVOLVER SOUND', s: 'Контроль записи в аппаратной', p: '+2 500 ₽' }],
-  sound: [{ id: 'mix', t: 'Сведение + мастеринг', s: 'Для варианта «только запись»', p: 'от 5 000 ₽' }, { id: 'tune', t: 'Ручной тюн вокала', s: 'Стоимость согласуем до сессии', p: 'по запросу' }, { id: 'snip', t: 'Съёмка + 5 сниппетов', s: 'Согласуем до сессии', p: 'по запросу' }]
+  podcast: [{ id: 'sh', t: '+10 дополнительных Shorts', s: 'Ещё вертикальные ролики из той же съёмки', p: '+4 000 ₽' }, { id: 'eng', t: 'Отдельный звукорежиссёр в REVOLVER SOUND', s: 'Контроль записи в аппаратной', p: '+2 500 ₽' }],
+  sound: [{ id: 'mix', t: 'Сведение + мастеринг', s: 'Для варианта «только запись»', p: 'от 5 000 ₽' }, { id: 'tune', t: 'Ручной тюн вокала', s: 'Стоимость согласуем до сессии', p: 'по запросу' }, { id: 'snip', t: 'Дополнительная съёмка в зале', s: 'Согласуем до сессии', p: 'по запросу' }]
 };
 let calcState = null;
 (function () {
@@ -169,11 +169,10 @@ let calcState = null;
       }
       if (f === 'rent' || f === 'live') { if (o('sh')) pend.push('+10 Shorts — 4 000 ₽'); if (o('eng')) rows.push(['Отдельный звукорежиссёр', 2500]); }
     } else {
-      if (f === 'turnkey') { svc = 'Трек под ключ: трек + обложка + 3 Reels'; name = 'Трек под ключ'; pre = 'от '; rows.push(['Запись + сведение/мастер + обложка + 3 Reels', 15000]); inc = 'Один трек от записи до упаковки к релизу.'; hint = 'Финальную цену подтверждаем после брифа — зависит от сложности трека и числа дублей.'; if (o('tune')) pend.push('Ручной тюн вокала'); if (o('snip')) pend.push('Дополнительная съёмка сниппетов'); }
-      else if (f === 'combo') { svc = 'Комбо: трек + 5 сниппетов'; name = svc; rows.push(['2 ч записи + мастер + 1 ч съёмки + 5 сниппетов', 12900]); inc = 'Трек, мастер и пять сниппетов. Без обложки. Дистрибуция отдельно.'; hint = 'В пакете 2 часа записи и 1 час съёмки.'; }
-      else if (f === 'inst') { svc = 'Запись инструментов / Live-мультитрек'; name = 'Live-мультитрек'; pre = 'от '; rows.push([`Запись · ${hw(h)} × 2 000 ₽`, h * 2000]); inc = 'Поканальная запись. Видео считается отдельно.'; hint = 'Сетап и смету согласуем по райдеру.'; }
+      if (f === 'pack') { svc = PACK; name = 'Трек + обложка + сниппет + Reels'; rows.push(['Запись, сведение и мастеринг, обложка, сниппет и Reels', 13900]); inc = 'Сведённый трек, обложка, сниппет и Reels — всё готово к публикации.'; hint = 'Одна цена за весь набор. Видео снимаем в соседнем зале.'; if (o('tune')) pend.push('Ручной тюн вокала'); }
+      else if (f === 'inst') { svc = 'Запись инструментов / Live-мультитрек'; name = 'Live-мультитрек'; pre = 'от '; rows.push([`Запись · ${hw(h)} × 2 000 ₽`, h * 2000]); inc = 'Поканальная запись. Видео считается отдельно.'; hint = 'Зависит от числа инструментов и сложности сетапа.'; }
       else { svc = 'Запись вокала'; name = 'Запись вокала'; if (h >= 5) { rows.push(['Пакет · 5 часов', 6500]); if (h > 5) rows.push([`Дополнительно · ${hw(h - 5)}`, (h - 5) * 1500]); hint = 'Применён пакет: 5 часов за 6 500 ₽.'; } else { rows.push([`Запись · ${hw(h)} × 1 500 ₽`, h * 1500]); hint = 'Со звукорежиссёром. Пакет 5 часов — 6 500 ₽.'; } inc = 'Работа звукорежиссёра и исходники сессии.'; }
-      if (f === 'vocal' || f === 'inst') { if (o('mix')) { rows.push(['Сведение и мастеринг · от', 5000]); pre = 'от '; } if (o('tune')) pend.push('Ручной тюн вокала'); if (o('snip')) pend.push('Съёмка 5 сниппетов'); }
+      if (f === 'vocal' || f === 'inst' || f === 'pack') { if (o('mix')) { rows.push(['Сведение и мастеринг · от', 5000]); pre = 'от '; } if (o('tune')) pend.push('Ручной тюн вокала'); if (o('snip')) pend.push('Съёмка 5 сниппетов'); }
     }
     const total = rows.reduce((a, r) => a + r[1], 0);
     $('#estName').textContent = name; $('#estTot').innerHTML = f === 'live' && s === 'podcast' ? 'по запросу' : pre + money(total) + ' <small>₽</small>';
@@ -190,34 +189,49 @@ let calcState = null;
   renderFmt();
 })();
 
-/* ---- бронь / заявки ---- */
+/* ---- заявка: часы / демо, Telegram / телефон ---- */
 const fDate = $('#fDate'); const td = new Date(); fDate.min = new Date(td - td.getTimezoneOffset() * 6e4).toISOString().split('T')[0];
 let attach = '';
-function openBook(service, estimate = '') {
+const kindOf = () => $('input[name=kind]:checked').value, replyOf = () => $('input[name=reply]:checked').value;
+function syncForm() {
+  const demo = kindOf() === 'demo', ph = replyOf() === 'phone';
+  $('#demoRow').hidden = !demo; $('#dateRow').hidden = demo;
+  $('#fSubmit').textContent = demo ? 'Скинуть демо' : 'Узнать свободные часы';
+  $('#fContactL').textContent = ph ? 'Имя и телефон' : 'Имя и твой @ник в Telegram';
+  $('#fContact').placeholder = ph ? 'Имя, +7…' : 'Имя, @ник';
+  $('#fContact').type = 'text'; $('#fContact').autocomplete = ph ? 'tel' : 'name';
+  $('#fMsg').placeholder = demo ? 'Что за песня, что нужно сделать: запись, сведение, обложка…' : 'Читаешь под минус, играешь с группой, нужен просто чистый голос…';
+}
+$$('input[name=kind],input[name=reply]').forEach(i => i.addEventListener('change', syncForm)); syncForm();
+function openBook(service, estimate = '', kind) {
   if (service) { if (![...fService.options].some(o => o.value === service)) fService.add(new Option(service, service)); fService.value = service; who(); }
+  const k = $('input[name=kind][value=' + (kind || 'hours') + ']'); if (k) { k.checked = true; syncForm(); }
   attach = estimate; const a = $('#attach'); a.hidden = !estimate; a.textContent = estimate;
   $('#book').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
   setTimeout(() => $('#fContact').focus({ preventScroll: true }), 700);
-  track('book_open', { service });
+  track('book_open', { service, kind: kind || 'hours' });
 }
-document.addEventListener('click', e => { const b = e.target.closest('[data-book]'); if (b) { e.preventDefault(); openBook(b.dataset.service, ''); } });
+document.addEventListener('click', e => { const b = e.target.closest('[data-book]'); if (b) { e.preventDefault(); openBook(b.dataset.service, '', b.dataset.kind); } });
 const params = new URLSearchParams(location.search), pre = params.get('service');
-const MAP = { 'podcast-express': 'Экспресс-мультикам 24ч', rent: 'Аренда зала + свет', 'sound-vocal': 'Запись вокала', combo: 'Комбо: трек + 5 сниппетов', turnkey: 'Трек под ключ: трек + обложка + 3 Reels' };
+const MAP = { 'podcast-express': 'Экспресс-мультикам 24ч', rent: 'Аренда зала + свет', 'sound-vocal': 'Запись вокала', pack: PACK, combo: PACK, turnkey: PACK };
 if (pre && MAP[pre]) { fService.value = MAP[pre]; who(); if (location.hash === '#book') setTimeout(() => openBook(MAP[pre]), 300); }
 function reqText() {
-  const d = fDate.value, date = d ? new Date(d + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'пока не выбрана';
-  const L = ['Привет! Заявка с сайта REVOLVER (Фрунзе 49).', '', 'Услуга: ' + fService.value, 'Контакт: ' + $('#fContact').value.trim(), 'Дата: ' + date];
-  const m = $('#fMsg').value.trim(); if (m) L.push('Что важно: ' + m); if (attach) L.push('', attach); L.push('', 'Подскажите, пожалуйста, свободные слоты.'); return L.join('\n');
+  const demo = kindOf() === 'demo', d = fDate.value, date = d ? new Date(d + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'пока не выбран';
+  const L = [demo ? 'Привет! Скидываю демо с сайта REVOLVER (Фрунзе 49).' : 'Привет! Хочу узнать про свободные часы. Заявка с сайта REVOLVER (Фрунзе 49).', '', 'Услуга: ' + fService.value, 'Контакт: ' + $('#fContact').value.trim() + ' (ответить ' + (replyOf() === 'phone' ? 'по телефону' : 'в Telegram') + ')'];
+  if (demo) L.push('Демо: ' + ($('#fDemo').value.trim() || 'пришлю файлом в Telegram')); else L.push('Желаемый день: ' + date);
+  const m = $('#fMsg').value.trim(); if (m) L.push('Что важно: ' + m); if (attach) L.push('', attach);
+  L.push('', demo ? 'Послушайте, пожалуйста, и подскажите, с чего начать.' : 'Подскажите, пожалуйста, свободные часы.'); return L.join('\n');
 }
 async function copy(t) { try { if (navigator.clipboard && isSecureContext) { await navigator.clipboard.writeText(t); return true; } throw 0; } catch { const a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(a); a.select(); let ok = false; try { ok = document.execCommand('copy'); } catch { } a.remove(); return ok; } }
-function tgDraft() { window.open('https://t.me/' + (tgOf[fService.value] || CONTACTS.main) + '?text=' + encodeURIComponent(reqText()), '_blank', 'noopener'); $('#fNote').textContent = 'Проверь черновик в Telegram и нажми «Отправить». Дата пока не подтверждена.'; }
+const SENT = 'Ответим в течение дня — в Telegram или по телефону, как ты выбрал. Обычно быстрее, если не идёт сессия.';
+function tgDraft() { window.open('https://t.me/' + (tgOf[fService.value] || CONTACTS.main) + '?text=' + encodeURIComponent(reqText()), '_blank', 'noopener'); $('#fNote').textContent = 'Черновик открыт в Telegram — останется нажать «Отправить». ' + SENT; }
 $('#form').addEventListener('submit', async e => {
   e.preventDefault();
   if (!$('#fContact').value.trim()) { $('#fContact').focus(); toast('Оставь контакт, чтобы мы ответили'); return; }
-  track('lead_submit', { service: fService.value });
+  track('lead_submit', { service: fService.value, kind: kindOf(), reply: replyOf() });
   if (!CONTACTS.endpoint) return tgDraft();
-  const payload = { text: reqText(), service: fService.value, recipient: tgOf[fService.value] || CONTACTS.main, contact: $('#fContact').value.trim(), date: fDate.value, message: $('#fMsg').value.trim(), estimate: attach, page: location.pathname, utm: Object.fromEntries([...params].filter(p => p[0].startsWith('utm_'))) };
-  try { const r = await fetch(CONTACTS.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!r.ok) throw 0; toast('Заявка отправлена. Мы свяжемся с тобой'); $('#fNote').textContent = 'Заявка получена. Ответим в ближайшее время.'; e.target.reset(); who(); }
+  const payload = { text: reqText(), kind: kindOf(), reply: replyOf(), service: fService.value, recipient: tgOf[fService.value] || CONTACTS.main, contact: $('#fContact').value.trim(), demo: $('#fDemo').value.trim(), date: fDate.value, message: $('#fMsg').value.trim(), estimate: attach, page: location.pathname, utm: Object.fromEntries([...params].filter(p => p[0].startsWith('utm_'))) };
+  try { const r = await fetch(CONTACTS.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!r.ok) throw 0; toast('Заявка отправлена'); $('#fNote').textContent = 'Заявка получена. ' + SENT; e.target.reset(); syncForm(); who(); }
   catch { toast('Не получилось отправить — откроем Telegram'); tgDraft(); }
 });
 $('#fCopy').onclick = async () => { if (!$('#fContact').value.trim()) { $('#fContact').focus(); return; } toast(await copy(reqText()) ? 'Текст заявки скопирован' : 'Не удалось скопировать'); };
@@ -309,4 +323,21 @@ if (!reduce) (function g() { setTimeout(() => { document.body.classList.add('gl-
     audioUpdate();
   }
   draw();
+})();
+
+
+/* ---- плеер «до / после» ---- */
+(function () {
+  const tracks = $$('.lt'); if (!tracks.length) return;
+  let cur = null;
+  tracks.forEach(t => {
+    const before = t.dataset.before, after = t.dataset.after, btn = $('.lp', t), abs = $$('[data-ab]', t);
+    if (!before && !after) { t.classList.add('soon'); btn.title = 'Аудио появится после согласования с артистом'; return; }
+    btn.disabled = false; const a = new Audio(); a.preload = 'none'; let mode = 'before'; a.src = before || after; if (!before) mode = 'after';
+    const sync = () => abs.forEach(b => b.classList.toggle('on', b.dataset.ab === mode));
+    btn.onclick = () => { if (cur && cur !== a) { cur.pause(); } cur = a; a.paused ? a.play().catch(() => toast('Не удалось запустить аудио')) : a.pause(); };
+    a.onplay = () => { btn.textContent = 'Ⅱ'; track('listen_play'); }; a.onpause = () => btn.textContent = '▶'; a.onended = () => btn.textContent = '▶';
+    abs.forEach(b => b.onclick = () => { const src = b.dataset.ab === 'after' ? after : before; if (!src || mode === b.dataset.ab) return; const tm = a.currentTime, pl = !a.paused; mode = b.dataset.ab; a.src = src; a.onloadedmetadata = () => { a.currentTime = Math.min(tm, a.duration - .05); if (pl) a.play().catch(() => { }); }; a.load(); sync(); });
+    sync();
+  });
 })();

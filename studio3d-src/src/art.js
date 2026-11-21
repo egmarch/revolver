@@ -298,7 +298,7 @@ export function drawSign(c) {
   x.fillText('PODCAST  ·  SOUND', W * 0.5, H * 0.74);
   x.shadowColor = '#fff'; x.shadowBlur = 14; x.fillStyle = '#ffffff';
   x.font = `600 ${H * 0.115}px ${FONT_HEAD}`;
-  x.fillText('Фрунзе 49  ↓  подвал', W * 0.5, H * 0.91);
+  x.fillText('Фрунзе 49  ↓  вход', W * 0.5, H * 0.91);
   x.shadowBlur = 0;
 }
 
@@ -367,7 +367,7 @@ export function drawPoster(c, kind) {
   for (let i = 0; i < 8; i++) { x.beginPath(); x.arc(W * 0.68, H * 0.62, W * (0.1 + i * 0.017), 0, 7); x.stroke(); }
   x.fillStyle = pal.b; x.fillRect(W * 0.06, H * 0.86, W * 0.88, 4);
   x.fillStyle = pal.b; x.font = `700 ${W * 0.06}px Arial, sans-serif`;
-  x.fillText('Фрунзе 49 · подвал · 21:00', W * 0.06, H * 0.93);
+  x.fillText('Фрунзе 49 · 21:00', W * 0.06, H * 0.93);
 }
 
 export function crtFrame(c, t, cam, noiseSeed) {
@@ -410,4 +410,14 @@ export function drawTrafficSign(c) {
   x.fillStyle = '#111';
   x.beginPath(); x.arc(W * 0.5, W * 0.4, W * 0.05, 0, 7); x.fill();
   x.fillRect(W * 0.46, W * 0.45, W * 0.08, W * 0.22);
+}
+
+export function drawDjSign(c) {
+  const W = c.width, H = c.height, x = c.getContext('2d');
+  x.fillStyle = '#f4f1e6'; x.fillRect(0, 0, W, H);
+  x.strokeStyle = '#222'; x.lineWidth = 4; x.strokeRect(6, 6, W - 12, H - 12);
+  x.fillStyle = '#111'; x.textAlign = 'center';
+  x.font = '700 ' + (H * 0.2) + 'px Arial, sans-serif'; x.fillText('Школа диджеев', W / 2, H * 0.34);
+  x.fillStyle = '#c62a2a'; x.font = '800 ' + (H * 0.17) + 'px Arial, sans-serif'; x.fillText('идёт ремонт', W / 2, H * 0.62);
+  x.fillStyle = '#333'; x.font = '500 ' + (H * 0.1) + 'px Arial, sans-serif'; x.fillText('Дверь закрыта. Вход в студию — рядом.', W / 2, H * 0.86);
 }

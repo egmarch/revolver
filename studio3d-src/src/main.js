@@ -59,7 +59,7 @@ async function init() {
   applyTeleport(1, true);
   renderer.render(world.scene, camera);
   setProgress(100);
-  const go = $('#go'); go.disabled = false; go.textContent = 'Спуститься'; $('#loadbar').classList.add('hidden');
+  const go = $('#go'); go.disabled = false; go.textContent = 'Зайти'; $('#loadbar').classList.add('hidden');
   requestAnimationFrame(loop);
   window.__tour = tourApi;
 }
@@ -223,7 +223,7 @@ function updateFocus() {
   const cp = camera.position;
   for (const h of world.hotspots) {
     const el = markerEls.get(h);
-    if (h.zone !== state.zone || state.cardOpen || !state.started) { el.style.display = 'none'; continue; }
+    if (h.zone !== state.zone || h.disabled || state.cardOpen || !state.started) { el.style.display = 'none'; continue; }
     _v.copy(h.pos).sub(cp);
     const d = _v.length();
     _v.divideScalar(d);
@@ -249,10 +249,53 @@ function updateFocus() {
   const pr_ = $('#prompt'), cr = $('#cross'), ab = $('#actBtn');
   if (focus) {
     pr_.classList.add('on'); cr.classList.add('on');
-    pr_.lastElementChild.textContent = ' Осмотреть: ' + focus.title;
+    pr_.lastElementChild.textContent = (focus.pickup ? ' Взять: ' : ' Осмотреть: ') + focus.title;
     pr_.firstElementChild.textContent = isTouch ? '●' : 'E';
     ab.classList.add('on');
   } else { pr_.classList.remove('on'); cr.classList.remove('on'); ab.classList.remove('on'); }
+}
+const NOFILE = 'Здесь будет реальная запись: тот же фрагмент до и после сведения';
+const audioOK = {};
+let cardAudioEl = null;
+function checkAudio(f) {
+  if (audioOK[f] !== undefined) return Promise.resolve(audioOK[f]);
+  return fetch('../assets/audio/' + f, { method: 'HEAD' }).then(r => (audioOK[f] = r.ok)).catch(() => (audioOK[f] = false));
+}
+function stopCardAudio() {
+  if (cardAudioEl) { try { cardAudioEl.pause(); } catch (e) { } cardAudioEl = null; }
+  const b = $('#playBtn'); if (b) b.textContent = '▶';
+}
+function setupAudio(h) {
+  const box = $('#cardAudio'); stopCardAudio();
+  if (!h.audio) { box.classList.add('hidden'); return; }
+  const btn = $('#playBtn'), msg = $('#audioMsg');
+  box.classList.remove('hidden'); btn.classList.add('hidden'); msg.textContent = 'Проверяю запись…';
+  checkAudio(h.audio).then(ok => {
+    if (!state.cardOpen) return;
+    if (!ok) { msg.textContent = NOFILE; return; }
+    btn.classList.remove('hidden'); msg.textContent = h.audio.indexOf('before') > 0 ? 'Голос до обработки' : 'После сведения';
+    btn.onclick = () => {
+      if (cardAudioEl && !cardAudioEl.paused) { stopCardAudio(); return; }
+      cardAudioEl = new Audio('../assets/audio/' + h.audio);
+      cardAudioEl.onended = stopCardAudio;
+      cardAudioEl.onerror = () => { stopCardAudio(); btn.classList.add('hidden'); msg.textContent = NOFILE; };
+      cardAudioEl.play().then(() => { btn.textContent = '⏸'; }).catch(() => { });
+    };
+  });
+}
+function toast(t, s) {
+  const el = $('#toast'); el.innerHTML = '<b></b><span></span>'; el.firstChild.textContent = t; el.lastChild.textContent = s;
+  el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 5500);
+}
+function pickRevolver() {
+  if (!world || !weapons || weapons.S.hasRev) return false;
+  world.hideRevolverProp();
+  const h = world.hotspots.find(x => x.id === 'revolver');
+  if (h) { h.disabled = true; const el = markerEls.get(h); if (el) el.style.display = 'none'; }
+  weapons.giveRevolver();
+  $('#btnSwap').classList.remove('hidden'); $('#btnRel').classList.remove('hidden');
+  toast('Револьвер подобран', 'ЛКМ — огонь · R — перезарядка · Q или колесо — сменить оружие');
+  return true;
 }
 function interact() {
   if (state.cardOpen) return;
@@ -260,19 +303,22 @@ function interact() {
 }
 let openedAt = 0;
 function openCard(h) {
+  if (h.pickup) { pickRevolver(); return; }
   if (weapons) weapons.setTrigger(false);
   state.cardOpen = true; openedAt = performance.now();
   if (document.pointerLockElement) document.exitPointerLock();
-  $('#cardImg').src = `../assets/img/${h.img}.webp`;
-  $('#cardImg').alt = h.title;
+  const im = $('#cardImg');
+  if (h.img) { im.classList.remove('hidden'); im.onerror = () => { im.onerror = null; im.src = '../assets/img/control-1.webp'; }; im.src = `../assets/img/${h.img}.webp`; im.alt = h.title; } else im.classList.add('hidden');
+  setupAudio(h);
   $('#cardTitle').textContent = h.title;
   $('#cardText').textContent = h.text;
-  $('#cardBook').href = h.href;
+  const bk = $('#cardBook'); if (h.href) { bk.classList.remove('hidden'); bk.href = h.href; } else bk.classList.add('hidden');
   $('#card').classList.remove('hidden'); $('#shade').classList.remove('hidden');
   input.keys = {}; input.mx = input.mz = input.lx = input.ly = 0;
 }
 function closeCard() {
   if (!state.cardOpen) return;
+  stopCardAudio();
   state.cardOpen = false;
   $('#card').classList.add('hidden'); $('#shade').classList.add('hidden');
   if (!isTouch) { lockPointer(); }
@@ -418,7 +464,7 @@ $('#snd').addEventListener('click', () => {
 // ------------------------------------------------------------------
 // мини-карта
 const mm = $('#minimap'), mmx = mm.getContext('2d');
-const MAP = { x0: -4, z0: -1.6, s: 11.4 };
+const MAP = { x0: -4.2, z0: -1.6, s: 11.4 };
 let mapBase = null;
 function mp(x, z) { return [(x - MAP.x0) * MAP.s, (z - MAP.z0) * MAP.s]; }
 function drawMapBase() {
@@ -430,15 +476,15 @@ function drawMapBase() {
     c.fillStyle = fill; c.fillRect(a, b, c2 - a, d - b);
     if (stroke) { c.strokeStyle = stroke; c.lineWidth = 2; c.strokeRect(a, b, c2 - a, d - b); }
   };
-  rect(-4, 19.2, 14, 25, 'rgba(70,74,92,.5)', null);                 // улица
-  rect(5.25, 14, 14, 19.2, 'rgba(110,60,50,.5)', null);               // дом
-  rect(3.75, 14.4, 5.25, 19.2, 'rgba(120,120,130,.6)', '#8a8f9a');    // лестница
-  rect(3.75, 5.2, 5.25, 14.4, 'rgba(150,60,200,.55)', '#c070ff');    // коридор
+  rect(2.8, 5.6, 8.6, 16, 'rgba(70,74,92,.5)', null);                 // улица
+  rect(-2.0, 5.6, 2.8, 7.1, 'rgba(120,120,130,.6)', '#8a8f9a');       // лестница
+  rect(-3.4, 5.6, -2.0, 7.1, 'rgba(120,120,130,.45)', '#8a8f9a');     // площадка
+  rect(-3.4, 2.2, -0.2, 5.4, 'rgba(150,60,200,.55)', '#c070ff');      // тамбур
   rect(0, 0, 6, 5, 'rgba(40,150,70,.55)', '#35e06b');                  // зал
   rect(6, 0, 9, 5, 'rgba(200,190,160,.4)', '#d7ceb0');                 // лаундж
   rect(9, -1, 12, 5, 'rgba(60,100,220,.55)', '#6a95ff');               // студия
   c.fillStyle = '#fff'; c.font = '600 15px Manrope, Arial, sans-serif'; c.textAlign = 'center';
-  [['ул.', 5, 22.4], ['зал', 3, 2.7], ['лаундж', 7.5, 2.7], ['звук', 10.5, 2.0], ['вход', 4.5, 9.5]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
+  [['ул.', 5.8, 11], ['зал', 3, 2.7], ['лаундж', 7.5, 2.7], ['звук', 10.5, 2.0], ['тамб.', -1.8, 3.8]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
 }
 function drawMap() {
   mmx.drawImage(mapBase, 0, 0);
@@ -487,7 +533,7 @@ function loop(now) {
   if (state.grounded) { if (gnd < state.y - 0.3) { state.grounded = false; state.vy = 0; } else state.y = gnd; }
   if (!state.grounded) {
     state.vy -= 13 * dt; state.y += state.vy * dt;
-    const ceilAbs = state.z >= 15.2 ? 99 : 2.8;
+    const ceilAbs = (state.z >= 5.5 && state.x > -0.8) ? 99 : 2.8;
     const maxY = ceilAbs - 0.12 - EYE;
     if (state.y > maxY) { state.y = maxY; if (state.vy > 0) state.vy = 0; }
     if (state.y <= gnd) { state.y = gnd; state.vy = 0; state.grounded = true; }
@@ -541,7 +587,7 @@ const tourApi = {
   sprayAt: (ox, oy, oz, dx, dy, dz, n) => { const V = THREE.Vector3; return ox === undefined ? weapons.sprayAt(undefined, undefined, 1) : weapons.sprayAt(new V(ox, oy, oz), new V(dx, dy, dz).normalize(), n || 1); },
   fireAt: (ox, oy, oz, dx, dy, dz) => { const V = THREE.Vector3; weapons.S.cd = 0; if (weapons.S.weapon !== 0) weapons.switchWeapon(0); return weapons.fire(new V(ox, oy, oz), new V(dx, dy, dz).normalize()); },
   get weapons() { return weapons; }, jump,
-  interact, closeCard, hotspots: () => world.hotspots.map(h => h.id), open: (id) => openCard(world.hotspots.find(h => h.id === id)),
+  pickRevolver, interact, closeCard, hotspots: () => world.hotspots.map(h => h.id), open: (id) => openCard(world.hotspots.find(h => h.id === id)),
   fixed: () => { fixedQuality = true; }
 };
 
