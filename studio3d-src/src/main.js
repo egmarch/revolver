@@ -55,7 +55,7 @@ async function init() {
   renderer.autoClear = false; renderer.info.autoReset = false;
   stageEl.appendChild(renderer.domElement);
   setAniso(Math.min(renderer.capabilities.getMaxAnisotropy(), low ? 2 : 8));
-  camera = new THREE.PerspectiveCamera(72, 1, 0.05, 160);
+  camera = new THREE.PerspectiveCamera(72, 1, 0.1, 160);
   camera.rotation.order = 'YXZ';
   resize();
   applyPixel();
@@ -135,7 +135,6 @@ addEventListener('keydown', (e) => {
     if (e.code === 'KeyC') weapons.cycleColor();
     if (e.code === 'KeyX') weapons.clear();
   }
-  if (/^Digit[1-3]$/.test(e.code) && !e.repeat) teleport(+e.code.slice(5));
 });
 addEventListener('keyup', (e) => {
   if (KEYMAP[e.code]) input.keys[KEYMAP[e.code]] = false;
@@ -555,7 +554,8 @@ function drawMapBase() {
   };
   rect(-14.7, 5.6, 18, 11.2, 'rgba(70,74,92,.5)', null);               // тротуар
   rect(-14.7, -2, -11.2, 5.6, 'rgba(70,74,92,.5)', null);               // тротуар у Фрунзе
-  rect(-11.2, 0.1, 3.8, 5.6, 'rgba(230,150,60,.45)', '#ffb347');         // чайхана
+  rect(-11.2, 0.1, -3.4, 5.6, 'rgba(70,74,92,.5)', null);
+  rect(-3.4, 0.1, 3.8, 5.6, 'rgba(230,150,60,.45)', '#ffb347');         // чайхана
   rect(-2.0, 5.6, 2.8, 7.1, 'rgba(120,120,130,.6)', '#8a8f9a');       // лестница
   rect(-3.4, 5.6, -2.0, 7.1, 'rgba(120,120,130,.45)', '#8a8f9a');     // площадка
   rect(-3.4, 2.2, -0.2, 5.4, 'rgba(150,60,200,.55)', '#c070ff');      // тамбур

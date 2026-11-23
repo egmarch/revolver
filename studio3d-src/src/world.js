@@ -12,7 +12,7 @@ export const STAIR = { x0: -2.0, x1: 2.8, z0: 5.6, z1: 7.1, n: 16, rise: 3.0 };
 // --- логика высоты (ступени идут вдоль X, вверх на восток) ---
 let CUR_Y = 0;                                 // этаж игрока: чайхана (y≈3) лежит над тамбуром и залом (y=0)
 export function setLevel(y) { CUR_Y = y; }
-const CHR = [-11.3, 3.0, 0.3, 5.6];
+const CHR = [-3.5, 3.0, 0.3, 5.6];   // чайхана только над студией: от западной стены тамбура до восточного торца
 export const inChai = (x, z) => x >= CHR[0] && x <= CHR[1] && z >= CHR[2] && z <= CHR[3];
 export function groundY(x, z) {
   if (CUR_Y > 1.5 && inChai(x, z)) return 3.07;
@@ -39,8 +39,9 @@ export const WALK = [
   [0.3, 3.46, 0.3, 4.84, 'D'],           // зал 3,76 x 5,14
   [3.4, 4.4, 3.25, 3.65, 'D'],           // дверь зал-студия (акустическая стена 25 см)
   [4.31, 6.61, 0.3, 4.84, 'D'],          // студия звука 2,90 x 5,14
-  [-10.7, 2.7, 0.7, 5.1, 'U'],           // чайхана
-  [-11.7, -10.6, 0.9, 2.3, 'U']          // дверь чайханы (угловая стена у Фрунзе)
+  [-3.1, 2.7, 0.7, 5.1, 'U'],            // чайхана
+  [-3.9, -3.0, 0.9, 2.3, 'U'],           // дверь чайханы (западная стена, со стороны тротуара)
+  [-11.5, -3.7, 0.5, 5.65, 'U']          // тротуар-площадка перед дверью чайханы
 ];
 // препятствия (сырые прямоугольники x0,x1,z0,z1)
 const OBST_RAW = [
@@ -64,15 +65,14 @@ const OBST_RAW = [
   [4.08, 4.64, 0.54, 2.14],   // стол с вертушками (у западной стены)
   [6.6, 6.9, 2.15, 2.6],      // стойка со Stratocaster
   // чайхана (верхний этаж)
-  [-8.95, -7.85, 1.8, 2.6, 'U'], [-5.65, -4.55, 1.6, 2.4, 'U'], [-5.65, -4.55, 3.8, 4.6, 'U'], [-2.25, -1.15, 3.8, 4.6, 'U'], [-2.15, -1.05, 1.9, 2.7, 'U'],
-  [-10.85, -7.75, 3.3, 5.3, 'U'],      // тапчан
+  [-2.25, -1.15, 3.8, 4.6, 'U'], [-2.15, -1.05, 1.9, 2.7, 'U'], [0.45, 1.55, 3.2, 4.0, 'U'],
   [-0.7, 2.7, 0.3, 1.0, 'U'],          // стойка
-  [-10.6, -10.2, 4.8, 5.2, 'U'], [2.2, 2.6, 4.8, 5.2, 'U'], [-3.8, -3.4, 0.6, 1.0, 'U']
+  [2.2, 2.6, 4.8, 5.2, 'U'], [-3.2, -2.8, 0.6, 1.0, 'U']
 ];
 export const OBST = OBST_RAW.map(o => o[4] ? o : [o[0], o[1], o[2], o[3], 'D']);
 
 const ZONE_NAMES = {
-  street: ['Улица · Фрунзе 49', 'Вечер. Вход — вниз по лестнице. Чайхана — за углом, у Фрунзе'],
+  street: ['Улица · Фрунзе 49', 'Вечер. Вход — вниз по лестнице. Чайхана — на первом этаже, слева от спуска'],
   chai: ['Чайхана', 'Первый этаж дома 49/3 · заходи и садись'],
   entry: ['Тамбур', 'Направо дверь в студию, прямо — школа диджеев (ремонт)'],
   hall: ['REVOLVER PODCAST · 19 м²', 'Зал для видеоподкастов · 3,76 × 5,14 м'],
@@ -89,19 +89,19 @@ export function zoneAt(x, z, y = 0) {
 }
 
 export const TELEPORTS = {
-  1: { x: 6.5, z: 8.9, yaw: 0.45, pitch: -0.1, lv: 3 },
-  4: { x: -13.3, z: 1.6, yaw: -1.5708, pitch: -0.05, lv: 3 },
+  1: { x: -10.2, z: 9.2, yaw: -1.12, pitch: -0.06, lv: 3 },   // старт: угол у чайханы, вдалеке виден спуск
+  4: { x: -5.2, z: 1.6, yaw: -1.5708, pitch: -0.05, lv: 3 },
   2: { x: 1.3, z: 4.1, yaw: -0.3, pitch: -0.05 },
   3: { x: 6.2, z: 4.55, yaw: 0.35, pitch: -0.1 }
 };
 
 const LIGHTS = {
   chai: [
-    { p: [-8.0, 5.6, 2.6], c: 0xffa040, i: 16, d: 9 },
-    { p: [-3.0, 5.6, 3.2], c: 0xffb060, i: 16, d: 9 },
-    { p: [1.2, 5.4, 2.2], c: 0xffa850, i: 12, d: 8 },
-    { p: [-9.6, 4.4, 1.4], c: 0xff7040, i: 6, d: 5 },
-    { p: [-5.6, 5.0, 5.0], c: 0xffd9a0, i: 8, d: 6 },
+    { p: [-1.8, 5.6, 2.6], c: 0xffa040, i: 16, d: 9 },
+    { p: [0.6, 5.6, 3.6], c: 0xffb060, i: 16, d: 9 },
+    { p: [1.8, 5.4, 2.0], c: 0xffa850, i: 12, d: 8 },
+    { p: [-3.0, 4.4, 1.4], c: 0xff7040, i: 6, d: 5 },
+    { p: [-1.2, 5.0, 4.8], c: 0xffd9a0, i: 8, d: 6 },
     { p: [0.8, 4.2, 1.0], c: 0xffe3b8, i: 7, d: 5 }
   ],
   street: [
@@ -211,7 +211,7 @@ export function buildWorld(opts = {}) {
     carpetRed: M(0xffffff, { map: T.carpetRed, roughness: 1, emissive: 0x330806, emissiveMap: T.carpetRed, emissiveIntensity: 0.12 }),
     facade: M(0xffffff, { map: T.facade, roughness: 0.4, metalness: 0.2, emissive: 0xffffff, emissiveMap: T.facade, emissiveIntensity: 0.12 }),
     black: M(0x0a0a0c, { roughness: 0.9 }),
-    ceil: M(0x0b0b0d, { roughness: 1 }),
+    ceil: M(0x6a6078, { roughness: 1, emissive: 0x3a2a55, emissiveIntensity: 1 }),
     steel: M(0x8a8f96, { roughness: 0.4, metalness: 0.85 }),
     darkSteel: M(0x2a2d31, { roughness: 0.5, metalness: 0.8 }),
     white: M(0xe6e4dc, { roughness: 0.6 }),
@@ -294,10 +294,13 @@ export function buildWorld(opts = {}) {
   const R_X0 = -15.2;                       // бордюр Фрунзе (со стороны дома)
 
   // --- земля (без прорези под спуск), тротуары, дороги ---
-  texBox(S, -330, 2.0, -330, -3.4, 2.8, 330, mat.concreteDark, 6);
-  texBox(S, 2.8, 2.0, -330, 330, 2.8, 330, mat.concreteDark, 6);
+  // ВАЖНО: земляные плиты НЕ должны заходить в подземные комнаты (тамбур, зал, студия: x −3.6…7.2, z −0.4…5.6, высота до 3.06).
+  // Раньше плита y 2.0–2.8 висела внутри тамбура и студии — это и был «чёрный меш под потолком».
+  texBox(S, -330, 2.0, -330, -3.6, 2.8, 330, mat.concreteDark, 6);
+  texBox(S, 7.4, 2.0, -330, 330, 2.8, 330, mat.concreteDark, 6);
+  texBox(S, 2.8, 2.0, 5.7, 7.4, 2.8, 330, mat.concreteDark, 6);
   texBox(S, -3.4, 2.0, 7.4, 2.8, 2.8, 330, mat.concreteDark, 6);
-  texBox(S, -3.4, 2.0, -330, 2.8, 2.8, 5.6, mat.concreteDark, 6);
+  texBox(S, -3.6, 2.0, -330, 7.4, 2.8, -0.5, mat.concreteDark, 6);
   // тротуар вдоль восточного фасада (к Ольги Жилиной): прорезь под спуск остаётся открытой
   texBox(S, R_X0, 2.4, 5.6, -3.4, SY, 11.2, mat.pave, 2);
   texBox(S, -3.4, 2.4, 7.4, 2.8, SY, 11.2, mat.pave, 2);
@@ -310,7 +313,7 @@ export function buildWorld(opts = {}) {
   texBox(S, -30.4, 2.4, -330, -26.8, 3.0, 11.7, M(0x3f6a3a, { roughness: 1 }), 1); texBox(S, -30.4, 2.4, 23.2, -26.8, 3.0, 330, M(0x3f6a3a, { roughness: 1 }), 1);   // разделительная полоса
   texBox(S, R_X0 - 0.3, 2.4, -330, R_X0, 3.05, 11.7, mat.concrete, 1); texBox(S, R_X0 - 0.3, 2.4, 23.2, R_X0, 3.05, 330, mat.concrete, 1);   // бордюр Фрунзе
   texBox(S, -330, 2.4, 11.2, 330, 3.05, 11.7, mat.concrete, 1); texBox(S, -330, 2.4, 23.2, 330, 3.05, 23.5, mat.concrete, 1);               // бордюры Ольги Жилиной
-  texBox(S, -48, 2.4, -330, -42, SY, 330, mat.pave, 2); texBox(S, -330, 2.4, 23.5, 330, SY, 29.5, mat.pave, 2); texBox(S, -330, 2.4, -330, -48, SY, 330, mat.concrete, 2);
+  texBox(S, -48, 2.4, -330, -42, SY, 23.5, mat.pave, 2); texBox(S, -48, 2.4, 23.5, 330, SY, 29.5, mat.pave, 2); texBox(S, -330, 2.4, -330, -48, SY, 330, mat.concrete, 2);
   // разметка Фрунзе (3 полосы в каждую сторону) и Ольги Жилиной (по две полосы)
   for (let z = -200; z < 200; z += 6) {
     if (z > 8 && z < 26) continue;
@@ -333,8 +336,10 @@ export function buildWorld(opts = {}) {
   const HB = 10.5;
   texBox(S, -11.2, SY, -19, 3.8, 7.0, 0.1, [darkWall, shopM, darkWall, darkWall, darkWall, darkWall], [8, 8]);   // сплошная часть крыла (витрины к Фрунзе)
   texBox(S, 3.2, SY, 0.1, 3.8, 7.0, 5.6, wallM, 1);                                                             // торец рядом с чайханой
-  texBox(S, -11.2, 7.0, -19, 3.8, HB, 5.6, [darkWall, decoM, mat.concreteDark, darkWall, decoM, darkWall], [7, 3.5]);
-  texBox(S, -11.2, HB, -19, 3.8, HB + 0.4, 5.8, mat.concreteDark, 1);
+  texBox(S, -11.2, 7.0, -19, 3.8, HB, 0.1, [darkWall, decoM, mat.concreteDark, darkWall, decoM, darkWall], [7, 3.5]);
+  texBox(S, -3.4, 7.0, 0.1, 3.8, HB, 5.6, [darkWall, decoM, mat.concreteDark, darkWall, decoM, darkWall], [4, 3.5]);   // над чайханой: только над студией
+  texBox(S, -11.2, HB, -19, 3.8, HB + 0.4, 0.1, mat.concreteDark, 1); texBox(S, -3.4, HB, 0.1, 3.8, HB + 0.4, 5.8, mat.concreteDark, 1);
+  texBox(S, -11.2, 2.4, 0.1, -3.6, SY, 5.6, mat.pave, 2);   // площадка-тротуар на месте прежнего западного крыла чайханы
   // длинный низкий дом вдоль Фрунзе дальше на запад (магазины)
   texBox(S, -11.2, SY, -62, 3.8, 7.0, -19, [darkWall, shopM, darkWall, darkWall, darkWall, darkWall], [8, 8]);
   texBox(S, -11.2, 7.0, -62, 3.8, HB, -19, [darkWall, decoM, mat.concreteDark, darkWall, darkWall, darkWall], [7, 3.5]);
@@ -344,7 +349,7 @@ export function buildWorld(opts = {}) {
   texBox(S, 5.8, 9.5, -24.4, 43.8, 80, 5.6, [panelM, panelM, mat.concreteDark, mat.concreteDark, panelM, panelM], [12, 9]);
   B(S, 40, 0.1, 0.3, emi(0xff2e97, 1.6), 24.8, 7.0, 5.72); B(S, 40, 0.1, 0.12, emi(0x19f0ff, 1.5), 24.8, 9.6, 5.7);
   // неоновая полоса по крылу
-  B(S, 0.3, 0.12, 24.6, emi(0xff2e97, 1.6), -11.35, 7.0, -6.7); B(S, 15, 0.12, 0.3, emi(0xff2e97, 1.6), -3.7, 7.0, 5.72);
+  B(S, 0.3, 0.12, 19.1, emi(0xff2e97, 1.6), -11.35, 7.0, -9.45); B(S, 7.2, 0.12, 0.3, emi(0xff2e97, 1.6), 0.2, 7.0, 5.72);
   // вывески магазинов (общие, без названий) и навесы
   const nsign = (txt, col, x, z, w, face) => { const c = TX.cv(512, 128); ART.drawNeonText(c, txt, col, `700 64px ${ART.FONT_HEAD}`); const m = new THREE.MeshBasicMaterial({ map: TX.toTex(c), transparent: true, toneMapped: false, depthWrite: false }); if (face === 'w') plane(S, w, w / 4, m, -11.3, 6.4, z, '-x'); else plane(S, w, w / 4, m, x, 6.4, 5.7, '+z'); glowSprite(S, col, w * 0.9, face === 'w' ? -11.7 : x, 6.4, face === 'w' ? z : 5.9, 0.16); };
   nsign('КОФЕ', '#19f0ff', 0, -30, 2.6, 'w'); nsign('PIZZA', '#ff9a3c', 0, -42, 2.6, 'w'); nsign('24', '#ffe36a', 0, -52, 1.6, 'w'); nsign('OPEN', '#ff2e97', 12, 0, 2.4, 'e'); nsign('AUTO', '#7cff6b', 30, 0, 2.2, 'e');
@@ -359,11 +364,16 @@ export function buildWorld(opts = {}) {
   glowSprite(S, 0xff3020, 11, -0.2, 8.7, 6.3, 0.26);
   const arrC = TX.cv(128, 160); ART.drawArrow(arrC);
   const arrM = new THREE.MeshBasicMaterial({ map: TX.toTex(arrC), transparent: true, toneMapped: false, depthWrite: false });
-  const arrow = plane(S, 0.9, 1.1, arrM, 2.6, 4.35, 6.35, '+z');
-  const arrow2 = plane(S, 0.9, 1.1, arrM, 2.6, 4.35, 6.35, '-z');
-  glowSprite(S, 0xff3a2a, 2.5, 2.6, 4.35, 6.35, 0.35);
-  B(S, 0.05, 1.2, 0.05, mat.darkSteel, 2.6, 5.0, 6.2);
-  SPH(S, 0.32, emi(0xfff3d8, 1.1), 3.4, 5.0, 6.0); glowSprite(S, 0xfff0cc, 3.4, 3.4, 5.0, 6.0, 0.6);
+  // указатель-стрелка: стойка стоит на тротуаре, табличка двусторонняя
+  const AX = 3.6, AZ = 6.2;
+  B(S, 0.08, 2.9, 0.08, mat.darkSteel, AX, SY + 1.45, AZ);
+  B(S, 1.0, 1.2, 0.04, mat.darkSteel, AX, SY + 2.35, AZ);
+  const arrow = plane(S, 0.9, 1.1, arrM, AX, SY + 2.35, AZ + 0.025, '+z');
+  const arrow2 = plane(S, 0.9, 1.1, arrM, AX, SY + 2.35, AZ - 0.025, '-z');
+  glowSprite(S, 0xff3a2a, 2.5, AX, SY + 2.35, AZ + 0.1, 0.3);
+  // уличный фонарь у спуска (раньше шар висел в воздухе)
+  B(S, 0.1, 4.4, 0.1, mat.darkSteel, 4.6, SY + 2.2, 6.0); B(S, 0.1, 0.1, 0.6, mat.darkSteel, 4.6, SY + 4.35, 5.75);
+  SPH(S, 0.24, emi(0xfff3d8, 1.1), 4.6, SY + 4.2, 5.5); glowSprite(S, 0xfff0cc, 3.0, 4.6, SY + 4.2, 5.5, 0.5);
   // --- дома вокруг (по карте): северо-восток 56 и 56/1, юго-запад 88 и 86, юго-восток 96, 49/1 за домом ---
   const tw = (x0, x1, z0, z1, h, k = 0) => { const m = k ? decoM : panelM; texBox(S, x0, SY - 0.5, z0, x1, h, z1, [m, m, mat.concreteDark, mat.concreteDark, m, m], [12, 9]); };
   tw(1.8, 30, 32, 108, 18); tw(6, 46, 36, 64, 57); tw(-82, -52, -12, 20, 43); tw(-84, -52, -64, -28, 40); tw(-80, -33, 80, 134, 17);
@@ -421,19 +431,19 @@ export function buildWorld(opts = {}) {
   //  ЧАЙХАНА (1 этаж крыла 49/3, над студией): дверь с угловой стороны у Фрунзе, окна на обе улицы
   // ======================================================
   const CH = G.chai;
-  const CX0 = -11.0, CX1 = 3.0, CZ0 = 0.3, CZ1 = 5.4, CTOP = 6.7;
+  const CX0 = -3.4, CX1 = 3.0, CZ0 = 0.3, CZ1 = 5.4, CTOP = 6.7;
   const ochre = M(0xd49a58, { roughness: 0.9 });
   const ornC = TX.cv(256, 128); { const x = ornC.getContext('2d'); x.fillStyle = '#c4703a'; x.fillRect(0, 0, 256, 128);
     x.fillStyle = '#f3e6c8'; x.fillRect(0, 22, 256, 6); x.fillRect(0, 100, 256, 6);
     for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? '#1f5f8b' : '#f3e6c8'; x.beginPath(); x.moveTo(i * 32 + 16, 34); x.lineTo(i * 32 + 30, 64); x.lineTo(i * 32 + 16, 94); x.lineTo(i * 32 + 2, 64); x.closePath(); x.fill(); } }
   const ornT = TX.toTex(ornC); ornT.repeat.set(5, 1); const ornM = M(0xffffff, { map: ornT, roughness: 0.9 });
   const glassW = new THREE.MeshStandardMaterial({ color: 0xffd9a0, transparent: true, opacity: 0.28, roughness: 0.05, emissive: 0xff9a40, emissiveIntensity: 0.25, depthWrite: false });
-  texBox(CH, CX0, 2.96, CZ0, CX1, CHY, CZ1, mat.woodFloor, 1.2);                          // пол
+  texBox(CH, CX0, 3.05, CZ0, CX1, CHY, CZ1, mat.woodFloor, 1.2);                          // пол
   texBox(CH, CX0 - 0.2, CHY, CZ0 - 0.2, CX1 + 0.2, CTOP + 0.2, CZ0, ochre, 1);             // северная стена (к башне/соседям)
   texBox(CH, CX1, CHY, CZ0, CX1 + 0.2, CTOP + 0.2, CZ1 + 0.2, ochre, 1);                   // стена к башне
-  texBox(CH, CX0, CTOP, CZ0, CX1, CTOP + 0.2, CZ1 + 0.2, M(0x5a3a22, { roughness: 0.8 }), 1);   // потолок
+  texBox(CH, CX0, CTOP, CZ0, CX1, CTOP + 0.2, CZ1, M(0x5a3a22, { roughness: 0.8 }), 1);   // потолок
   for (let bx = CX0 + 0.8; bx < CX1; bx += 1.4) B(CH, 0.14, 0.16, CZ1 - CZ0, M(0x3f2616), bx, CTOP - 0.08, (CZ0 + CZ1) / 2);   // балки
-  plane(CH, CX1 - CX0, 1.1, ornM, (CX0 + CX1) / 2, 4.0, CZ0 + 0.01, '+z', [5, 1]);
+  plane(CH, CX1 - CX0, 1.1, ornM, (CX0 + CX1) / 2, 4.0, CZ0 + 0.01, '+z', [2.3, 1]);
   plane(CH, CZ1 - CZ0, 1.1, ornM, CX1 - 0.01, 4.0, (CZ0 + CZ1) / 2, '-x', [1.5, 1]);
   // восточный фасад: окна по всей длине (чайхана видна с Ольги Жилиной)
   texBox(CH, CX0, SY, CZ1, CX1, 4.2, CZ1 + 0.2, wallM, 1); texBox(CH, CX0, 6.4, CZ1, CX1, 7.0, CZ1 + 0.2, wallM, 1);
@@ -455,26 +465,24 @@ export function buildWorld(opts = {}) {
     x.fillStyle = '#f3ead2'; x.textAlign = 'center'; x.font = `700 54px ${ART.FONT_HEAD}`; x.fillText('МАНТЫ', 192, 100); x.font = `600 34px ${ART.FONT_HEAD}`; x.fillText('ПЛОВ · ЧАЙ', 192, 168); x.fillStyle = '#e8a43a'; x.fillRect(80, 190, 224, 4); }
   plane(CH, 0.8, 0.53, M(0xffffff, { map: TX.toTex(mnC), roughness: 0.9 }), CX0 + 0.02, 4.7, 3.0, '+x');
   // низкие столы с подушками и коврами
-  const rugs = [[-9.4, 1.4, -7.4, 3.0, 0xb02a4a], [-9.4, 3.6, -7.4, 5.0, 0x1f5f8b], [-6.2, 1.2, -4.0, 2.9, 0x1f5f8b], [-6.2, 3.6, -4.0, 4.8, 0xb02a4a], [-2.8, 3.4, -0.6, 5.0, 0xb02a4a], [-2.6, 1.6, -0.6, 3.0, 0x2f7a4a]];
-  rugs.forEach(([a, b, c, d, rc]) => { B(CH, c - a, 0.012, d - b, M(rc, { roughness: 1 }), (a + c) / 2, CHY + 0.006, (b + d) / 2); B(CH, c - a - 0.3, 0.014, d - b - 0.3, M(0xf3e6c8, { roughness: 1 }), (a + c) / 2, CHY + 0.008, (b + d) / 2); B(CH, c - a - 0.5, 0.016, d - b - 0.5, M(rc, { roughness: 1 }), (a + c) / 2, CHY + 0.01, (b + d) / 2); });
+  const rugs = [[-2.8, 3.4, -0.6, 5.0, 0xb02a4a], [-2.6, 1.6, -0.6, 3.0, 0x2f7a4a], [0.2, 3.0, 2.0, 4.4, 0x1f5f8b]];
+  rugs.forEach(([a, b, c, d, rc]) => { B(CH, c - a, 0.012, d - b, M(rc, { roughness: 1 }), (a + c) / 2, CHY + 0.006, (b + d) / 2); B(CH, c - a - 0.3, 0.012, d - b - 0.3, M(0xf3e6c8, { roughness: 1 }), (a + c) / 2, CHY + 0.018, (b + d) / 2); B(CH, c - a - 0.5, 0.012, d - b - 0.5, M(rc, { roughness: 1 }), (a + c) / 2, CHY + 0.030, (b + d) / 2); });
   const cushionCols = [0xb02a4a, 0x1f5f8b, 0xe8a43a, 0x2f7a4a, 0x8a3aa0];
-  const tbls = [[-8.4, 2.2], [-5.1, 2.0], [-5.1, 4.2], [-1.7, 4.2], [-1.6, 2.3]];
+  const tbls = [[-1.7, 4.2], [-1.6, 2.3], [1.0, 3.6]];
   tbls.forEach(([tx, tz], i) => {
     B(CH, 1.1, 0.07, 0.8, M(0x6a3a1c, { roughness: 0.6 }), tx, CHY + 0.38, tz); [[-0.45, -0.3], [0.45, -0.3], [-0.45, 0.3], [0.45, 0.3]].forEach(([a, b]) => B(CH, 0.07, 0.36, 0.07, M(0x4a2a14), tx + a, CHY + 0.18, tz + b));
     CYL(CH, 0.2, 0.2, 0.025, M(0xf3f1ea, { roughness: 0.3 }), tx, CHY + 0.42, tz, 18); CYL(CH, 0.07, 0.07, 0.1, M(0x1f5f8b), tx + 0.3, CHY + 0.46, tz + 0.15, 10);
     [[-0.95, 0], [0.95, 0], [0, -0.7], [0, 0.7]].forEach(([ox, oz], k) => B(CH, 0.56, 0.16, 0.56, M(cushionCols[(i + k) % 5], { roughness: 0.9 }), tx + ox, CHY + 0.1, tz + oz, 0.2 * k));
   });
-  B(CH, 3.0, 0.5, 2.0, M(0x7a4a28, { roughness: 0.7 }), -9.3, CHY + 0.25, 4.3); B(CH, 3.1, 0.06, 2.1, M(0x4a2a14), -9.3, CHY + 0.52, 4.3);
-  B(CH, 1.5, 0.3, 0.9, M(0x6a3a1c), -9.3, CHY + 0.7, 4.3); B(CH, 2.7, 0.14, 1.8, M(0xb02a4a, { roughness: 1 }), -9.3, CHY + 0.6, 4.3);
   B(CH, 3.4, 1.0, 0.7, M(0x7a4a28, { roughness: 0.7 }), 1.0, CHY + 0.5, CZ0 + 0.55); B(CH, 3.5, 0.06, 0.8, M(0xe9c48a), 1.0, CHY + 1.03, CZ0 + 0.55);
   [-0.2, 0.9].forEach((sx, i) => { for (let k = 0; k < 3; k++) CYL(CH, 0.3, 0.3, 0.16, M(k % 2 ? 0xe8c070 : 0xd9a85a, { roughness: 0.8 }), 0.4 + sx + i * 0.9, CHY + 1.12 + k * 0.17, CZ0 + 0.55, 16); CYL(CH, 0.32, 0.32, 0.04, M(0x8a5a2a), 0.4 + sx + i * 0.9, CHY + 1.66, CZ0 + 0.55, 16); });
   CYL(CH, 0.18, 0.2, 0.5, mat.gold, 2.2, CHY + 1.3, CZ0 + 0.55, 14); SPH(CH, 0.2, mat.gold, 2.2, CHY + 1.62, CZ0 + 0.55, 1, 0.7, 1);
   [0, 1, 2].forEach(i => glowSprite(CH, 0xffffff, 0.8, 0.4 + i * 0.7, CHY + 2.0, CZ0 + 0.55, 0.3));
-  B(CH, 6.0, 0.05, 0.3, M(0x6a3a1c), -2.8, CHY + 2.0, CZ0 + 0.2); B(CH, 4.5, 0.05, 0.3, M(0x6a3a1c), 0.6, CHY + 2.35, CZ0 + 0.2);
-  for (let i = 0; i < 9; i++) { const px = -5.4 + i * 0.65; B(CH, 0.22, 0.24, 0.22, M(i % 2 ? 0x1f5f8b : 0xf3f1ea, { roughness: 0.3 }), px, CHY + 2.15, CZ0 + 0.2); SPH(CH, 0.07, M(0xe8c070, { roughness: 0.4, metalness: 0.7 }), px, CHY + 2.33, CZ0 + 0.2); }
+  B(CH, 3.0, 0.05, 0.3, M(0x6a3a1c), -1.9, CHY + 2.0, CZ0 + 0.2); B(CH, 4.5, 0.05, 0.3, M(0x6a3a1c), 0.6, CHY + 2.35, CZ0 + 0.2);
+  for (let i = 4; i < 9; i++) { const px = -5.4 + i * 0.65; B(CH, 0.22, 0.24, 0.22, M(i % 2 ? 0x1f5f8b : 0xf3f1ea, { roughness: 0.3 }), px, CHY + 2.15, CZ0 + 0.2); SPH(CH, 0.07, M(0xe8c070, { roughness: 0.4, metalness: 0.7 }), px, CHY + 2.33, CZ0 + 0.2); }
   tbls.forEach(([tx, tz]) => { CYL(CH, 0.05, 0.04, 0.14, new THREE.MeshStandardMaterial({ color: 0xcfeaff, transparent: true, opacity: 0.4 }), tx - 0.3, CHY + 0.5, tz - 0.1, 10); [0xff4f9a, 0xffd23a, 0xf4f4f4].forEach((fc, k) => SPH(CH, 0.035, M(fc), tx - 0.3 + (k - 1) * 0.04, CHY + 0.62 + k * 0.01, tz - 0.1, 1, 0.8, 1)); });
-  [[-10.4, 5.0], [2.4, 5.0], [-3.6, 0.8]].forEach(([px, pz]) => { CYL(CH, 0.2, 0.15, 0.4, M(0xb06a3a), px, CHY + 0.2, pz, 12); for (let k = 0; k < 6; k++) { const a = k * 1.05; SPH(CH, 0.2, mat.leaf, px + Math.cos(a) * 0.15, CHY + 0.8 + (k % 3) * 0.2, pz + Math.sin(a) * 0.15, 0.5, 1.6, 0.5); } });
-  [[-9.5, 2.2], [-7.0, 4.0], [-4.5, 2.2], [-2.0, 4.0], [0.0, 2.4], [-6.2, 0.9], [1.8, 4.6], [-10.2, 4.6]].forEach(([lx, lz]) => {
+  [[2.4, 5.0], [-3.0, 0.8]].forEach(([px, pz]) => { CYL(CH, 0.2, 0.15, 0.4, M(0xb06a3a), px, CHY + 0.2, pz, 12); for (let k = 0; k < 6; k++) { const a = k * 1.05; SPH(CH, 0.2, mat.leaf, px + Math.cos(a) * 0.15, CHY + 0.8 + (k % 3) * 0.2, pz + Math.sin(a) * 0.15, 0.5, 1.6, 0.5); } });
+  [[-2.8, 2.4], [-2.0, 4.0], [0.0, 2.4], [1.8, 4.6], [-1.0, 1.2]].forEach(([lx, lz]) => {
     CYL(CH, 0.012, 0.012, 0.8, mat.black, lx, CTOP - 0.4, lz, 6);
     CYL(CH, 0.16, 0.12, 0.3, emi(0xffa040, 1.3), lx, CTOP - 0.95, lz, 10); glowSprite(CH, 0xffa040, 2.0, lx, CTOP - 0.95, lz, 0.38);
   });
@@ -491,30 +499,33 @@ export function buildWorld(opts = {}) {
   // ======================================================
   const ST = G.stairs;
   const stepM = [mat.concrete, mat.concrete, M(0xffffff, { map: T.concreteDark, roughness: 0.6, metalness: 0.2 }), mat.concrete, mat.concrete, mat.concrete];
-  const sdz = (STAIR.z1 - STAIR.z0) / STAIR.n, sdy = STAIR.rise / STAIR.n;
+  // ВАЖНО: ST повёрнут (локально x_l = 10.85 − z_мир, z_l = x_мир + 16.4), поэтому ступени строим в локальных координатах
+  const sdx = (STAIR.x1 - STAIR.x0) / STAIR.n, sdy = STAIR.rise / STAIR.n;
+  const LX0 = 10.85 - STAIR.z1, LX1 = 10.85 - STAIR.z0, LZ0 = STAIR.x0 + 16.4;   // 3.75..5.25, 14.4…
+  const antiM = M(0x888070, { roughness: 0.4, metalness: 0.6 });
   for (let k = 0; k < STAIR.n; k++) {
-    texBox(ST, STAIR.x0, 0, STAIR.z0 + k * sdz, STAIR.x1, (k + 1) * sdy, STAIR.z0 + (k + 1) * sdz, stepM, 1);
-    // анти-скользящая полоса
-    B(ST, 1.5, 0.012, 0.05, M(0x888070, { roughness: 0.4, metalness: 0.6 }), 4.5, (k + 1) * sdy + 0.006, STAIR.z0 + (k + 1) * sdz - 0.06);
+    texBox(ST, LX0, 0, LZ0 + k * sdx, LX1, (k + 1) * sdy, LZ0 + (k + 1) * sdx, stepM, 1);
+    B(ST, 1.4, 0.01, 0.05, antiM, (LX0 + LX1) / 2, (k + 1) * sdy + 0.005, LZ0 + (k + 1) * sdx - 0.06);   // анти-скользящая полоса
   }
   // площадка
   texBox(ST, 3.75, -0.2, 13.2, 5.25, 0.0, 14.4, mat.concreteDark, 1);
   // торцевая стена с металлической дверью
   texBox(ST, 3.45, 0, 13.0, 5.45, 3.5, 13.2, mat.brick, 2);
   // козырёк-перекрытие
-  texBox(ST, 3.45, 3.0, 13.0, 5.6, 3.5, 15.2, mat.concreteDark, 1);
+  texBox(ST, 3.45, 3.0, 13.02, 5.58, 3.45, 15.2, mat.concreteDark, 1);
   // светильник на площадке
   CYL(ST, 0.16, 0.16, 0.1, M(0xdddddd), 4.5, 2.95, 14.2, 12);
   CYL(ST, 0.12, 0.12, 0.02, emi(0xdbe6ff, 1.4), 4.5, 2.89, 14.2, 12);
   glowSprite(ST, 0xc8dcff, 1.4, 4.5, 2.7, 14.2, 0.45);
   // поручень вдоль левой стены
   {
-    const len = Math.hypot(STAIR.z1 - STAIR.z0, STAIR.rise);
-    const ang = Math.atan2(STAIR.rise, STAIR.z1 - STAIR.z0);
-    const rail = B(ST, 0.05, 0.05, len, mat.steel, 3.9, 0.95 + STAIR.rise / 2, (STAIR.z0 + STAIR.z1) / 2, 0, -ang);
+    const run = STAIR.x1 - STAIR.x0;
+    const len = Math.hypot(run, STAIR.rise);
+    const ang = Math.atan2(STAIR.rise, run);
+    B(ST, 0.05, 0.05, len, mat.steel, 3.95, 0.95 + STAIR.rise / 2 + 0.1, LZ0 + run / 2, 0, -ang);
     for (let k = 0; k < 5; k++) {
-      const zz = STAIR.z0 + 0.4 + k * 1.15; const yy = groundY(3.9, zz);
-      B(ST, 0.04, 0.95, 0.04, mat.steel, 3.88, yy + 0.47, zz);
+      const wx = STAIR.x0 + 0.3 + k * 1.1; const yy = groundY(wx, 6.0);
+      B(ST, 0.04, 0.95, 0.04, mat.steel, 3.95, yy + 0.47 + 0.1, wx + 16.4);
     }
   }
   // боковая лампа на стене лестницы (мягкий свет)
@@ -542,8 +553,6 @@ export function buildWorld(opts = {}) {
     doors.push(d); return d;
   }
   addDoor(ST, { axis: 'x', hx: 5.35, hz: 14.25, w: 0.9, h: 2.1, t: 0.08, open: -Math.PI / 2 * 0.92, mats: [mdM, mdM, mat.darkSteel, mat.darkSteel, mat.darkSteel, mat.darkSteel], cx: 5.35, cz: 13.8 });
-  // ручка-скоба
-  B(ST, 0.03, 0.03, 0.3, mat.steel, 5.3, 1.05, 13.5);
 
   // ======================================================
   //  ТАМБУР (после поворота направо от лестницы)
@@ -586,9 +595,9 @@ export function buildWorld(opts = {}) {
     const pz_ = f === '-z' ? pz : pz; const g = plane(E, 0.5, 0.75, M(0xffffff, { map: TX.toTex(pc), roughness: 0.8 }), px, 1.4, pz_, f);
   });
   // лампа
-  CYL(E, 0.12, 0.12, 0.05, M(0xffe9c0), -1.8, 2.76, 3.8, 12);
-  SPH(E, 0.09, emi(0xffe3b8, 1.4), -1.8, 2.66, 3.8);
-  glowSprite(E, 0xffd9a0, 1.4, -1.8, 2.6, 3.8, 0.45);
+  CYL(E, 0.14, 0.14, 0.05, M(0xffe9c0), -1.8, wy - 0.025, 3.8, 14);   // плафон вплотную к потолку
+  CYL(E, 0.11, 0.11, 0.02, emi(0xffe3b8, 1.4), -1.8, wy - 0.06, 3.8, 14);
+  glowSprite(E, 0xffd9a0, 1.4, -1.8, wy - 0.25, 3.8, 0.4);
   [-3.38, -0.24].forEach(xx => B(E, 0.04, 0.04, 3.2, emi(0xd22bff, 1.5), xx, 2.65, 3.8));
   glowSprite(E, 0xd02bff, 3.5, -1.8, 2.4, 3.8, 0.18);
 
@@ -612,7 +621,7 @@ export function buildWorld(opts = {}) {
   plane(H, HD - 3.9, wy, mat.foam, 0.012, wy / 2, (3.9 + HD) / 2, '+x', [(HD - 3.9) * 1.5, wy * 1.5]);
   plane(H, 0.9, wy - 2.1, mat.foam, 0.012, (2.1 + wy) / 2, 3.45, '+x', [1.35, (wy - 2.1) * 1.5]);
   addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: wM, cx: -0.1, cz: 3.45 });
-  B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz0 - 0.03); B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz1 + 0.03); B(H, 0.1, 0.06, 1.0, wM, -0.1, 2.13, 3.45);
+  B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz0 - 0.02); B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz1 + 0.02); B(H, 0.1, 0.06, 1.0, wM, -0.1, 2.13, 3.45);
   // южная стена с дверью: шторы
   texBox(H, -0.2, 0, HD, HW + 0.25, wy + 0.1, HD + 0.2, mat.concreteDark, 2);
   plane(H, HW, wy, mat.curtain, HW / 2, wy / 2, HD - 0.03, '-z', [HW, 1]);
@@ -642,7 +651,7 @@ export function buildWorld(opts = {}) {
   const redrawDoor = () => { ART.drawDoorStencil(dsC); dsT.needsUpdate = true; };
   const mdoor = addDoor(H, { axis: 'x', hx: HW + 0.07, hz: doorZ1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: [wM, dsM, wM, wM, wM, wM], cx: HW + 0.07, cz: 3.45 });
   // зелёная рамка двери
-  B(H, 0.3, 2.12, 0.06, M(0x0f8a3a), HW + 0.12, 1.06, doorZ0 - 0.03); B(H, 0.3, 2.12, 0.06, M(0x0f8a3a), HW + 0.12, 1.06, doorZ1 + 0.03); B(H, 0.3, 0.06, 1.0, M(0x0f8a3a), HW + 0.12, 2.13, 3.45);
+  B(H, 0.3, 2.12, 0.06, M(0x0f8a3a), HW + 0.12, 1.06, doorZ0 - 0.02); B(H, 0.3, 2.12, 0.06, M(0x0f8a3a), HW + 0.12, 1.06, doorZ1 + 0.02); B(H, 0.3, 0.06, 1.0, M(0x0f8a3a), HW + 0.12, 2.13, 3.45);
   // конусы
   const coneG = new THREE.ConeGeometry(0.13, 0.5, 14);
   [[3.4, 4.45], [3.58, 4.1]].forEach(([cx, cz], i) => {
@@ -1237,7 +1246,7 @@ export function buildWorld(opts = {}) {
         if (u.p > 110) u.p = -110; if (u.p < -110) u.p = 110;
         if (u.axis === 'x') c.position.x = u.p; else c.position.z = u.p;
       }
-      arrow.position.y = 4.35 + Math.sin(t * 3) * 0.08; arrow2.position.y = arrow.position.y;
+      arrow.position.y = SY + 2.35 + Math.sin(t * 3) * 0.05; arrow2.position.y = arrow.position.y;
     }
   }
 
