@@ -5,7 +5,8 @@ export const BOARD_ENDPOINT = '';            // например: 'https://revol
 
 const LS_KEY = 'revolver_board_v1';
 const COLORS = ['#c9f23b', '#ff4b2e', '#c23cff', '#ffffff', '#111111', '#19f0ff', '#ff2e97', '#ff9a3c'];
-const MAX_PTS = 30000;
+const MAX_PTS = 30000, TTL = 24 * 3600 * 1000;   // рисунок живёт сутки
+const fresh = (p) => p.length < 5 || Date.now() - p[4] < TTL;
 
 export function initBoard(board, weapons) {
   if (!board || !weapons) return;
@@ -25,9 +26,9 @@ export function initBoard(board, weapons) {
   // загрузка сохранённого рисунка
   function load() {
     if (BOARD_ENDPOINT) {
-      fetch(BOARD_ENDPOINT, { cache: 'no-store' }).then(r => r.json()).then(d => { if (d && Array.isArray(d.pts)) { pts = d.pts.slice(-MAX_PTS); replay(pts); } }).catch(() => { });
+      fetch(BOARD_ENDPOINT, { cache: 'no-store' }).then(r => r.json()).then(d => { if (d && Array.isArray(d.pts)) { pts = d.pts.filter(fresh).slice(-MAX_PTS); replay(pts); } }).catch(() => { });
     } else {
-      try { const d = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); if (Array.isArray(d)) { pts = d.slice(-MAX_PTS); replay(pts); } } catch (e) { }
+      try { const d = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); if (Array.isArray(d)) { pts = d.filter(fresh).slice(-MAX_PTS); replay(pts); } } catch (e) { }
     }
   }
   function save(force) {
@@ -40,7 +41,7 @@ export function initBoard(board, weapons) {
       const body = JSON.stringify({ pts: pending.splice(0, 600) });
       try { if (!(navigator.sendBeacon && navigator.sendBeacon(BOARD_ENDPOINT, new Blob([body], { type: 'text/plain' })))) fetch(BOARD_ENDPOINT, { method: 'POST', body, headers: { 'content-type': 'text/plain' }, keepalive: true }).catch(() => { }); } catch (e) { }
     } else {
-      try { localStorage.setItem(LS_KEY, JSON.stringify(pts.slice(-MAX_PTS))); } catch (e) { }
+      try { localStorage.setItem(LS_KEY, JSON.stringify(pts.filter(fresh).slice(-MAX_PTS))); } catch (e) { }
     }
   }
 
@@ -50,7 +51,7 @@ export function initBoard(board, weapons) {
     const x = Math.round(uv.x * W), y = Math.round((1 - uv.y) * H), r = 9 + Math.round(Math.random() * 6);
     const key = x + ',' + y; if (key === lastPaintKey) return; lastPaintKey = key;
     dot(x, y, r, ci); texture.needsUpdate = true;
-    const p = [x, y, r, ci]; pts.push(p); pending.push(p); if (pts.length > MAX_PTS) pts.shift(); dirty = true;
+    const p = [x, y, r, ci, Date.now()]; pts.push(p); pending.push(p); if (pts.length > MAX_PTS) pts.shift(); dirty = true;
   };
   weapons.boardClear = () => { ctx.fillStyle = '#f4f5f7'; ctx.fillRect(0, 0, W, H); texture.needsUpdate = true; pts = []; pending = []; try { localStorage.removeItem(LS_KEY); } catch (e) { } };
 

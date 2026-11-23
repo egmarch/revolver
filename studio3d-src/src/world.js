@@ -364,10 +364,8 @@ export function buildWorld(opts = {}) {
   glowSprite(S, 0xff3020, 11, -0.2, 8.7, 6.3, 0.26);
   const arrC = TX.cv(128, 160); ART.drawArrow(arrC);
   const arrM = new THREE.MeshBasicMaterial({ map: TX.toTex(arrC), transparent: true, toneMapped: false, depthWrite: false });
-  // указатель-стрелка: стойка стоит на тротуаре, табличка двусторонняя
+  // стрелка просто висит в воздухе (как в Vice City): без стойки и таблички
   const AX = 3.6, AZ = 6.2;
-  B(S, 0.08, 2.9, 0.08, mat.darkSteel, AX, SY + 1.45, AZ);
-  B(S, 1.0, 1.2, 0.04, mat.darkSteel, AX, SY + 2.35, AZ);
   const arrow = plane(S, 0.9, 1.1, arrM, AX, SY + 2.35, AZ + 0.025, '+z');
   const arrow2 = plane(S, 0.9, 1.1, arrM, AX, SY + 2.35, AZ - 0.025, '-z');
   glowSprite(S, 0xff3a2a, 2.5, AX, SY + 2.35, AZ + 0.1, 0.3);
@@ -807,7 +805,9 @@ export function buildWorld(opts = {}) {
   B(bb, 0.1, 0.06, 0.012, M(0x222), 0, 0.03, 0.078);
   // скейтборд красный
   { // скейтборд (красная дека с графикой) стоит на верхней полке
-    const sk = new THREE.Group(); sk.position.set(3.9, 2.32, 0.4); sk.rotation.set(0, 0.04, Math.PI / 2 - 0.15); sh.add(sk);
+    // деку ставим на ребро вдоль полки (длина по X), у задней стенки, колёсами к стенке
+    const skO = new THREE.Group(); skO.position.set(3.9, 2.1, 0.2); skO.rotation.set(-0.08, Math.PI / 2, 0); sh.add(skO);
+    const sk = new THREE.Group(); sk.rotation.z = Math.PI / 2; skO.add(sk);
     const deck = M(0xc9381f, { roughness: 0.4 });
     B(sk, 0.2, 0.012, 0.8, deck, 0, 0, 0); B(sk, 0.2, 0.012, 0.1, deck, 0, 0.012, 0.42, 0, -0.35); B(sk, 0.2, 0.012, 0.1, deck, 0, 0.012, -0.42, 0, 0.35);
     B(sk, 0.14, 0.013, 0.5, M(0xf1c40f, { roughness: 0.5 }), 0, 0.0005, 0);

@@ -1,0 +1,13 @@
+name = "revolver-bot"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+# Откуда принимаем заявки с формы сайта (запасной сценарий). Через запятую.
+ALLOWED_ORIGINS = "https://revolvernsk.ru,https://www.revolvernsk.ru"
+
+# Состояние: выбранный тег клиента и связка «сообщение в рабочем чате → клиент».
+# Создать: npx wrangler kv namespace create STATE  → вписать id ниже.
+[[kv_namespaces]]
+binding = "STATE"
+id = "ВПИШИ_ID_KV"

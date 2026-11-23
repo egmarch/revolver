@@ -65,3 +65,25 @@ events = ('''<section class="sec wall" id="events" data-acc="red"><div class="wr
       <button class="btn red sm" type="button" data-book data-service="Мероприятие: концерт">Хочу такую тусу</button></div>
   </article>
 </div></section>''')
+
+
+GEAR_IC = {
+ 'mic':'<rect x="20" y="6" width="16" height="28" rx="8"/><path d="M12 28c0 10 7 16 16 16s16-6 16-16M28 44v8M20 52h16"/><path d="M20 16h16M20 22h16" opacity=".5"/>',
+ 'card':'<rect x="4" y="14" width="48" height="28" rx="4"/><circle cx="16" cy="28" r="6"/><circle cx="34" cy="28" r="3"/><circle cx="44" cy="28" r="3"/><path d="M10 48h36" opacity=".5"/>',
+ 'spk':'<rect x="12" y="4" width="32" height="48" rx="4"/><circle cx="28" cy="18" r="5"/><circle cx="28" cy="36" r="10"/><circle cx="28" cy="36" r="3.5"/>',
+ 'gtr':'<path d="M48 4l4 4-6 6-4-4zM44 12L30 26"/><path d="M26 26c-6-2-12 2-12 8-4 0-8 3-8 8 0 6 6 10 12 8 4-1 6-4 6-8 6 0 10-6 8-12z"/><circle cx="22" cy="38" r="3"/>',
+ 'dj':'<rect x="4" y="8" width="48" height="40" rx="4"/><circle cx="26" cy="28" r="13"/><circle cx="26" cy="28" r="3"/><path d="M26 28l9-6M46 14v26" /><circle cx="46" cy="14" r="2"/>',
+ 'hp':'<path d="M10 34V28a18 18 0 0136 0v6"/><rect x="6" y="32" width="10" height="16" rx="4"/><rect x="40" y="32" width="10" height="16" rx="4"/>',
+ 'pad':'<rect x="4" y="8" width="48" height="40" rx="4"/><rect x="10" y="14" width="10" height="10" rx="2"/><rect x="23" y="14" width="10" height="10" rx="2"/><rect x="36" y="14" width="10" height="10" rx="2"/><rect x="10" y="29" width="10" height="10" rx="2"/><rect x="23" y="29" width="10" height="10" rx="2"/><rect x="36" y="29" width="10" height="10" rx="2"/>',
+ 'key':'<rect x="3" y="14" width="50" height="30" rx="3"/><path d="M11 44V30M19 44V30M27 44V30M35 44V30M43 44V30M9 14v16M17 14v16M33 14v16M41 14v16" /><rect x="8" y="14" width="5" height="16" fill="currentColor"/><rect x="16" y="14" width="5" height="16" fill="currentColor"/><rect x="32" y="14" width="5" height="16" fill="currentColor"/><rect x="40" y="14" width="5" height="16" fill="currentColor"/>',
+}
+GEAR = [
+ ('mic','Микрофоны',['Invotone CM400L','AKG MK519','Shure SM7B (подкастовый)']),
+ ('card','Звуковые карты',['MOTU 828 mk3','Behringer UMC404','Focusrite Scarlett 2i4']),
+ ('spk','Мониторы',['KRK RP5 G5']),
+ ('hp','Наушники',['Sennheiser HD 215','Sennheiser HD 206','Beyerdynamic DT 990','AKG K240']),
+ ('gtr','Гитары',['Cort Les Paul']),
+ ('dj','Проигрыватель для скретчинга',['Vestax PDX-2000 mkII']),
+ ('pad','Драм-машины и пэды',['Akai MPD26','Ableton Launchpad']),
+ ('key','MIDI-клавиатура',['M-Audio KeyRig 49']),
+]

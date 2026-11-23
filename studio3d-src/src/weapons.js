@@ -251,16 +251,22 @@ export function createWeapons(env) {
   const crackMat = new THREE.MeshBasicMaterial({ map: crackTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 });
   const quad = new THREE.PlaneGeometry(1, 1);
   const decals = []; let dIdx = 0;
+  // журнал для сохранения (сутки): краска и дырки хранятся компактно, на сцену попадают как раньше
+  const LS_PAINT = 'revolver_paint_v1', TTL = 24 * 3600 * 1000, r3 = (v) => Math.round(v * 1000) / 1000;
+  const dlog = [], plog = []; let dirty = false;
   const _n = new THREE.Vector3(), _p = new THREE.Vector3();
-  function placeDecal(p, n, size, crack) {
+  function placeDecal(p, n, size, crack, rot, mi, t) {
+    if (rot === undefined) rot = Math.random() * 6.28;
+    if (mi === undefined) mi = (Math.random() * 3) | 0;
+    if (t === undefined) { t = Date.now(); dlog.push([r3(p.x), r3(p.y), r3(p.z), r3(n.x), r3(n.y), r3(n.z), r3(size), crack ? 1 : 0, r3(rot), mi, t]); if (dlog.length > MAX_DECALS) dlog.shift(); dirty = true; }
     let m = decals[dIdx];
     if (!m) { m = new THREE.Mesh(quad, dMat[0]); decals[dIdx] = m; scene.add(m); }
     dIdx = (dIdx + 1) % MAX_DECALS;
-    m.material = crack ? crackMat : dMat[(Math.random() * 3) | 0];
+    m.material = crack ? crackMat : dMat[mi];
     m.scale.set(size, size, 1);
     m.position.copy(p).addScaledVector(n, 0.004);
     setOrient(m, n);
-    m.rotateZ(Math.random() * 6.28);
+    m.rotateZ(rot);
     m.visible = true;
   }
   function setOrient(o, n) {
@@ -276,16 +282,19 @@ export function createWeapons(env) {
   paint.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   const col = new THREE.Color(), dummy = new THREE.Object3D();
   let pIdx = 0, pCount = 0;
-  function addSplat(p, n, size, sx = 1, sy = 1, vertical = false, off = 0) {
+  function addSplat(p, n, size, sx = 1, sy = 1, vertical = false, rot, ci, t) {
+    if (ci === undefined) ci = S.color;
+    if (rot === undefined) rot = vertical ? 0 : Math.random() * 6.28;
+    if (t === undefined) { t = Date.now(); plog.push([r3(p.x), r3(p.y), r3(p.z), r3(n.x), r3(n.y), r3(n.z), r3(size), sx, sy, vertical ? 1 : 0, r3(rot), ci, t]); if (plog.length > MAX_PAINT) plog.shift(); dirty = true; }
     dummy.position.copy(p).addScaledVector(n, 0.003 + (pIdx % 9) * 0.0004);
     dummy.scale.set(size * sx, size * sy, 1);
     dummy.up.set(0, 1, 0);
     if (Math.abs(n.y) > 0.95) dummy.up.set(0, 0, 1);
     dummy.lookAt(dummy.position.x + n.x, dummy.position.y + n.y, dummy.position.z + n.z);
-    if (!vertical) dummy.rotateZ(Math.random() * 6.28);
+    if (!vertical) dummy.rotateZ(rot);
     dummy.updateMatrix();
     paint.setMatrixAt(pIdx, dummy.matrix);
-    col.set(COLORS[S.color]); paint.setColorAt(pIdx, col);
+    col.set(COLORS[ci]); paint.setColorAt(pIdx, col);
     pIdx = (pIdx + 1) % MAX_PAINT; pCount = Math.min(MAX_PAINT, pCount + 1);
     paint.count = pCount;
     paint.instanceMatrix.needsUpdate = true; if (paint.instanceColor) paint.instanceColor.needsUpdate = true;
@@ -416,7 +425,26 @@ export function createWeapons(env) {
   }
   api.clear = () => {
     pCount = 0; pIdx = 0; paint.count = 0; decals.forEach(d => d.visible = false); dIdx = 0;
+    plog.length = 0; dlog.length = 0; try { localStorage.removeItem(LS_PAINT); } catch (e) { }
   };
+  // сохранение: раз в несколько секунд, только когда игрок не жмёт баллончик (чтобы не дёргать кадры)
+  function savePaint() {
+    if (!dirty) return; dirty = false;
+    const now = Date.now();
+    try { localStorage.setItem(LS_PAINT, JSON.stringify({ p: plog.filter(r => now - r[12] < TTL), d: dlog.filter(r => now - r[10] < TTL) })); } catch (e) { }
+  }
+  function restorePaint() {
+    let d; try { d = JSON.parse(localStorage.getItem(LS_PAINT) || 'null'); } catch (e) { d = null; }
+    if (!d) return;
+    const now = Date.now(), V = THREE.Vector3, pp = new V(), nn = new V();
+    (d.p || []).forEach(r => { if (now - r[12] >= TTL || r.length < 13) return; pp.set(r[0], r[1], r[2]); nn.set(r[3], r[4], r[5]); addSplat(pp, nn, r[6], r[7], r[8], !!r[9], r[10], r[11], r[12]); plog.push(r); });
+    (d.d || []).forEach(r => { if (now - r[10] >= TTL || r.length < 11) return; pp.set(r[0], r[1], r[2]); nn.set(r[3], r[4], r[5]); placeDecal(pp, nn, r[6], !!r[7], r[8], r[9], r[10]); dlog.push(r); });
+    while (plog.length > MAX_PAINT) plog.shift(); while (dlog.length > MAX_DECALS) dlog.shift();
+  }
+  setInterval(() => { if (!S.trigger) savePaint(); }, 5000);
+  addEventListener('pagehide', savePaint);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) savePaint(); });
+  restorePaint();
   api.counts = () => ({ decals: decals.filter(d => d.visible).length, paint: pCount });
 
   // ---------- HUD ----------
