@@ -3,6 +3,7 @@ import { buildWorld, groundY, WALK, OBST, PLAYER_R, EYE, TELEPORTS, ZONE_NAMES, 
 import { loadFonts } from './art.js';
 import { setAniso } from './tex.js';
 import { initBoard } from './board.js';
+import { createPasha } from './npc.js';
 import { createWeapons } from './weapons.js';
 
 const $ = (s) => document.querySelector(s);
@@ -20,14 +21,14 @@ const state = {
 const input = { keys: {}, mx: 0, mz: 0, lx: 0, ly: 0, run: false };
 
 let weapons = null, curMag = 0, lastWheel = 0;
-let renderer, camera, world, stageEl = $('#stage');
+let renderer, camera, world, stageEl = $('#stage'), pasha = null;
 let fixedQuality = qs.get('fixed') === '1';
 let pr = 1, prMax = 1, qualityMode = 'auto';
 
 // ------------------------------------------------------------------
 async function init() {
   qualityMode = $('#q').value;
-  const low = qualityMode === 'low' || qs.get('q') === 'low';
+  const low = qualityMode === 'low' || qs.get('q') === 'low' || (isTouch && qs.get('q') !== 'high');
   prMax = Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 2);
   pr = low ? 1 : prMax;
   try {
@@ -56,6 +57,15 @@ async function init() {
   world.redrawMural(); world.redrawDoor(); world.redrawSign();
   weapons = createWeapons({ renderer, camera, scene: world.scene, getWorld: () => world, audio, state });
   initBoard(world.board, weapons);
+  // Паша-звукорежиссёр сидит за пультом; брызги и выстрелы выводят его из себя
+  pasha = createPasha(world.scene, {
+    x: 5.71, z: 1.3, yaw: Math.PI, low,
+    onSay: (n, t) => toast(n, t),
+    onPunch: () => punchFx(),
+    onRestart: () => { location.reload(); }
+  });
+  weapons.extra = [pasha.group];
+  weapons.onNpc = (why) => { if (pasha && pasha.state() === 'sit') { pasha.provoke(why); const h = world.hotspots.find(x => x.id === 'pasha'); if (h) { h.disabled = true; const el = markerEls.get(h); if (el) el.style.display = 'none'; } if (state.cardOpen) closeCard(); } };
   buildMarkers();
   drawMapBase();
   applyTeleport(1, true);
@@ -290,6 +300,16 @@ function toast(t, s) {
   const el = $('#toast'); el.innerHTML = '<b></b><span></span>'; el.firstChild.textContent = t; el.lastChild.textContent = s;
   el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 5500);
 }
+let shake = 0;
+function punchFx() {
+  shake = 1; state.paused = true; if (weapons) weapons.setTrigger(false);
+  if (document.pointerLockElement) document.exitPointerLock();
+  let f = document.getElementById('hitfx');
+  if (!f) { f = document.createElement('div'); f.id = 'hitfx'; f.style.cssText = 'position:fixed;inset:0;z-index:99;pointer-events:none;background:radial-gradient(ellipse at center,rgba(255,40,30,.15),rgba(180,0,0,.75));opacity:0;transition:opacity .08s'; document.body.appendChild(f); }
+  f.style.opacity = '1'; setTimeout(() => { f.style.transition = 'opacity 1.1s'; f.style.opacity = '0.85'; }, 120);
+  if (actx && state.sound) { const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(35, t + 0.18); g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.25); o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.3); }
+  toast('Паша', 'Получил по лицу. Начинаем заново.');
+}
 function pickRevolver() {
   if (!world || !weapons || weapons.S.hasRev) return false;
   world.hideRevolverProp();
@@ -505,7 +525,7 @@ $('#snd').addEventListener('click', () => setSound(!state.sound));
 // ------------------------------------------------------------------
 // мини-карта
 const mm = $('#minimap'), mmx = mm.getContext('2d');
-const MAP = { x0: -4.2, z0: -1.6, s: 11.4 };
+const MAP = { x0: -16.5, z0: -2, s: 6.0 };
 let mapBase = null;
 function mp(x, z) { return [(x - MAP.x0) * MAP.s, (z - MAP.z0) * MAP.s]; }
 function drawMapBase() {
@@ -517,14 +537,16 @@ function drawMapBase() {
     c.fillStyle = fill; c.fillRect(a, b, c2 - a, d - b);
     if (stroke) { c.strokeStyle = stroke; c.lineWidth = 2; c.strokeRect(a, b, c2 - a, d - b); }
   };
-  rect(2.8, 5.6, 8.6, 16, 'rgba(70,74,92,.5)', null);                 // улица
+  rect(-14.7, 5.6, 18, 11.2, 'rgba(70,74,92,.5)', null);               // тротуар
+  rect(-14.7, -2, -11.2, 5.6, 'rgba(70,74,92,.5)', null);               // тротуар у Фрунзе
+  rect(-11.2, 0.1, 3.8, 5.6, 'rgba(230,150,60,.45)', '#ffb347');         // чайхана
   rect(-2.0, 5.6, 2.8, 7.1, 'rgba(120,120,130,.6)', '#8a8f9a');       // лестница
   rect(-3.4, 5.6, -2.0, 7.1, 'rgba(120,120,130,.45)', '#8a8f9a');     // площадка
   rect(-3.4, 2.2, -0.2, 5.4, 'rgba(150,60,200,.55)', '#c070ff');      // тамбур
   rect(0, 0, 3.76, 5.14, 'rgba(40,150,70,.55)', '#35e06b');            // зал
   rect(4.01, 0, 6.91, 5.14, 'rgba(60,100,220,.55)', '#6a95ff');        // студия
   c.fillStyle = '#fff'; c.font = '600 15px Manrope, Arial, sans-serif'; c.textAlign = 'center';
-  [['ул.', 5.8, 11], ['зал', 1.9, 2.7], ['звук', 5.45, 2.0], ['тамб.', -1.8, 3.8]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
+  [['ул.', 6, 9.4], ['зал', 1.9, 2.7], ['звук', 5.45, 2.0], ['тамб.', -1.8, 3.8], ['чай', -4, 3.0]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
 }
 function drawMap() {
   mmx.drawImage(mapBase, 0, 0);
@@ -586,8 +608,9 @@ function loop(now) {
   if (zn !== state.zone) setZone(zn, false);
   if (world) world.update(dt, state.x, state.z, state.zone);
   updateLofi();
+  if (pasha) { { const vis = state.zone === 'studio' || state.zone === 'hall' || state.zone === 'entry'; if (pasha.group.visible !== vis) { pasha.group.visible = vis; weapons.invalidate(); } } pasha.update(dt, state.x, state.z); if (shake > 0) { shake = Math.max(0, shake - dt * 1.4); } }
   camera.position.set(state.x, state.eyeY + Math.sin(state.bob) * 0.018, state.z);
-  camera.rotation.set(state.pitch, state.yaw, 0);
+  camera.rotation.set(state.pitch + (shake ? (Math.random() - 0.5) * shake * 0.12 : 0), state.yaw + (shake ? (Math.random() - 0.5) * shake * 0.12 : 0), shake ? (Math.random() - 0.5) * shake * 0.1 : 0);
   camera.updateMatrixWorld();
   if (world) {
     updateFocus();
@@ -619,6 +642,7 @@ $('#q').addEventListener('change', () => {
 });
 
 const tourApi = {
+  pasha: () => pasha && ({ state: pasha.state(), x: pasha.group.position.x, z: pasha.group.position.z }),
   // отладка: пройти по точкам с настоящими коллизиями, вернуть где остановились
   sim: (pts) => {
     const out = [];

@@ -41,7 +41,7 @@ export default {
         if (!Array.isArray(p) || p.length !== 4) continue;
         const [x, y, r, c] = p.map(Number);
         if (![x, y, r, c].every(Number.isFinite)) continue;
-        if (x < 0 || x > W || y < 0 || y > H || r < 4 || r > 24 || c < 0 || c > 4) continue;
+        if (x < 0 || x > W || y < 0 || y > H || r < 4 || r > 24 || c < 0 || c > 7) continue;
         add.push([Math.round(x), Math.round(y), Math.round(r), Math.round(c)]);
       }
       if (!add.length) return json(req, { ok: true, added: 0 });

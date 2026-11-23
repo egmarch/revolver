@@ -4,7 +4,7 @@
 export const BOARD_ENDPOINT = '';            // например: 'https://revolver-board.<аккаунт>.workers.dev/board'
 
 const LS_KEY = 'revolver_board_v1';
-const COLORS = ['#c9f23b', '#ff4b2e', '#c23cff', '#ffffff', '#111111'];
+const COLORS = ['#c9f23b', '#ff4b2e', '#c23cff', '#ffffff', '#111111', '#19f0ff', '#ff2e97', '#ff9a3c'];
 const MAX_PTS = 30000;
 
 export function initBoard(board, weapons) {

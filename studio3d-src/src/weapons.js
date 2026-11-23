@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { cv, rng, toTex } from './tex.js';
 
-export const COLORS = ['#c9f23b', '#ff4b2e', '#c23cff', '#ffffff', '#111111'];
+export const COLORS = ['#c9f23b', '#ff4b2e', '#c23cff', '#ffffff', '#111111', '#19f0ff', '#ff2e97', '#ff9a3c'];
 const MAX_DECALS = 150, MAX_PAINT = 4000;
 
 function holeCanvas(seed, crack) {
@@ -110,19 +110,36 @@ export function createWeapons(env) {
   cyl(rev, 0.032, 0.036, 0.3, cloth, 0.0, -0.13, 0.27, 1.25, 0, 14); // рукав
   const flash = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   flash.position.set(0, 0.022, -0.3); flash.visible = false; rev.add(flash);
-  // баллончик
+  // баллончик с краской: алюминиевый корпус с цветной этикеткой, купол-плечо, цветной колпак с форсункой
   const can = new THREE.Group();
-  const stk = toTex(canSticker());
-  const canBody = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.17, 20), [M(0xffffff, { map: stk, metalness: 0.5, roughness: 0.35 }), M(0xb8bcc2, { metalness: 0.8, roughness: 0.3 }), M(0xb8bcc2, { metalness: 0.8 })]);
-  canBody.position.set(0, 0, 0); can.add(canBody);
-  cyl(can, 0.026, 0.03, 0.02, M(0xb8bcc2, { metalness: 0.8, roughness: 0.3 }), 0, 0.095, 0);
+  const canC = cv(256, 256), cx2 = canC.getContext('2d'), canT = toTex(canC); canT.wrapS = THREE.RepeatWrapping;
+  const shadeHex = (hex, k) => { const n = parseInt(hex.slice(1), 16), f = (v) => Math.max(0, Math.min(255, Math.round(v * (1 + k)))); return `rgb(${f(n >> 16 & 255)},${f(n >> 8 & 255)},${f(n & 255)})`; };
+  function paintCanLabel(hex) {
+    const x = cx2; x.clearRect(0, 0, 256, 256);
+    const g = x.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, hex); g.addColorStop(1, shadeHex(hex, -0.45)); x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+    x.fillStyle = 'rgba(255,255,255,.16)'; x.fillRect(26, 0, 24, 256); x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(176, 0, 80, 256);
+    x.fillStyle = '#0d0d10'; x.fillRect(0, 84, 256, 70);
+    x.fillStyle = hex; x.font = '900 40px Unbounded, Impact, sans-serif'; x.textAlign = 'center'; x.fillText('REVOLVER', 128, 133);
+    x.fillStyle = '#f4f4f6'; x.font = '700 13px Arial'; x.fillText('SPRAY PAINT · 400 ML', 128, 172);
+    x.fillStyle = '#f4f4f6'; for (let i = 0; i < 26; i++) x.fillRect(18 + i * 3.2, 200, 1 + (i % 3), 26);
+    x.fillStyle = 'rgba(255,255,255,.55)'; for (let i = 0; i < 5; i++) { x.beginPath(); x.arc(30 + i * 48, 10 + (i * 37) % 30, 3 + i % 3, 0, 7); x.fill(); }
+    canT.needsUpdate = true;
+  }
+  const alu = M(0xc9ced4, { metalness: 0.85, roughness: 0.28 });
+  const canBody = new THREE.Mesh(new THREE.CylinderGeometry(0.0335, 0.0335, 0.145, 32, 1, true), M(0xffffff, { map: canT, metalness: 0.35, roughness: 0.38 }));
+  can.add(canBody);
+  const lath = (pts, m, y) => { const me = new THREE.Mesh(new THREE.LatheGeometry(pts.map(p => new THREE.Vector2(p[0], p[1])), 32), m); me.position.y = y; can.add(me); return me; };
+  lath([[0.0335, 0], [0.0325, 0.008], [0.029, 0.018], [0.0235, 0.026], [0.0195, 0.031], [0.0195, 0.036]], alu, 0.0725);                    // плечо-купол
+  lath([[0, 0], [0.0335, 0], [0.0345, -0.004], [0.032, -0.009], [0.026, -0.015], [0, -0.016]], alu, -0.0725);                              // донышко
+  lath([[0.0205, 0], [0.0205, 0.044], [0.0185, 0.05], [0, 0.05]], M(0x2c2c32, { roughness: 0.55, metalness: 0.15 }), 0.105);              // колпак
   const capMat = M(0xc9f23b, { metalness: 0.1, roughness: 0.5 });
-  cyl(can, 0.026, 0.026, 0.035, capMat, 0, 0.12, 0);
-  bx(can, 0.012, 0.012, 0.025, dark, 0, 0.126, -0.02);
+  lath([[0.0215, 0], [0.0215, 0.02], [0.0205, 0.02], [0.0205, 0]], capMat, 0.108);                                                     // цветное кольцо на колпаке
+  bx(can, 0.016, 0.01, 0.024, M(0xf2f2f4, { roughness: 0.4, metalness: 0.1 }), 0, 0.151, -0.014);                                     // кнопка-форсунка
+  cyl(can, 0.0034, 0.0034, 0.012, dark, 0, 0.151, -0.03, Math.PI / 2, 0, 8);
   bx(can, 0.05, 0.05, 0.06, skin, 0.0, -0.01, 0.04);
   cyl(can, 0.032, 0.036, 0.3, cloth, 0.0, -0.12, 0.2, 1.2, 0, 14);
   const mist = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, opacity: 0.6, depthWrite: false, color: 0xc9f23b }));
-  mist.position.set(0, 0.126, -0.1); mist.visible = false; can.add(mist);
+  mist.position.set(0, 0.151, -0.1); mist.visible = false; can.add(mist);
 
   const vm = new THREE.Group(); vmScene.add(vm);
   vm.add(rev); vm.add(can); rev.visible = false;
@@ -224,6 +241,7 @@ export function createWeapons(env) {
     if (tCache && tZone === state.zone) return tCache;
     const list = [];
     for (const k in w.groups) { const g = w.groups[k]; if (!g.visible) continue; g.traverse(o => { if (o.isMesh && o.visible && !(o.material.transparent && o.material.opacity < 0.5 && !o.material.alphaTest) && o.material.side !== THREE.DoubleSide) list.push(o); }); }
+    (api.extra || []).forEach(g => { if (g.visible) g.traverse(o => { if (o.isMesh && o.visible) list.push(o); }); });   // персонажи (Паша)
     tCache = list; tZone = state.zone; return list;
   }
   function pick(origin, dir) {
@@ -242,6 +260,7 @@ export function createWeapons(env) {
   function shootAt(origin, dir) {
     const h = pick(origin, dir);
     if (!h) return null;
+    if (h.object.userData.npc) { emit(sparks, h.point, h.normal, 6, 1.6, 0.3, [1, 0.5, 0.3]); if (api.onNpc) api.onNpc('gun'); return h; }
     const door = h.object.userData.noPaint;
     if (h.object.userData.crt) {
       placeDecal(h.point, h.normal, 0.3, true);
@@ -275,7 +294,8 @@ export function createWeapons(env) {
     if (t === S.weapon && S.swap >= 1) return;
     S.swapTo = t; S.swap = 0; S.reload = -1; S.trigger = false; audio.spray(false);
   };
-  api.cycleColor = (i) => { S.color = i === undefined ? (S.color + 1) % COLORS.length : i; capMat.color.set(COLORS[S.color]); mist.material.color.set(COLORS[S.color]); updateHud(); };
+  api.cycleColor = (i) => { S.color = i === undefined ? (S.color + 1) % COLORS.length : i; capMat.color.set(COLORS[S.color]); mist.material.color.set(COLORS[S.color]); paintCanLabel(COLORS[S.color]); updateHud(); };
+  api.randomColor = () => { const pool = COLORS.map((c, i) => i).filter(i => COLORS[i] !== '#ffffff'); api.cycleColor(pool[Math.floor(Math.random() * pool.length)]); };
   api.setTrigger = (d) => {
     S.trigger = d;
     if (S.weapon === 0 && d) api.fire();
@@ -289,6 +309,7 @@ export function createWeapons(env) {
   };
   function sprayHit(origin, dir) {
     const h = pick(origin, dir);
+    if (h && h.object.userData.npc) { if (api.onNpc) api.onNpc('paint'); return h; }
     if (h && h.object.userData.board && h.uv) { if (api.boardPaint) api.boardPaint(h.uv, COLORS[S.color]); return h; }   // белая доска: рисунок сохраняется
     if (!h || h.object.userData.noPaint) return null;
     const jit = new THREE.Vector3();
@@ -390,5 +411,6 @@ export function createWeapons(env) {
     renderer.clearDepth(); renderer.render(vmScene, vmCam);
   };
   api.paint = paint; api.vm = vm; api.vmScene = vmScene; api.vmCam = vmCam;
+  api.randomColor();   // у каждого входа баллончик другого цвета
   return api;
 }
