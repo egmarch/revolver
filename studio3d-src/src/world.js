@@ -454,6 +454,10 @@ export function buildWorld(opts = {}) {
   texBox(CH, CX0 - 0.2, 4.2, CZ0, CX0, 6.4, 1.0, ochre, 1); texBox(CH, CX0 - 0.2, 4.2, 2.2, CX0, 6.4, CZ1 + 0.2, ochre, 1);
   texBox(CH, CX0 - 0.2, 6.4, CZ0, CX0, CTOP + 0.2, CZ1 + 0.2, ochre, 1);
   texBox(CH, CX0 - 0.2, 5.4, 1.0, CX0, 6.4, 2.2, ochre, 1);
+  // цоколь западной стены (закрывает щель под стеной) и порог двери чайханы (проём z 1.0…2.2)
+  texBox(CH, CX0 - 0.2, 2.8, CZ0, CX0, CHY, 1.0, mat.concreteDark, 1); texBox(CH, CX0 - 0.2, 2.8, 2.2, CX0, CHY, CZ1 + 0.2, mat.concreteDark, 1);
+  texBox(CH, CX0 - 0.22, 2.9, 1.0, CX0 + 0.12, CHY + 0.045, 2.2, M(0x6a3a1c, { roughness: 0.6 }), 1);    // деревянный порог выше тротуара на 12 см
+  B(CH, 0.03, 0.012, 1.2, mat.gold, CX0 - 0.06, CHY + 0.051, 1.6);                                          // латунная накладка
   B(CH, 0.03, 1.4, 2.6, glassW, CX0 - 0.1, 5.0, 3.8); B(CH, 0.03, 1.4, 0.7, glassW, CX0 - 0.1, 5.0, 0.65);
   [CZ0 + 1.9, 3.0, 4.2].forEach(zz => B(CH, 0.05, 1.5, 0.06, M(0x6a3a1c), CX0 - 0.12, 5.0, zz));
   for (let i = 0; i < 6; i++) B(CH, 1.5, 0.1, 0.62, M(i % 2 ? 0xf3e6c8 : 0xc4402a, { roughness: 0.8 }), CX0 - 0.95, 5.95, 0.1 + i * 0.62 + 0.4, 0, 0, -0.16);
