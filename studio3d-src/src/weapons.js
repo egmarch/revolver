@@ -90,7 +90,7 @@ export function createWeapons(env) {
   const bx = (g, w, h, d, m, x, y, z, rx = 0, ry = 0, rz = 0) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); me.position.set(x, y, z); me.rotation.set(rx, ry, rz); g.add(me); return me; };
 
   // ---------- руки: настоящая кисть с пальцами (ладонь, 3 сустава на палец, ногти) ----------
-  const skinM = new THREE.MeshStandardMaterial({ color: 0xd49a76, roughness: 0.6, metalness: 0 });
+  const skinM = new THREE.MeshStandardMaterial({ color: 0xdc8f5e, roughness: 0.75, metalness: 0, emissive: 0x6a3a22, emissiveIntensity: 0.3 });
   const nailM = M(0xf2dccf, { metalness: 0, roughness: 0.28 });
   const fleeceC = cv(64, 64); { const x = fleeceC.getContext('2d'), r = rng(31); x.fillStyle = '#1d2330'; x.fillRect(0, 0, 64, 64); for (let i = 0; i < 300; i++) { x.fillStyle = `rgba(${60 + r() * 50},${70 + r() * 50},${95 + r() * 60},${0.12 + r() * 0.22})`; x.beginPath(); x.arc(r() * 64, r() * 64, 0.8 + r() * 1.6, 0, 7); x.fill(); } }
   const sleeveM = new THREE.MeshStandardMaterial({ map: toTex(fleeceC), roughness: 1, metalness: 0 });
@@ -180,13 +180,15 @@ export function createWeapons(env) {
   lath([[0.0205, 0], [0.0205, 0.044], [0.0185, 0.05], [0, 0.05]], M(0x2c2c32, { roughness: 0.55, metalness: 0.15 }), 0.105);              // колпак
   const capMat = M(0xc9f23b, { metalness: 0.1, roughness: 0.5 });
   lath([[0.0215, 0], [0.0215, 0.02], [0.0205, 0.02], [0.0205, 0]], capMat, 0.108);                                                     // цветное кольцо на колпаке
-  bx(can, 0.016, 0.01, 0.024, M(0xf2f2f4, { roughness: 0.4, metalness: 0.1 }), 0, 0.151, -0.014);                                     // кнопка-форсунка
+  const nozzle = bx(can, 0.016, 0.01, 0.024, M(0xf2f2f4, { roughness: 0.4, metalness: 0.1 }), 0, 0.151, -0.014);                                     // кнопка-форсунка
   cyl(can, 0.0034, 0.0034, 0.012, dark, 0, 0.151, -0.03, Math.PI / 2, 0, 8);
   // рука: три пальца обхватывают корпус, указательный лежит на форсунке, большой упирается слева сзади
   palm(can, 0.062, 0.0, 0.034, 0, 0, 0.0, 0.075, 0.03);
   [0.027, 0.0, -0.027].forEach((y, i) => finger(can, arc(0, 0, 0.042 + (i ? 0.0 : 0), 0.042, y, [-6, 32, 68, 105, 140]), 0.0092 - i * 0.0005));
-  finger(can, [[0.058, 0.052, 0.03], [0.05, 0.1, 0.012], [0.032, 0.14, -0.005], [0.01, 0.157, -0.02]], 0.0092);
-  finger(can, arc(0, 0, 0.044, 0.044, 0.012, [-70, -112, -150, -185]).map(p => [p[0], p[1] - 0.012, p[2]]), 0.0104);
+  // указательный палец: от костяшки справа сзади к кнопке; при распылении нажимает на форсунку
+  const idx = new THREE.Group(); can.add(idx);
+  finger(idx, [[0.054, 0.062, 0.03], [0.047, 0.1, 0.016], [0.032, 0.143, 0.004], [0.012, 0.165, -0.012]], 0.0102);
+  idx.traverse(o => { o.userData.hand = false; });
   sleeve(can, [0.075, -0.03, 0.065], [0.16, -0.17, 0.36]);
   const mist = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, opacity: 0.6, depthWrite: false, color: 0xc9f23b }));
   mist.position.set(0, 0.151, -0.1); mist.visible = false; can.add(mist);
@@ -432,7 +434,8 @@ export function createWeapons(env) {
     S.flash = Math.max(0, S.flash - dt);
     flash.visible = S.flash > 0; flash.rotation.z = Math.random() * 6; flashLight.intensity = S.flash > 0 ? 3 : 0;
     hammer.rotation.x = 0.5 - (S.cd > 0.12 ? 0.5 : 0);
-    // баллончик
+    // баллончик: палец жмёт на форсунку
+    { const press = S.weapon === 1 && S.trigger && S.swap >= 1 ? 1 : 0; S.press = (S.press || 0) + (press - (S.press || 0)) * Math.min(1, dt * 22); idx.position.set(-0.003 * S.press, -0.0065 * S.press, 0.0); idx.rotation.z = 0.05 * S.press; nozzle.position.y = 0.151 - 0.0045 * S.press; }
     mist.visible = false;
     if (S.weapon === 1 && S.trigger && S.swap >= 1) {
       mist.visible = true; mist.rotation.z = Math.random() * 6; vm.position.x += (Math.random() - 0.5) * 0.002;
@@ -467,6 +470,10 @@ export function createWeapons(env) {
     gc.load('models/high/viewmodel_can_hand.glb', (g) => {
       can.children.slice().forEach(ch => { if (ch.userData.hand) ch.visible = false; });
       g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.18 : 0; mt.metalness = 0; mt.roughness = 0.85; } } });
+      g.scene.traverse((m) => { if (m.isMesh && m.material) { const mt = m.material; mt.onBeforeCompile = (sh) => {
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvOP = position;');
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('void main() {', 'void main() {\n  if (vOP.x > 0.022 && vOP.y > 0.072) discard;');
+      }; mt.needsUpdate = true; } });
       can.add(g.scene);
     }, undefined, () => { }); }
   // револьвер с рукой из GLB (Higgsfield + Blender); если файла нет или он не загрузился, остаётся процедурный

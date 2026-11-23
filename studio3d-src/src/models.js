@@ -21,3 +21,13 @@ export function loadCarModels(cars, parent) {
     }).catch(() => { });
   });
 }
+
+// Реквизит: заменяет процедурные детали группы моделью из GLB (если файл загрузился); спрайты-подсветки остаются
+export function loadProp(url, group, o = {}) {
+  const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+  loader.load(url, (g) => {
+    g.scene.traverse((o) => { if (o.isMesh && o.material) { o.frustumCulled = false; o.material.emissive = new THREE.Color(0xffffff); o.material.emissiveMap = o.material.map || null; o.material.emissiveIntensity = o.material.map ? 0.2 : 0; o.material.metalness = Math.min(o.material.metalness || 0, 0.3); } });
+    group.children.slice().forEach((c) => { if (!c.isSprite) c.visible = false; });
+    g.scene.rotation.y = o.rotY || 0; g.scene.position.y = o.y || 0; group.add(g.scene);
+  }, undefined, () => { });
+}

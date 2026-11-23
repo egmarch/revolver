@@ -24,6 +24,17 @@ let weapons = null, curMag = 0, lastWheel = 0;
 let renderer, camera, world, stageEl = $('#stage'), pasha = null;
 let fixedQuality = qs.get('fixed') === '1';
 let pr = 1, prMax = 1, qualityMode = 'auto';
+// пиксель-арт: сцена рисуется в низком разрешении (~270 строк) и растягивается без сглаживания; по умолчанию включён
+let pxOn = qs.get('px') !== '0';
+try { if (qs.get('px') === null && localStorage.getItem('revolver_px') === '0') pxOn = false; } catch (e) { }
+function applyPixel() {
+  document.body.classList.toggle('px', pxOn);
+  if (!renderer) return;
+  const k = Math.max(1.6, window.innerHeight / 270);
+  pr = pxOn ? 1 / k : (qualityMode === 'low' ? 1 : prMax);
+  renderer.setPixelRatio(pr); resize();
+  const b = document.getElementById('pxBtn'); if (b) b.style.opacity = pxOn ? 1 : 0.55;
+}
 
 // ------------------------------------------------------------------
 async function init() {
@@ -32,7 +43,7 @@ async function init() {
   prMax = Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 2);
   pr = low ? 1 : prMax;
   try {
-    renderer = new THREE.WebGLRenderer({ antialias: !low && !isTouch, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ antialias: !low && !isTouch && !pxOn, powerPreference: 'high-performance' });
   } catch (e) {
     $('#go').textContent = 'WebGL недоступен'; return;
   }
@@ -47,6 +58,7 @@ async function init() {
   camera = new THREE.PerspectiveCamera(72, 1, 0.05, 160);
   camera.rotation.order = 'YXZ';
   resize();
+  applyPixel();
 
   setProgress(15);
   await loadFonts();
@@ -623,7 +635,7 @@ function loop(now) {
   if (humFilter) humFilter.frequency.value = state.zone === 'street' ? 700 : 260;
 
   // адаптивное разрешение
-  if (qualityMode === 'auto' && !fixedQuality && state.started) {
+  if (qualityMode === 'auto' && !fixedQuality && !pxOn && state.started) {
     fpsAcc += dt; fpsN++; adaptCool -= dt;
     if (fpsN >= 45) {
       const avg = fpsAcc / fpsN; fpsAcc = 0; fpsN = 0;
@@ -635,10 +647,13 @@ function loop(now) {
   }
 }
 
+const pxBtn = document.getElementById('pxBtn');
+if (pxBtn) pxBtn.addEventListener('click', () => { pxOn = !pxOn; try { localStorage.setItem('revolver_px', pxOn ? '1' : '0'); } catch (e) { } applyPixel(); });
+addEventListener('resize', () => { if (pxOn && renderer) applyPixel(); });
 $('#q').addEventListener('change', () => {
   qualityMode = $('#q').value;
   if (!renderer) return;
-  pr = qualityMode === 'low' ? 1 : prMax; renderer.setPixelRatio(pr);
+  pr = qualityMode === 'low' ? 1 : prMax; renderer.setPixelRatio(pr); applyPixel();
 });
 
 const tourApi = {

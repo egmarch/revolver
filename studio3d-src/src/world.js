@@ -3,7 +3,7 @@ import woodUrl from './tex/wood.jpg';
 import * as TX from './tex.js';
 import * as ART from './art.js';
 import { buildPalms } from './palm.js';
-import { loadCarModels } from './models.js';
+import { loadCarModels, loadProp } from './models.js';
 
 export const EYE = 1.62;
 export const PLAYER_R = 0.3;
@@ -1029,6 +1029,7 @@ export function buildWorld(opts = {}) {
     CYL(revProp, 0.032, 0.032, 0.05, st, -0.1, 0.045, 0, 14, Math.PI / 2);
     B(revProp, 0.05, 0.09, 0.04, M(0x6b3d22, { roughness: 0.6 }), -0.19, -0.01, 0, 0, 0, 0.35);
     glowSprite(revProp, 0xffd070, 0.7, 0, 0.05, 0, 0.5); }
+  loadProp('models/high/revolver_prop.glb', revProp, { rotY: -Math.PI / 2, y: -0.005 });   // новая модель револьвера на столе (из GLB)
   // операторское кресло
   const ch = new THREE.Group(); ch.position.set(10.45, 0, 1.0); ch.rotation.y = -Math.PI / 2 + 0.3; U.add(ch);
   B(ch, 0.5, 0.1, 0.5, M(0x15161a, { roughness: 0.5 }), 0, 0.5, 0); B(ch, 0.5, 0.4, 0.1, M(0x8a867a, { roughness: 0.6 }), 0, 0.78, -0.24);

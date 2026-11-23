@@ -138,6 +138,7 @@ body.touch #zones button span{display:none}
 html{overflow:hidden;height:100%;position:fixed;width:100%}
 #actBtn{bottom:calc(env(safe-area-inset-bottom) + 262px)}
 #rotate{bottom:calc(env(safe-area-inset-bottom) + 350px)}
+body.px #stage canvas{image-rendering:pixelated;image-rendering:crisp-edges;filter:contrast(1.03) saturate(1.22)}
 </style>
 </head>
 <body>
@@ -169,6 +170,7 @@ html{overflow:hidden;height:100%;position:fixed;width:100%}
     <canvas id="minimap" width="208" height="216"></canvas>
     <div class="row">
       <button class="pill" id="snd" title="Звук">🔇</button>
+      <button class="pill" id="pxBtn" title="Пиксель-арт">▦</button>
       <a class="pill" href="../index.html?service=pack#book" id="hours">Свободные часы</a>
       <a class="pill" href="../index.html" id="exit">Выйти на сайт</a>
     </div>
