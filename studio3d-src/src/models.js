@@ -15,6 +15,7 @@ export function loadCarModels(cars, parent) {
     cache[f].then((src) => {
       const u = spr.userData, m = src.clone(true);
       m.rotation.y = u.axis === 'x' ? (u.dir > 0 ? Math.PI / 2 : -Math.PI / 2) : (u.dir > 0 ? 0 : Math.PI);   // перед модели = +Z
+      if (f === 'car_muscle.glb') m.rotation.y += Math.PI;   // у этой модели перед смотрит в −Z
       const holder = new THREE.Group(); holder.add(m); holder.userData = u;
       holder.position.set(spr.position.x, 2.9, spr.position.z);
       parent.add(holder); parent.remove(spr); cars[idx] = holder;
@@ -27,7 +28,7 @@ export function loadProp(url, group, o = {}) {
   const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
   loader.load(url, (g) => {
     g.scene.traverse((o) => { if (o.isMesh && o.material) { o.frustumCulled = false; o.material.emissive = new THREE.Color(0xffffff); o.material.emissiveMap = o.material.map || null; o.material.emissiveIntensity = o.material.map ? 0.2 : 0; o.material.metalness = Math.min(o.material.metalness || 0, 0.3); } });
-    group.children.slice().forEach((c) => { if (!c.isSprite) c.visible = false; });
+    if (!o.keep) group.children.slice().forEach((c) => { if (!c.isSprite) c.visible = false; });
     g.scene.rotation.y = o.rotY || 0; g.scene.position.y = o.y || 0; group.add(g.scene);
   }, undefined, () => { });
 }

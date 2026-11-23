@@ -185,9 +185,20 @@ export function createWeapons(env) {
   // рука: три пальца обхватывают корпус, указательный лежит на форсунке, большой упирается слева сзади
   palm(can, 0.062, 0.0, 0.034, 0, 0, 0.0, 0.075, 0.03);
   [0.027, 0.0, -0.027].forEach((y, i) => finger(can, arc(0, 0, 0.042 + (i ? 0.0 : 0), 0.042, y, [-6, 32, 68, 105, 140]), 0.0092 - i * 0.0005));
-  // указательный палец: от костяшки справа сзади к кнопке; при распылении нажимает на форсунку
-  const idx = new THREE.Group(); can.add(idx);
-  finger(idx, [[0.054, 0.062, 0.03], [0.047, 0.1, 0.016], [0.032, 0.143, 0.004], [0.012, 0.165, -0.012]], 0.0102);
+  // указательный палец: три фаланги с суставами, сужается к кончику, ноготь; при распылении сгибается и жмёт на форсунку
+  const idx = new THREE.Group(); idx.position.set(0, 0, 0); can.add(idx);
+  const fingerSkin = new THREE.MeshStandardMaterial({ color: 0xe08d5e, roughness: 0.7, metalness: 0, emissive: 0x5a2f1a, emissiveIntensity: 0.3 });
+  const idxJ = [new THREE.Vector3(0.056, 0.058, 0.03), new THREE.Vector3(0.049, 0.094, 0.018), new THREE.Vector3(0.036, 0.126, 0.002), new THREE.Vector3(0.016, 0.1555, -0.013)];
+  const idxR = [0.0118, 0.0108, 0.0098, 0.0088];
+  const phal = [];
+  for (let i = 0; i < 3; i++) {
+    const a0 = idxJ[i], b0 = idxJ[i + 1], d = b0.clone().sub(a0), len = d.length();
+    const seg = new THREE.Mesh(new THREE.CylinderGeometry(idxR[i + 1], idxR[i], len, 18), fingerSkin);
+    seg.position.copy(a0).addScaledVector(d, 0.5); seg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); seg.scale.set(1, 1, 0.88); idx.add(seg); phal.push(seg);
+    const kn = new THREE.Mesh(new THREE.SphereGeometry(idxR[i] * 1.06, 18, 12), fingerSkin); kn.position.copy(a0); idx.add(kn);
+  }
+  const tipS = new THREE.Mesh(new THREE.SphereGeometry(idxR[3], 18, 12), fingerSkin); tipS.position.copy(idxJ[3]); tipS.scale.set(1, 1.15, 0.9); idx.add(tipS);
+  const nailI = new THREE.Mesh(new THREE.CapsuleGeometry(0.0062, 0.008, 4, 10), nailM); nailI.position.set(idxJ[3].x - 0.002, idxJ[3].y + 0.0, idxJ[3].z - 0.0075); nailI.rotation.set(0.3, 0, 0.9); nailI.scale.set(1, 1, 0.45); idx.add(nailI);
   idx.traverse(o => { o.userData.hand = false; });
   sleeve(can, [0.075, -0.03, 0.065], [0.16, -0.17, 0.36]);
   const mist = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, opacity: 0.6, depthWrite: false, color: 0xc9f23b }));
@@ -435,7 +446,7 @@ export function createWeapons(env) {
     flash.visible = S.flash > 0; flash.rotation.z = Math.random() * 6; flashLight.intensity = S.flash > 0 ? 3 : 0;
     hammer.rotation.x = 0.5 - (S.cd > 0.12 ? 0.5 : 0);
     // баллончик: палец жмёт на форсунку
-    { const press = S.weapon === 1 && S.trigger && S.swap >= 1 ? 1 : 0; S.press = (S.press || 0) + (press - (S.press || 0)) * Math.min(1, dt * 22); idx.position.set(-0.003 * S.press, -0.0065 * S.press, 0.0); idx.rotation.z = 0.05 * S.press; nozzle.position.y = 0.151 - 0.0045 * S.press; }
+    { const press = S.weapon === 1 && S.trigger && S.swap >= 1 ? 1 : 0; S.press = (S.press || 0) + (press - (S.press || 0)) * Math.min(1, dt * 22); idx.position.set(0, 0, 0); idx.rotation.set(0, 0, 0); idx.position.copy(idxJ[0]).multiplyScalar(-1); idx.rotation.z = 0.0; { const pv = idxJ[0]; idx.position.set(pv.x, pv.y, pv.z); idx.rotation.z = 0.2 * S.press; idx.position.sub(new THREE.Vector3(pv.x, pv.y, pv.z).applyEuler(idx.rotation)); } nozzle.position.y = 0.151 - 0.0045 * S.press; }
     mist.visible = false;
     if (S.weapon === 1 && S.trigger && S.swap >= 1) {
       mist.visible = true; mist.rotation.z = Math.random() * 6; vm.position.x += (Math.random() - 0.5) * 0.002;
@@ -472,7 +483,7 @@ export function createWeapons(env) {
       g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.18 : 0; mt.metalness = 0; mt.roughness = 0.85; } } });
       g.scene.traverse((m) => { if (m.isMesh && m.material) { const mt = m.material; mt.onBeforeCompile = (sh) => {
         sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvOP = position;');
-        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('void main() {', 'void main() {\n  if (vOP.x > 0.022 && vOP.y > 0.072) discard;');
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('void main() {', 'void main() {\n  if (vOP.x > 0.02 && vOP.y > 0.106) discard;');
       }; mt.needsUpdate = true; } });
       can.add(g.scene);
     }, undefined, () => { }); }

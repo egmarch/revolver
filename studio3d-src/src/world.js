@@ -611,7 +611,7 @@ export function buildWorld(opts = {}) {
   plane(H, 3.0, wy, mat.carpetRed, 0.012, wy / 2, 1.5, '+x', [3.33, 3.11]);
   plane(H, HD - 3.9, wy, mat.carpetRed, 0.012, wy / 2, (3.9 + HD) / 2, '+x', [HD - 3.9 + 0.12, 3.11]);
   plane(H, 0.9, 0.7, mat.carpetRed, 0.012, 2.45, 3.45, '+x', [1.0, 0.78]);
-  addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: wM, cx: -0.1, cz: 3.45 });
+  addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: [mat.carpetRed, mat.carpetRed, wM, wM, wM, wM], cx: -0.1, cz: 3.45 });   // дверь обита тем же ковром
   B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz0 - 0.03); B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz1 + 0.03); B(H, 0.1, 0.06, 1.0, wM, -0.1, 2.13, 3.45);
   // южная стена с дверью: шторы
   texBox(H, -0.2, 0, HD, HW + 0.25, wy + 0.1, HD + 0.2, mat.concreteDark, 2);
@@ -625,7 +625,13 @@ export function buildWorld(opts = {}) {
   const muralC = TX.cv(2048, 1180);
   const doorRect = { x: doorZ0 / HD * 2048, y: 1180 - 2.1 / wy * 1180, w: (doorZ1 - doorZ0) / HD * 2048, h: 2.1 / wy * 1180 };
   const muralT = TX.toTex(muralC);
-  const redrawMural = () => { ART.drawMural(muralC, doorRect); muralT.needsUpdate = true; };
+  let muralImg = null;
+  const redrawMural = () => {
+    if (muralImg) { const x = muralC.getContext('2d'); x.clearRect(0, 0, muralC.width, muralC.height); x.drawImage(muralImg, 0, 0, muralC.width, muralC.height); x.clearRect(doorRect.x, doorRect.y, doorRect.w, doorRect.h); }
+    else ART.drawMural(muralC, doorRect);
+    muralT.needsUpdate = true;
+  };
+  { const im = new Image(); im.onload = () => { muralImg = im; redrawMural(); }; im.src = 'img/mural.jpg'; }
   redrawMural();
   const muralM = M(0xffffff, { map: muralT, roughness: 0.9, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: muralT, emissiveIntensity: 0.18 });
   const muralPl = plane(H, HD, wy, muralM, HW - 0.012, wy / 2, HD / 2, '-x');
@@ -887,11 +893,7 @@ export function buildWorld(opts = {}) {
   [[-0.25, -0.2], [0.25, -0.2], [-0.25, 0.2], [0.25, 0.2]].forEach(([lx, lz]) => B(sc, 0.025, 0.55, 0.025, mat.black, lx, 0.275, lz));
   B(sc, 0.62, 0.03, 0.46, M(0x7a5a38, { roughness: 0.6 }), 0, 0.56, 0);
   const plaidM = M(0xffffff, { map: T.plaid, roughness: 0.8 });
-  B(sc, 0.56, 0.16, 0.4, plaidM, 0, 0.66, 0);
-  B(sc, 0.5, 0.05, 0.34, M(0x2c1c14), 0, 0.745, 0);
-  B(sc, 0.46, 0.06, 0.3, M(0xffffff, { map: T.dollar }), 0, 0.78, 0, 0.1);
-  B(sc, 0.5, 0.025, 0.4, plaidM, 0.0, 0.88, -0.28, 0, -0.35);
-  const lid = new THREE.Mesh(BOXG, plaidM); lid.scale.set(0.56, 0.03, 0.4); lid.position.set(0, 0.95, -0.35); lid.rotation.x = -1.35; sc.add(lid);
+  loadProp('models/high/suitcase.glb', sc, { keep: true, y: 0.575 });   // чемодан с деньгами из GLB (Higgsfield), крышка на петлях
   // пальмы
   const leafShape = new THREE.Shape();
   leafShape.moveTo(0, 0); leafShape.quadraticCurveTo(0.07, 0.35, 0, 0.9); leafShape.quadraticCurveTo(-0.07, 0.35, 0, 0);

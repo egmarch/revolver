@@ -71,7 +71,7 @@ async function init() {
   initBoard(world.board, weapons);
   // Паша-звукорежиссёр сидит за пультом; брызги и выстрелы выводят его из себя
   pasha = createPasha(world.scene, {
-    x: 5.71, z: 1.3, yaw: Math.PI, low, glbUrl: 'models/high/pasha.glb',
+    x: 5.71, z: 1.3, yaw: Math.PI, low, glbUrl: 'models/high/pasha.glb', hipsAdjust: 0.1,
     onSay: (n, t) => toast(n, t),
     onPunch: () => punchFx(),
     onRestart: () => { location.reload(); }
