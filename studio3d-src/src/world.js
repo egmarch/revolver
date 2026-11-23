@@ -8,74 +8,107 @@ export const PLAYER_R = 0.3;
 export const STAIR = { x0: -2.0, x1: 2.8, z0: 5.6, z1: 7.1, n: 16, rise: 3.0 };
 
 // --- логика высоты (ступени идут вдоль X, вверх на восток) ---
+let CUR_Y = 0;                                 // этаж игрока: чайхана (y≈3) лежит над тамбуром и залом (y=0)
+export function setLevel(y) { CUR_Y = y; }
+const CHR = [-11.0, 3.0, 0.3, 5.6];
+export const inChai = (x, z) => x >= CHR[0] && x <= CHR[1] && z >= CHR[2] && z <= CHR[3];
 export function groundY(x, z) {
-  if (x >= 2.8 && z >= 5.5) return 3.0;
+  if (CUR_Y > 1.5 && inChai(x, z)) return 3.07;
   if (z >= 5.5 && z <= 7.2 && x > -2.0 && x < 2.8) {
     const k = Math.floor((x - STAIR.x0) / ((STAIR.x1 - STAIR.x0) / STAIR.n));
     return (k + 1) * (STAIR.rise / STAIR.n);
   }
+  if (z >= 5.5 && z < 7.4 && x >= -3.4 && x <= -2.0) return 0;   // площадка внизу лестницы
+  if (z >= 5.5) return 3.0;                                     // улица
   return 0;
 }
 
 // центры допустимых положений (уже отступ от стен)
 export const WALK = [
-  [3.1, 7.8, 5.65, 14.55],      // тротуар
-  [-2.9, 3.4, 5.9, 6.8],        // лестница и площадка
-  [-2.95, -2.25, 4.9, 6.2],     // дверь площадка-тамбур
-  [-3.1, -0.5, 2.5, 5.1],       // тамбур
-  [-0.6, 0.6, 3.25, 3.65],      // дверь тамбур-зал
-  [0.3, 5.7, 0.3, 4.7],         // зал
-  [5.5, 6.5, 3.25, 3.65],       // дверь зал-лаундж
-  [6.4, 8.7, -0.7, 4.7]         // студия звука (одна комната)
+  [3.1, 40, 5.65, 10.6, 'U'],            // тротуар (восток от спуска)
+  [-40, 3.4, 7.8, 10.6, 'U'],            // тротуар южнее парапета спуска
+  [-40, -3.5, 5.65, 7.8, 'U'],           // тротуар западнее спуска, вход в чайхану
+  [-2.9, 3.4, 5.9, 6.8],                 // лестница и площадка
+  [-2.95, -2.25, 4.9, 6.2],              // дверь площадка-тамбур
+  [-3.1, -0.5, 2.5, 5.1, 'D'],           // тамбур
+  [-0.6, 0.6, 3.25, 3.65, 'D'],          // дверь тамбур-зал
+  [0.3, 3.46, 0.3, 4.84, 'D'],           // зал 3,76 x 5,14
+  [3.4, 4.4, 3.25, 3.65, 'D'],           // дверь зал-студия (акустическая стена 25 см)
+  [4.31, 6.61, 0.3, 4.84, 'D'],          // студия звука 2,90 x 5,14
+  [-10.7, 2.7, 0.7, 5.1, 'U'],           // чайхана
+  [-6.6, -5.4, 5.0, 6.0, 'U']            // дверь чайханы
 ];
 // препятствия (сырые прямоугольники x0,x1,z0,z1)
-export const OBST = [
-  [1.9, 5.1, 0.0, 0.7],      // стеллаж
-  [1.05, 1.8, 0.1, 0.95],    // ЭЛТ-стойка
-  [2.42, 3.58, 0.95, 3.15],  // стол
-  [1.72, 2.28, 1.45, 2.0],   // кресло
-  [3.72, 4.15, 1.45, 2.0],   // кресло
-  [5.05, 5.9, 1.0, 1.8],     // столик с чемоданом
-  [5.5, 5.95, 1.95, 2.7],    // гитары
-  [5.2, 5.9, 0.1, 0.9],      // пальма у стеллажа
-  [5.1, 5.9, 4.0, 4.9],      // пальма + конус
-  [0.1, 0.8, 0.1, 0.9],      // пальма у стеллажа
-  [0.1, 0.8, 4.1, 4.9],      // пальма
-  [1.0, 2.9, 4.2, 5.0],      // чёрный диван
-  [6.1, 7.05, 0.1, 2.4],     // пульт
-  [7.1, 7.9, 0.5, 1.5],      // кресло оператора
-  [8.05, 8.55, 3.85, 4.35]   // стойка микрофона
+const OBST_RAW = [
+  [0.21, 3.41, 0.0, 0.7],     // стеллаж
+  [0.2, 0.85, 0.75, 1.35],    // ЭЛТ-стойка
+  [1.43, 2.33, 1.14, 2.84],   // стол
+  [0.85, 1.35, 1.74, 2.24],   // кресло
+  [2.41, 2.91, 1.74, 2.24],   // кресло
+  [3.04, 3.66, 1.32, 1.78],   // столик с чемоданом
+  [3.45, 3.76, 2.2, 2.7],     // гитара Cort на стойке
+  [3.1, 3.7, 0.65, 1.25],     // пальма
+  [0.3, 0.8, 1.55, 2.05],     // пальма у ЭЛТ
+  [0.2, 0.7, 4.45, 4.95],     // пальма
+  [3.22, 3.72, 4.45, 4.95],   // колонка
+  [0.93, 2.83, 4.18, 5.0],    // чёрный диван
+  [4.01, 4.96, 0.24, 2.54],   // пульт
+  [5.01, 5.81, 0.64, 1.64],   // кресло оператора
+  [5.96, 6.46, 3.99, 4.49],   // стойка микрофона
+  [4.06, 5.96, 4.3, 5.0],     // белый диван
+  [4.46, 5.36, 3.78, 4.24],   // стеклянный столик
+  [5.1, 6.7, 0.0, 0.6],       // стол с вертушками
+  [6.6, 6.9, 2.15, 2.6],      // стойка со Stratocaster
+  // чайхана (верхний этаж)
+  [-9.05, -7.75, 0.8, 3.6, 'U'],       // тапчан
+  [-9.0, -7.8, 1.7, 2.7, 'U'],
+  [-8.95, -7.85, 3.8, 4.8, 'U'], [-5.65, -4.55, 1.6, 2.4, 'U'], [-5.65, -4.55, 3.8, 4.6, 'U'], [-2.25, -1.15, 3.8, 4.6, 'U'], [-2.15, -1.05, 1.9, 2.7, 'U'],
+  [-10.85, -7.75, 0.35, 2.45, 'U'],
+  [-0.7, 2.7, 0.3, 1.0, 'U'],          // стойка
+  [-10.6, -10.2, 4.8, 5.2, 'U'], [2.2, 2.6, 4.8, 5.2, 'U'], [-3.8, -3.4, 0.6, 1.0, 'U']
 ];
+export const OBST = OBST_RAW.map(o => o[4] ? o : [o[0], o[1], o[2], o[3], 'D']);
 
 const ZONE_NAMES = {
-  street: ['Улица · Фрунзе 49', 'Ночь. Вход — вниз по лестнице'],
+  street: ['Улица · Фрунзе 49', 'Вечер. Вход — вниз по лестнице. Чайхана — слева от спуска'],
+  chai: ['Чайхана', 'Первый этаж дома 49/3 · заходи и садись'],
   entry: ['Тамбур', 'Направо дверь в студию, прямо — школа диджеев (ремонт)'],
-  hall: ['REVOLVER PODCAST · 30 м²', 'Зал для видеоподкастов'],
-  studio: ['REVOLVER SOUND · 18 м²', 'Комната звукозаписи']
+  hall: ['REVOLVER PODCAST · 19 м²', 'Зал для видеоподкастов · 3,76 × 5,14 м'],
+  studio: ['REVOLVER SOUND · 15 м²', 'Комната звукозаписи · 2,90 × 5,14 м']
 };
 export { ZONE_NAMES };
 
-export function zoneAt(x, z) {
-  if (z > 5.3 && x > -1.9) return 'street';
+export function zoneAt(x, z, y = 0) {
+  if (y > 1.5 && inChai(x, z)) return 'chai';
+  if (z > 5.3 && (x > -1.9 || x < -3.5 || z > 7.4)) return 'street';
   if (x < -0.1) return 'entry';
-  if (x < 6.0) return 'hall';
+  if (x < 3.9) return 'hall';
   return 'studio';
 }
 
 export const TELEPORTS = {
-  1: { x: 5.8, z: 8.25, yaw: 1.07, pitch: -0.18 },
-  2: { x: 3.6, z: 4.62, yaw: 0.12, pitch: -0.02 },
-  3: { x: 7.4, z: 4.7, yaw: 0.2, pitch: -0.1 }
+  1: { x: 5.8, z: 8.25, yaw: 1.07, pitch: -0.18, lv: 3 },
+  4: { x: -5.6, z: 4.7, yaw: 3.14, pitch: -0.05, lv: 3 },
+  2: { x: 1.3, z: 4.1, yaw: -0.3, pitch: -0.05 },
+  3: { x: 6.2, z: 4.55, yaw: 0.35, pitch: -0.1 }
 };
 
 const LIGHTS = {
+  chai: [
+    { p: [-8.0, 5.6, 2.6], c: 0xffa040, i: 16, d: 9 },
+    { p: [-3.0, 5.6, 3.2], c: 0xffb060, i: 16, d: 9 },
+    { p: [1.2, 5.4, 2.2], c: 0xffa850, i: 12, d: 8 },
+    { p: [-9.6, 4.4, 1.4], c: 0xff7040, i: 6, d: 5 },
+    { p: [-5.6, 5.0, 5.0], c: 0xffd9a0, i: 8, d: 6 },
+    { p: [0.8, 4.2, 1.0], c: 0xffe3b8, i: 7, d: 5 }
+  ],
   street: [
-    { p: [6.6, 5.4, 7.0], c: 0xff6a50, i: 22, d: 14 },
-    { p: [3.2, 5.0, 5.95], c: 0xfff1d0, i: 22, d: 12 },
-    { p: [5.6, 7.6, 12.05], c: 0xffa550, i: 110, d: 28 },
-    { p: [-0.9, 2.4, 6.35], c: 0xbfd2ff, i: 16, d: 8 },
-    { p: [9.6, 4.2, 6.35], c: 0x6c8cff, i: 50, d: 20 },
-    { p: [-2.6, 1.7, 5.0], c: 0xd57bff, i: 5, d: 6 }
+    { p: [-60, 40, 30], c: 0xffa060, i: 5200, d: 200 },
+    { p: [3.4, 8.0, 12.0], c: 0xff7ac0, i: 160, d: 38 },
+    { p: [-22, 9.0, 8.0], c: 0x7ae8ff, i: 120, d: 34 },
+    { p: [22, 9.0, 8.0], c: 0xffc47a, i: 120, d: 34 },
+    { p: [-0.9, 5.4, 6.35], c: 0xbfd2ff, i: 18, d: 8 },
+    { p: [5.8, 4.8, 6.4], c: 0xff5a4a, i: 40, d: 12 }
   ],
   entry: [
     { p: [-1.8, 2.4, 3.8], c: 0xffe3b8, i: 8, d: 6 },
@@ -86,24 +119,25 @@ const LIGHTS = {
     { p: [0.6, 2.0, 3.45], c: 0xffffff, i: 2, d: 4 }
   ],
   hall: [
-    { p: [3.0, 2.5, 2.8], c: 0xdfe8ff, i: 9, d: 9 },
-    { p: [3.4, 1.4, 1.0], c: 0x3a62ff, i: 5, d: 4.5 },
-    { p: [5.0, 2.3, 2.4], c: 0xe6ffe8, i: 6, d: 6 },
-    { p: [0.9, 1.6, 2.4], c: 0xff6a3a, i: 4, d: 4.5 },
+    { p: [1.9, 2.55, 2.0], c: 0xdfe8ff, i: 9, d: 9 },
+    { p: [1.9, 1.4, 0.9], c: 0x3a62ff, i: 5, d: 4.5 },
+    { p: [2.8, 2.3, 2.4], c: 0xe6ffe8, i: 6, d: 6 },
+    { p: [0.8, 1.6, 2.0], c: 0xff6a3a, i: 4, d: 4.5 },
     { p: [1.5, 2.4, 4.0], c: 0xffffff, i: 4, d: 6 },
     { p: [0.4, 2.0, 3.45], c: 0xd070ff, i: 2, d: 4 }
   ],
   studio: [
-    { p: [7.0, 1.7, 1.3], c: 0x5aa0ff, i: 16, d: 6 },
-    { p: [7.9, 2.4, 2.8], c: 0xcfe0ff, i: 18, d: 7 },
-    { p: [8.3, 1.4, 0.4], c: 0x3a58ff, i: 9, d: 5 },
-    { p: [7.4, 2.5, 4.2], c: 0x9ab8ff, i: 12, d: 7 },
-    { p: [6.6, 1.4, 3.8], c: 0xff9a60, i: 2.5, d: 3 },
-    { p: [8.5, 1.0, 2.0], c: 0xff2b2b, i: 3, d: 3 }
+    { p: [4.91, 1.7, 1.44], c: 0x5aa0ff, i: 16, d: 6 },
+    { p: [5.81, 2.5, 2.94], c: 0xcfe0ff, i: 18, d: 7 },
+    { p: [6.21, 1.4, 0.54], c: 0x3a58ff, i: 9, d: 5 },
+    { p: [5.31, 2.6, 4.34], c: 0x9ab8ff, i: 12, d: 7 },
+    { p: [4.51, 1.4, 3.94], c: 0xff9a60, i: 2.5, d: 3 },
+    { p: [6.41, 1.0, 2.14], c: 0xff2b2b, i: 3, d: 3 }
   ]
 };
 const FOG = {
-  street: [0x0b1020, 0.022, 0.8],
+  chai: [0x2a1810, 0.035, 0.6],
+  street: [0xe0709c, 0.0085, 0.8],
   entry: [0x120a1a, 0.05, 0.55],
   hall: [0x05060a, 0.05, 0.5],
   studio: [0x03040a, 0.055, 0.45]
@@ -116,7 +150,7 @@ export function buildWorld(opts = {}) {
   scene.fog = new THREE.FogExp2(0x0b1020, 0.022);
 
   const G = {};
-  ['street', 'stairs', 'entry', 'hall', 'studio'].forEach(n => { G[n] = new THREE.Group(); G[n].name = n; scene.add(G[n]); });
+  ['street', 'stairs', 'entry', 'hall', 'studio', 'chai'].forEach(n => { G[n] = new THREE.Group(); G[n].name = n; scene.add(G[n]); });
 
   // ---------- материалы ----------
   const M = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85, metalness: 0 }, o));
@@ -236,104 +270,187 @@ export function buildWorld(opts = {}) {
     s.scale.set(size, size, 1); s.position.set(x, y, z); parent.add(s); return s;
   }
 
+  G.stairs.rotation.y = Math.PI / 2; G.stairs.position.set(-16.4, 0, 10.85);   // лестничная клетка в своих локальных координатах
   // ======================================================
-  //  УЛИЦА
+  //  УЛИЦА: Фрунзе, 49/3. Квартал по OSM: длинный двухэтажный дом, ограждённая дорога
+  //  в 3 полосы (одностороннее движение), чётные дома напротив, 25-этажные башни за домом.
+  //  Мировые координаты. Тротуар на y = 3. Лестница в студию — прежняя (G.stairs).
   // ======================================================
   const S = G.street;
-  [G.street, G.stairs].forEach(g => { g.rotation.y = Math.PI / 2; g.position.set(-16.4, 0, 10.85); });
-  texBox(S, -9, 2.4, 8, 3.75, 3.0, 25, mat.pave, 2);              // левая плита
-  texBox(S, 3.75, 2.4, 19.2, 5.25, 3.0, 25, mat.pave, 2);        // перед лестницей
-  texBox(S, -60, 2.8, 25, 80, 2.9, 80, mat.asphalt, 6);           // проезжая часть
-  texBox(S, -9, 2.75, 24.8, 5.4, 2.95, 25.2, mat.concrete, 1);      // бордюр
-  // разметка
-  const lineM = M(0x9a9a9a, { roughness: 0.6 });
-  for (let i = -8; i < 5; i += 3) plane(S, 1.4, 0.16, lineM, i, 2.915, 31, '+y');
-  for (let i = 0; i < 9; i++) plane(S, 0.5, 5.2, lineM, -3.5 + i * 0.9, 2.915, 28.0, '+y');
-  // фасад дома справа
-  texBox(G.stairs, 5.25, 0, 13.2, 5.45, 3.0, 13.35, mat.brick, 2);
-  texBox(G.stairs, 5.25, 2.1, 13.35, 5.45, 3.0, 14.25, mat.brick, 2);
-  texBox(G.stairs, 5.25, 0, 14.25, 5.45, 3.0, 19.2, mat.brick, 2);                    // кирпичная стена лестницы (низ)
-  texBox(S, 5.25, 3.0, 10, 24, 3.45, 28, mat.darkSteel, 1);                          // карниз-козырёк
-  texBox(S, 5.25, 3.45, 10, 24, 10.5, 28, [mat.concreteDark, mat.facade, mat.concreteDark, mat.concreteDark, mat.facade, mat.concreteDark], [2.4, 2.4]);
-  // низ фасада (витрины) — поверх
-  // вывеска
+  const SY = 3.0, CHY = 3.07;
+  const ldr = new THREE.TextureLoader();
+  const imgTex = (f, rx = 1, ry = 1, rep = false) => { const t = ldr.load('img/' + f); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); } return t; };
+  const litM = (map, k = 0.5, tint = 0xffffff) => new THREE.MeshStandardMaterial({ map, color: tint, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: k, roughness: 0.9 });
+  const decoM = litM(imgTex('facade_deco.jpg', 1, 1, true), 0.5);
+  const panelM = litM(imgTex('facade_panel.jpg', 1, 1, true), 0.7);
+  const shopM = M(0xffffff, { map: T.facade, roughness: 0.4, metalness: 0.2, emissive: 0xffffff, emissiveMap: T.facade, emissiveIntensity: 0.35 });
+  const wallM = M(0xe9cfc6, { roughness: 0.9 });
+  const darkWall = M(0x6a5a78, { roughness: 0.95 });
+
+  // --- земля, тротуар, дорога ---
+  const asph = M(0x3a3446, { roughness: 0.9 });
+  texBox(S, -320, 2.2, 5.6, 320, 2.9, 11.5, mat.concreteDark, 4);   // основание под тротуаром (юг от фасада)
+  texBox(S, -45, 2.4, 5.6, -3.4, SY, 11.2, mat.pave, 2);            // тротуар: запад
+  texBox(S, -3.4, 2.4, 7.4, 2.8, SY, 11.2, mat.pave, 2);            // южнее парапета спуска
+  texBox(S, 2.8, 2.4, 5.6, 45, SY, 11.2, mat.pave, 2);              // восток
+  texBox(S, -320, 2.4, 5.6, -45, SY, 11.2, mat.concrete, 2); texBox(S, 45, 2.4, 5.6, 320, SY, 11.2, mat.concrete, 2);
+  texBox(S, -320, 2.4, 11.2, 320, 3.05, 11.5, mat.concrete, 1);     // бордюр
+  texBox(S, -320, 2.2, 11.5, 320, 2.9, 23.2, asph, 8);              // проезжая часть, 3 полосы
+  texBox(S, -320, 2.4, 23.2, 320, 3.05, 23.5, mat.concrete, 1);
+  texBox(S, -320, 2.4, 23.5, 320, SY, 29.5, mat.pave, 2);           // тротуар напротив
+  texBox(S, -320, 2.0, 29.5, 320, 2.9, 80, mat.concreteDark, 6);
+  const lineM = M(0xe8e0f0, { roughness: 0.6 }), yelM = M(0xf2c14e, { roughness: 0.6 });
+  for (let x = -110; x < 110; x += 6) { B(S, 2.6, 0.012, 0.14, lineM, x, 2.905, 15.35); B(S, 2.6, 0.012, 0.14, lineM, x, 2.905, 19.2); }
+  B(S, 640, 0.012, 0.12, lineM, 0, 2.905, 11.8); B(S, 640, 0.012, 0.12, lineM, 0, 2.905, 22.9);
+  // --- ограждение дороги по обе стороны (пешеходам на проезжую часть нельзя) ---
+  function fence(x0, x1, z) {
+    const m = mat.steel;
+    for (let x = x0; x <= x1; x += 1.6) B(S, 0.06, 1.05, 0.06, M(0x6c5aa8, { roughness: 0.5, metalness: 0.6 }), x, SY + 0.52, z);
+    B(S, x1 - x0, 0.05, 0.05, M(0x6c5aa8, { metalness: 0.6 }), (x0 + x1) / 2, SY + 1.0, z); B(S, x1 - x0, 0.04, 0.04, M(0x6c5aa8, { metalness: 0.6 }), (x0 + x1) / 2, SY + 0.55, z);
+    B(S, x1 - x0, 0.04, 0.04, M(0x6c5aa8, { metalness: 0.6 }), (x0 + x1) / 2, SY + 0.2, z);
+  }
+  fence(-110, 110, 11.65); fence(-110, 110, 23.35);
+  // торцы квартала: заграждение с синим-красным барьером
+  [-42, 42].forEach(x => { B(S, 0.3, 1.2, 5.6, M(0xd9402a, { roughness: 0.6 }), x, SY + 0.6, 8.4); B(S, 0.32, 0.25, 5.6, M(0xf3f3f0), x, SY + 0.9, 8.4); });
+
+  // --- дом 49/3: витрины внизу, окна вверху ---
+  const HB = 10.5;
+  texBox(S, -110, SY, -14, -11.2, 7.0, 5.6, [darkWall, darkWall, darkWall, darkWall, shopM, darkWall], [8, 8]);
+  texBox(S, 3.2, SY, -14, 110, 7.0, 5.6, [darkWall, darkWall, darkWall, darkWall, shopM, darkWall], [8, 8]);
+  texBox(S, -110, 7.0, -14, 110, HB, 5.6, [darkWall, darkWall, mat.concreteDark, darkWall, decoM, darkWall], [7, 3.5]);
+  texBox(S, -110, HB, -14, 110, HB + 0.4, 5.8, mat.concreteDark, 1);
+  B(S, 220, 0.12, 0.3, emi(0xff2e97, 1.6), 0, 7.0, 5.72); B(S, 220, 0.1, 0.12, emi(0x19f0ff, 1.5), 0, HB - 0.1, 5.7);
+  // навесы над витринами соседних магазинов
+  [-34, -26, -19, 7.5, 13, 20, 27, 34].forEach((ax, i) => { const c = [0xff6fa8, 0x3dd6c4, 0xffc15a, 0x9b6cff][i % 4]; B(S, 5.6, 0.12, 1.5, M(c, { roughness: 0.7 }), ax, 5.9, 6.35, 0, 0.18); B(S, 5.6, 0.5, 0.04, M(c, { roughness: 0.7 }), ax, 5.62, 7.05); });
+  // неоновые вывески магазинов (общие, без названий)
+  const nsign = (txt, col, x, y, w) => { const c = TX.cv(512, 128); ART.drawNeonText(c, txt, col, `700 64px ${ART.FONT_HEAD}`); plane(S, w, w / 4, new THREE.MeshBasicMaterial({ map: TX.toTex(c), transparent: true, toneMapped: false, depthWrite: false }), x, y, 5.7, '+z'); glowSprite(S, col, w * 0.9, x, y, 5.9, 0.16); };
+  nsign('КОФЕ', '#19f0ff', -26, 6.4, 2.6); nsign('OPEN', '#ff2e97', 20.5, 6.3, 2.4); nsign('24', '#ffe36a', 34, 6.3, 1.6); nsign('PIZZA', '#ff9a3c', -33.5, 6.4, 2.6); nsign('AUTO', '#7cff6b', 13.6, 6.3, 2.2);
+  // вывеска REVOLVER (прежняя) и красная стрелка вниз над спуском
   const signC = TX.cv(1024, 256); ART.drawSign(signC);
   const signT = TX.toTex(signC);
   const signM = new THREE.MeshBasicMaterial({ map: signT, toneMapped: false });
-  texBox(S, 5.05, 5.3, 19.4, 5.25, 6.9, 26.6, mat.black, 1);
-  plane(S, 7.2, 1.5, signM, 5.04, 6.1, 23.0, '-x');
-  glowSprite(S, 0xff3020, 11, 4.4, 6.1, 23.0, 0.28);
-  // стрелка вниз
+  B(S, 7.4, 1.7, 0.1, mat.black, 7.8, 5.95, 5.66);
+  plane(S, 7.2, 1.5, signM, 7.8, 5.95, 5.72, '+z');
+  glowSprite(S, 0xff3020, 11, 7.8, 5.95, 6.3, 0.26);
   const arrC = TX.cv(128, 160); ART.drawArrow(arrC);
   const arrM = new THREE.MeshBasicMaterial({ map: TX.toTex(arrC), transparent: true, toneMapped: false, depthWrite: false });
-  const arrow = plane(S, 0.9, 1.1, arrM, 4.5, 4.35, 19.0, '+z');
-  const arrow2 = plane(S, 0.9, 1.1, arrM, 4.5, 4.35, 19.0, '-z');
-  glowSprite(S, 0xff3a2a, 2.5, 4.5, 4.35, 19.0, 0.35);
-  // кронштейн стрелки
-  B(S, 0.05, 1.2, 0.05, mat.darkSteel, 4.5, 5.0, 18.8);
-  // шар-фонарь
-  SPH(S, 0.32, emi(0xfff3d8, 1.1), 4.9, 5.0, 19.6);
-  glowSprite(S, 0xfff0cc, 3.4, 4.9, 5.0, 19.6, 0.6);
-  // левый парапет лестницы
-  texBox(G.stairs, 3.45, 0, 13.2, 3.75, 4.0, 19.2, [mat.brick, mat.brick, mat.pave, mat.brick, mat.brick, mat.brick], 2);
-  // кондиционер с тегом
-  const tagC = TX.cv(256, 256); ART.drawTag(tagC);
-  const tagM = M(0xffffff, { map: TX.toTex(tagC), roughness: 0.7 });
-  const acBody = M(0x9a9c98, { roughness: 0.7 });
-  const AC = [acBody, acBody, acBody, acBody, tagM, acBody];
-  texBox(S, 2.5, 3.0, 17.4, 3.4, 4.05, 18.4, AC, 1);
-  // ограждения на тротуаре (вдоль северного края, граница ходьбы)
-  const railM = mat.steel;
-  for (let x = -3.9; x <= 3.5; x += 1.4) B(S, 0.05, 1.0, 0.05, railM, x, 3.5, 19.25);
-  B(S, 7.6, 0.05, 0.05, railM, -0.2, 3.95, 19.25); B(S, 7.6, 0.05, 0.05, railM, -0.2, 3.55, 19.25);
-  // ограждение по бордюру
-  for (let x = -8; x <= 5.2; x += 1.5) B(S, 0.05, 0.95, 0.05, railM, x, 3.47, 24.6);
-  B(S, 13.2, 0.05, 0.05, railM, -1.4, 3.9, 24.6); B(S, 13.2, 0.05, 0.05, railM, -1.4, 3.45, 24.6);
-  // торцевые здания слева и справа
-  const bW = M(0xffffff, { map: TX.toTex(TX.windowsCanvas(31, 8, 12), rep), emissive: 0xffffff, roughness: 0.8 });
-  bW.emissiveMap = bW.map; bW.emissiveIntensity = 0.65;
-  texBox(S, -30, 0, -2, -9, 18, 30, [bW, bW, mat.concreteDark, mat.concreteDark, bW, bW], [6, 6]);
-  // дома через дорогу
-  const bxs = [[-30, 12, 46, 20], [-14, 10, 52, 28], [-2, 14, 47, 18], [14, 10, 50, 32], [26, 12, 46, 22], [40, 14, 52, 26]];
-  bxs.forEach(([bx, bw, bz, bh], i) => {
-    const wm = M(0xffffff, { map: TX.toTex(TX.windowsCanvas(40 + i, 9, 14), rep), emissive: 0xffffff, roughness: 0.9 });
-    wm.emissiveMap = wm.map; wm.emissiveIntensity = 0.55;
-    texBox(S, bx, 0, bz, bx + bw, bh, bz + 10, [wm, wm, mat.concreteDark, mat.concreteDark, wm, wm], [5, 5]);
+  const arrow = plane(S, 0.9, 1.1, arrM, 2.6, 4.35, 6.35, '+z');
+  const arrow2 = plane(S, 0.9, 1.1, arrM, 2.6, 4.35, 6.35, '-z');
+  glowSprite(S, 0xff3a2a, 2.5, 2.6, 4.35, 6.35, 0.35);
+  B(S, 0.05, 1.2, 0.05, mat.darkSteel, 2.6, 5.0, 6.2);
+  SPH(S, 0.32, emi(0xfff3d8, 1.1), 3.4, 5.0, 6.0); glowSprite(S, 0xfff0cc, 3.4, 3.4, 5.0, 6.0, 0.6);
+
+  // --- башни и дома напротив (по OSM): 49 за подиумом, 49/1, 49/2; 86, 88, 96 через дорогу ---
+  const tw = (x0, x1, z0, z1, h, k = 0) => { const m = k ? decoM : panelM; texBox(S, x0, SY - 0.5, z0, x1, h, z1, [m, m, mat.concreteDark, mat.concreteDark, m, m], [12, 9]); };
+  tw(-14, 14, -48, -16, 78); tw(-80, -46, -80, -48, 76); tw(-132, -98, -92, -60, 72);
+  tw(-62, -22, 34, 52, 40); tw(-14, 34, 34, 52, 43); tw(42, 96, 34, 52, 17); tw(-110, -70, 34, 50, 28); tw(100, 150, 34, 56, 36);
+  tw(-30, 30, 70, 96, 60);
+  // --- небо (картинка Higgsfield) и силуэт города на горизонте ---
+  const skyT = imgTex('sky.jpg'); skyT.wrapS = THREE.RepeatWrapping;
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 14, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshBasicMaterial({ map: skyT, side: THREE.BackSide, fog: false, depthWrite: false }));
+  sky.position.y = 2.5; sky.rotation.y = 0.9; sky.renderOrder = -2; S.add(sky);
+  const skyL = imgTex('skyline.png', 3, 1, true);
+  const skl = new THREE.Mesh(new THREE.CylinderGeometry(300, 300, 52, 48, 1, true), new THREE.MeshBasicMaterial({ map: skyL, transparent: true, side: THREE.BackSide, fog: false, depthWrite: false }));
+  skl.position.y = 26; skl.renderOrder = -1; S.add(skl);
+  // --- пальмы-спрайты вдоль тротуаров ---
+  const palmT = [imgTex('palm1.png'), imgTex('palm2.png')];
+  const palmSprite = (x, z, h, k) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: palmT[k], transparent: true, alphaTest: 0.35, fog: true })); sp.center.set(0.5, 0); sp.scale.set(h / 2, h, 1); sp.position.set(x, SY, z); S.add(sp); };
+  for (let x = -40; x <= 40; x += 6.5) palmSprite(x + (x % 13 ? 0.6 : 0), 10.4, 6.4 + (Math.abs(x) % 3), Math.abs(x | 0) % 2);
+  for (let x = -100; x <= 100; x += 7.5) palmSprite(x, 26.5, 8.4 + (Math.abs(x) % 4), Math.abs(x | 0) % 2);
+  // --- фонари, скамейки, урны ---
+  [-36, -18, 0, 18, 36].forEach((lx, i) => {
+    B(S, 0.12, 5.2, 0.12, mat.darkSteel, lx, SY + 2.6, 10.9); B(S, 1.4, 0.1, 0.1, mat.darkSteel, lx, SY + 5.15, 10.55);
+    B(S, 0.6, 0.12, 0.3, emi(i % 2 ? 0xff7ac0 : 0xffc47a, 1.5), lx, SY + 5.05, 10.0);
+    glowSprite(S, i % 2 ? 0xff7ac0 : 0xffb060, 5, lx, SY + 4.95, 10.0, 0.45);
   });
-  // светофор и знак пешеходного перехода
-  const tl = new THREE.Group(); tl.position.set(3.5, 3.0, 25.5); S.add(tl);
-  B(tl, 0.12, 3.6, 0.12, mat.darkSteel, 0, 1.8, 0);
-  B(tl, 0.36, 1.0, 0.3, mat.black, 0, 3.55, 0);
-  SPH(tl, 0.1, emi(0xff2a2a, 1.4), 0, 3.85, 0.17);
-  SPH(tl, 0.1, M(0x222222), 0, 3.55, 0.17);
-  SPH(tl, 0.1, M(0x222222), 0, 3.25, 0.17);
-  glowSprite(tl, 0xff2a2a, 1.3, 0, 3.85, 0.3, 0.8);
-  const psC = TX.cv(128, 128); ART.drawTrafficSign(psC);
-  plane(tl, 0.7, 0.7, new THREE.MeshBasicMaterial({ map: TX.toTex(psC), toneMapped: false }), 0, 2.4, 0.08, '+z');
-  const tl2 = tl.clone(); tl2.position.set(-3.0, 3.0, 25.5); S.add(tl2);
-  // уличные фонари
-  [[-1.2, 22], [-4.5, 22.5]].forEach(([lx, lz]) => {
-    B(S, 0.12, 7.6, 0.12, mat.darkSteel, lx, 3 + 3.8, lz);
-    B(S, 1.2, 0.1, 0.1, mat.darkSteel, lx + 0.5, 10.6, lz);
-    B(S, 0.5, 0.12, 0.3, emi(0xffc47a, 1.4), lx + 1.0, 10.5, lz);
-    glowSprite(S, 0xffb060, 5, lx + 1.0, 10.4, lz, 0.55);
-  });
-  // машины на дороге
+  [-24, 25].forEach(bx => { B(S, 1.6, 0.06, 0.5, M(0x7a4a28), bx, SY + 0.45, 9.4); B(S, 1.6, 0.4, 0.05, M(0x7a4a28), bx, SY + 0.75, 9.18); B(S, 0.06, 0.45, 0.4, mat.black, bx - 0.7, SY + 0.22, 9.4); B(S, 0.06, 0.45, 0.4, mat.black, bx + 0.7, SY + 0.22, 9.4); });
+  CYL(S, 0.22, 0.2, 0.7, M(0x3a8a5a, { roughness: 0.6 }), 11.2, SY + 0.35, 9.0, 12);
+  // --- машины (картинки Higgsfield, движутся по трём полосам в одну сторону) ---
   const cars = [];
-  for (let i = 0; i < 5; i++) {
-    const car = new THREE.Group();
-    B(car, 1.9, 0.5, 4.2, M(i % 2 ? 0x1b2530 : 0x3a2a2a, { roughness: 0.4, metalness: 0.4 }), 0, 0.5, 0);
-    B(car, 1.6, 0.45, 2.2, M(0x0a1018, { roughness: 0.2, metalness: 0.5 }), 0, 0.95, -0.2);
-    B(car, 0.35, 0.14, 0.05, emi(0xffeeb8, 1.5), -0.6, 0.55, 2.12); B(car, 0.35, 0.14, 0.05, emi(0xffeeb8, 1.5), 0.6, 0.55, 2.12);
-    B(car, 0.35, 0.12, 0.05, emi(0xff2020, 1.3), -0.6, 0.55, -2.12); B(car, 0.35, 0.12, 0.05, emi(0xff2020, 1.3), 0.6, 0.55, -2.12);
-    glowSprite(car, 0xfff0c0, 2.2, 0, 0.55, 2.8, 0.35);
-    car.rotation.y = Math.PI / 2;
-    const dir = i % 2 ? 1 : -1;
-    car.userData = { dir, speed: 5 + i * 1.3, x: -30 + i * 15, z: dir > 0 ? 33.5 : 29.5 };
-    if (dir < 0) car.rotation.y = -Math.PI / 2;
-    car.position.set(car.userData.x, 2.9, car.userData.z);
+  const carDefs = [['car_diablo.png', 4.5, 21.3], ['car_testarossa.png', 4.6, 17.5], ['car_muscle.png', 4.8, 13.7], ['car_muscle2.png', 4.6, 21.3], ['car_jeep.png', 4.4, 17.5], ['car_cabrio.png', 5.0, 13.7], ['car_diablo.png', 4.5, 17.5], ['car_muscle.png', 4.8, 21.3]];
+  const carTex = {};
+  carDefs.forEach(([f, w, lz], i) => {
+    const t = carTex[f] || (carTex[f] = imgTex(f));
+    const aspect = { 'car_jeep.png': 234 / 512, 'car_diablo.png': 140 / 512 }[f] || 0.26;
+    const h = w * aspect;
+    const car = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, color: 0xe6d8f0 }));
+    car.rotation.y = Math.PI; car.userData = { dir: -1, speed: 6 + (i * 1.7) % 7, x: -80 + i * 22, z: lz, h };
+    car.position.set(car.userData.x, 2.9 + h / 2, lz);
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.92, 0.5), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.set(0, -h / 2 + 0.02, 0); shadow.rotation.y = 0; car.add(shadow);
     S.add(car); cars.push(car);
-  }
+  });
+
+  // ======================================================
+  //  ЧАЙХАНА (1 этаж дома 49/3, слева от спуска, над тамбуром и залом): вход с тротуара
+  // ======================================================
+  const CH = G.chai;
+  const CX0 = -11.0, CX1 = 3.0, CZ0 = 0.3, CZ1 = 5.4, CTOP = 6.7;
+  const ochre = M(0xd49a58, { roughness: 0.9 });
+  const ornC = TX.cv(256, 128); { const x = ornC.getContext('2d'); x.fillStyle = '#c4703a'; x.fillRect(0, 0, 256, 128);
+    x.fillStyle = '#f3e6c8'; x.fillRect(0, 22, 256, 6); x.fillRect(0, 100, 256, 6);
+    for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? '#1f5f8b' : '#f3e6c8'; x.beginPath(); x.moveTo(i * 32 + 16, 34); x.lineTo(i * 32 + 30, 64); x.lineTo(i * 32 + 16, 94); x.lineTo(i * 32 + 2, 64); x.closePath(); x.fill(); } }
+  const ornT = TX.toTex(ornC); ornT.repeat.set(5, 1); const ornM = M(0xffffff, { map: ornT, roughness: 0.9 });
+  texBox(CH, CX0, 2.96, CZ0, CX1, CHY, CZ1, mat.woodFloor, 1.2);                       // пол
+  texBox(CH, CX0 - 0.2, CHY, CZ0 - 0.2, CX1 + 0.2, CTOP + 0.2, CZ0, [ochre, ochre, ochre, ochre, ochre, ochre], 1);   // задняя стена
+  texBox(CH, CX0 - 0.2, CHY, CZ0, CX0, CTOP + 0.2, CZ1 + 0.2, ochre, 1);
+  texBox(CH, CX1, CHY, CZ0, CX1 + 0.2, CTOP + 0.2, CZ1 + 0.2, ochre, 1);
+  texBox(CH, CX0, CTOP, CZ0, CX1, CTOP + 0.2, CZ1 + 0.2, M(0x5a3a22, { roughness: 0.8 }), 1);   // потолок
+  for (let bx = CX0 + 0.8; bx < CX1; bx += 1.4) B(CH, 0.14, 0.16, CZ1 - CZ0, M(0x3f2616), bx, CTOP - 0.08, (CZ0 + CZ1) / 2);   // балки
+  plane(CH, CX1 - CX0, 1.1, ornM, (CX0 + CX1) / 2, 4.0, CZ0 + 0.01, '+z', [5, 1]);       // орнамент по задней стене
+  plane(CH, CZ1 - CZ0, 1.1, ornM, CX0 + 0.01, 4.0, (CZ0 + CZ1) / 2, '+x', [1.5, 1]);
+  // фасад чайханы: подоконник, стёкла, дверной проём x -6.7…-5.3, вывеска и навес
+  const glassW = new THREE.MeshStandardMaterial({ color: 0xffd9a0, transparent: true, opacity: 0.28, roughness: 0.05, emissive: 0xff9a40, emissiveIntensity: 0.25, depthWrite: false });
+  texBox(CH, CX0, SY, CZ1, -6.7, 4.2, CZ1 + 0.2, wallM, 1); texBox(CH, -5.3, SY, CZ1, CX1, 4.2, CZ1 + 0.2, wallM, 1);
+  texBox(CH, CX0, 6.4, CZ1, CX1, 7.0, CZ1 + 0.2, wallM, 1); texBox(CH, -6.7, 5.4, CZ1, -5.3, 6.4, CZ1 + 0.2, wallM, 1);
+  B(CH, -6.7 - CX0, 2.2, 0.03, glassW, (CX0 - 6.7) / 2, 5.3, CZ1 + 0.1); B(CH, CX1 + 5.3, 2.2, 0.03, glassW, (CX1 - 5.3) / 2, 5.3, CZ1 + 0.1);
+  for (let mx = CX0 + 1.2; mx < CX1; mx += 1.6) if (mx < -7 || mx > -5) B(CH, 0.06, 2.2, 0.05, M(0x6a3a1c), mx, 5.3, CZ1 + 0.12);
+  B(CH, 0.12, 2.4, 0.12, M(0x6a3a1c), -6.7, 4.4, CZ1 + 0.1); B(CH, 0.12, 2.4, 0.12, M(0x6a3a1c), -5.3, 4.4, CZ1 + 0.1);
+  // навес над входом и вывеска
+  for (let i = 0; i < 7; i++) B(CH, 0.62, 0.1, 1.6, M(i % 2 ? 0xf3e6c8 : 0xc4402a, { roughness: 0.8 }), -9.2 + i * 0.62 + 2.2, 6.55, CZ1 + 0.85, 0, 0.16);
+  const chC = TX.cv(512, 128); ART.drawNeonText(chC, 'ЧАЙХАНА', '#ffb347', `700 66px ${ART.FONT_HEAD}`);
+  plane(CH, 3.4, 0.85, new THREE.MeshBasicMaterial({ map: TX.toTex(chC), transparent: true, toneMapped: false, depthWrite: false }), -6.0, 7.55, CZ1 + 0.3, '+z');
+  glowSprite(CH, 0xffa040, 5, -6.0, 7.55, CZ1 + 0.7, 0.22);
+  // «манты» на витрине: доска меню у входа (без цен и рекламы)
+  const mnC = TX.cv(384, 256); { const x = mnC.getContext('2d'); x.fillStyle = '#26211c'; x.fillRect(0, 0, 384, 256); x.strokeStyle = '#8a6a3a'; x.lineWidth = 10; x.strokeRect(5, 5, 374, 246);
+    x.fillStyle = '#f3ead2'; x.textAlign = 'center'; x.font = `700 54px ${ART.FONT_HEAD}`; x.fillText('МАНТЫ', 192, 100); x.font = `600 34px ${ART.FONT_HEAD}`; x.fillText('ПЛОВ · ЧАЙ', 192, 168); x.fillStyle = '#e8a43a'; x.fillRect(80, 190, 224, 4); }
+  plane(CH, 0.8, 0.53, M(0xffffff, { map: TX.toTex(mnC), roughness: 0.9 }), -4.55, 4.9, CZ1 - 0.02, '-z');
+  // низкие столы с подушками и коврами
+  const rugs = [[-9.4, 1.4, -7.4, 3.0, 0xb02a4a], [-9.4, 3.6, -7.4, 5.0, 0x1f5f8b], [-6.2, 1.2, -4.0, 2.9, 0x1f5f8b], [-6.2, 3.6, -4.0, 4.8, 0xb02a4a], [-2.8, 3.4, -0.6, 5.0, 0xb02a4a], [-2.6, 1.6, -0.6, 3.0, 0x2f7a4a]];
+  rugs.forEach(([a, b, c, d, rc]) => { B(CH, c - a, 0.012, d - b, M(rc, { roughness: 1 }), (a + c) / 2, CHY + 0.006, (b + d) / 2); B(CH, c - a - 0.3, 0.014, d - b - 0.3, M(0xf3e6c8, { roughness: 1 }), (a + c) / 2, CHY + 0.008, (b + d) / 2); B(CH, c - a - 0.5, 0.016, d - b - 0.5, M(rc, { roughness: 1 }), (a + c) / 2, CHY + 0.01, (b + d) / 2); });
+  const cushionCols = [0xb02a4a, 0x1f5f8b, 0xe8a43a, 0x2f7a4a, 0x8a3aa0];
+  const tbls = [[-8.4, 2.2], [-8.4, 4.3], [-5.1, 2.0], [-5.1, 4.2], [-1.7, 4.2], [-1.6, 2.3]];
+  tbls.forEach(([tx, tz], i) => {
+    B(CH, 1.1, 0.07, 0.8, M(0x6a3a1c, { roughness: 0.6 }), tx, CHY + 0.38, tz); [[-0.45, -0.3], [0.45, -0.3], [-0.45, 0.3], [0.45, 0.3]].forEach(([a, b]) => B(CH, 0.07, 0.36, 0.07, M(0x4a2a14), tx + a, CHY + 0.18, tz + b));
+    CYL(CH, 0.2, 0.2, 0.025, M(0xf3f1ea, { roughness: 0.3 }), tx, CHY + 0.42, tz, 18); CYL(CH, 0.07, 0.07, 0.1, M(0x1f5f8b), tx + 0.3, CHY + 0.46, tz + 0.15, 10);
+    [[-0.95, 0], [0.95, 0], [0, -0.7], [0, 0.7]].forEach(([ox, oz], k) => B(CH, 0.56, 0.16, 0.56, M(cushionCols[(i + k) % 5], { roughness: 0.9 }), tx + ox, CHY + 0.1, tz + oz, 0.2 * k));
+  });
+  // тапчан: деревянный помост с низким столом в дальнем левом углу
+  B(CH, 3.0, 0.5, 2.0, M(0x7a4a28, { roughness: 0.7 }), -9.3, CHY + 0.25, 1.4 + 0.0); B(CH, 3.1, 0.06, 2.1, M(0x4a2a14), -9.3, CHY + 0.52, 1.4);
+  B(CH, 1.5, 0.3, 0.9, M(0x6a3a1c), -9.3, CHY + 0.7, 1.4); B(CH, 2.7, 0.14, 1.8, M(0xb02a4a, { roughness: 1 }), -9.3, CHY + 0.6, 1.4);
+  // стойка с мантышницами и самоваром
+  B(CH, 3.4, 1.0, 0.7, M(0x7a4a28, { roughness: 0.7 }), 1.0, CHY + 0.5, CZ0 + 0.55); B(CH, 3.5, 0.06, 0.8, M(0xe9c48a), 1.0, CHY + 1.03, CZ0 + 0.55);
+  [-0.2, 0.9].forEach((sx, i) => { for (let k = 0; k < 3; k++) CYL(CH, 0.3, 0.3, 0.16, M(k % 2 ? 0xe8c070 : 0xd9a85a, { roughness: 0.8 }), 0.4 + sx + i * 0.9, CHY + 1.12 + k * 0.17, CZ0 + 0.55, 16); CYL(CH, 0.32, 0.32, 0.04, M(0x8a5a2a), 0.4 + sx + i * 0.9, CHY + 1.66, CZ0 + 0.55, 16); });
+  CYL(CH, 0.18, 0.2, 0.5, mat.gold, 2.2, CHY + 1.3, CZ0 + 0.55, 14); SPH(CH, 0.2, mat.gold, 2.2, CHY + 1.62, CZ0 + 0.55, 1, 0.7, 1);
+  const steam = [0, 1, 2].map(i => glowSprite(CH, 0xffffff, 0.8, 0.4 + i * 0.7, CHY + 2.0, CZ0 + 0.55, 0.3));
+  // полки с чайниками, вазы с цветами, горшки
+  B(CH, 6.0, 0.05, 0.3, M(0x6a3a1c), -2.8, CHY + 2.0, CZ0 + 0.2); B(CH, 4.5, 0.05, 0.3, M(0x6a3a1c), 0.6, CHY + 2.35, CZ0 + 0.2);
+  for (let i = 0; i < 9; i++) { const px = -5.4 + i * 0.65; B(CH, 0.22, 0.24, 0.22, M(i % 2 ? 0x1f5f8b : 0xf3f1ea, { roughness: 0.3 }), px, CHY + 2.15, CZ0 + 0.2); SPH(CH, 0.07, M(0xe8c070, { roughness: 0.4, metalness: 0.7 }), px, CHY + 2.33, CZ0 + 0.2); }
+  tbls.forEach(([tx, tz], i) => { CYL(CH, 0.05, 0.04, 0.14, new THREE.MeshStandardMaterial({ color: 0xcfeaff, transparent: true, opacity: 0.4 }), tx - 0.3, CHY + 0.5, tz - 0.1, 10); [0xff4f9a, 0xffd23a, 0xf4f4f4].forEach((fc, k) => SPH(CH, 0.035, M(fc), tx - 0.3 + (k - 1) * 0.04, CHY + 0.62 + k * 0.01, tz - 0.1, 1, 0.8, 1)); });
+  [[-10.4, 5.0], [2.4, 5.0], [-3.6, 0.8]].forEach(([px, pz]) => { CYL(CH, 0.2, 0.15, 0.4, M(0xb06a3a), px, CHY + 0.2, pz, 12); for (let k = 0; k < 6; k++) { const a = k * 1.05; SPH(CH, 0.2, mat.leaf, px + Math.cos(a) * 0.15, CHY + 0.8 + (k % 3) * 0.2, pz + Math.sin(a) * 0.15, 0.5, 1.6, 0.5); } });
+  // фонари под потолком
+  [[-9.5, 2.2], [-7.0, 4.0], [-4.5, 2.2], [-2.0, 4.0], [0.0, 2.4], [-6.2, 0.9], [1.8, 4.6], [-10.2, 4.6]].forEach(([lx, lz]) => {
+    B(CH, 0.012, 0.012, 0.012, mat.black, lx, CTOP - 0.1, lz); CYL(CH, 0.012, 0.012, 0.8, mat.black, lx, CTOP - 0.4, lz, 6);
+    CYL(CH, 0.16, 0.12, 0.3, emi(0xffa040, 1.3), lx, CTOP - 0.95, lz, 10); glowSprite(CH, 0xffa040, 2.0, lx, CTOP - 0.95, lz, 0.38);
+  });
+  // гирлянда над входом на тротуаре
+  for (let i = 0; i < 14; i++) B(S, 0.1, 0.1, 0.1, emi(i % 2 ? 0xffb347 : 0xff6fa8, 1.6), -9.4 + i * 0.5, 6.1 + Math.sin(i * 0.9) * 0.08, 7.0);
+
+  // стены лестничной клетки (прежние)
+  texBox(G.stairs, 5.25, 0, 13.2, 5.45, 3.0, 13.35, mat.brick, 2);
+  texBox(G.stairs, 5.25, 2.1, 13.35, 5.45, 3.0, 14.25, mat.brick, 2);
+  texBox(G.stairs, 5.25, 0, 14.25, 5.45, 3.0, 19.2, mat.brick, 2);                    // кирпичная стена лестницы (низ)
+  texBox(G.stairs, 3.45, 0, 13.2, 3.75, 4.0, 19.2, [mat.brick, mat.brick, mat.pave, mat.brick, mat.brick, mat.brick], 2);
 
   // ======================================================
   //  ЛЕСТНИЦА И ЛЕСТНИЧНАЯ КЛЕТКА
@@ -398,7 +515,7 @@ export function buildWorld(opts = {}) {
   //  ТАМБУР (после поворота направо от лестницы)
   // ======================================================
   const E = G.entry;
-  const wy = 2.8;
+  const wy = 2.96;
   const newsW = mat.news;
   const wM = M(0xefedf2, { roughness: 0.5 });
   const dk = mat.concreteDark;
@@ -445,49 +562,50 @@ export function buildWorld(opts = {}) {
   //  ЗАЛ REVOLVER PODCAST
   // ======================================================
   const H = G.hall;
+  const HW = 3.76, HD = 5.14;   // подкастная по эскизу и экспорту Cinema 4D
   // пол/потолок
-  texBox(H, 0, -0.1, 0, 6, 0, 5, mat.blueCarpet, 1.0);
-  texBox(H, 0, wy, 0, 6, wy + 0.1, 5, mat.ceil, 1);
+  texBox(H, 0, -0.1, 0, HW, 0, HD, mat.blueCarpet, 1.0);
+  texBox(H, 0, wy, 0, HW, wy + 0.1, HD, mat.ceil, 1);
   // северная стена — тёмный бетон/металл
-  texBox(H, -0.2, 0, -0.2, 6.1, wy + 0.1, 0, [mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, M(0x0f1013)], 2);
+  texBox(H, -0.2, 0, -0.2, HW + 0.25, wy + 0.1, 0, [mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark, M(0x0f1013)], 2);
   // западная — красный ковёр
   const wDz0 = 3.0, wDz1 = 3.9;
   const wmW = [mat.concreteDark, newsW, mat.concreteDark, mat.concreteDark, mat.concreteDark, mat.concreteDark];
   texBox(H, -0.2, 0, 0, 0, wy + 0.1, wDz0, wmW, 1);
-  texBox(H, -0.2, 0, wDz1, 0, wy + 0.1, 5, wmW, 1);
+  texBox(H, -0.2, 0, wDz1, 0, wy + 0.1, HD, wmW, 1);
   texBox(H, -0.2, 2.1, wDz0, 0, wy + 0.1, wDz1, wmW, 1);
-  plane(H, 3.0, 2.8, mat.carpetRed, 0.012, 1.4, 1.5, '+x', [3.33, 3.11]);
-  plane(H, 1.1, 2.8, mat.carpetRed, 0.012, 1.4, 4.45, '+x', [1.22, 3.11]);
+  plane(H, 3.0, wy, mat.carpetRed, 0.012, wy / 2, 1.5, '+x', [3.33, 3.11]);
+  plane(H, HD - 3.9, wy, mat.carpetRed, 0.012, wy / 2, (3.9 + HD) / 2, '+x', [HD - 3.9 + 0.12, 3.11]);
   plane(H, 0.9, 0.7, mat.carpetRed, 0.012, 2.45, 3.45, '+x', [1.0, 0.78]);
   addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: wM, cx: -0.1, cz: 3.45 });
   B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz0 - 0.03); B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz1 + 0.03); B(H, 0.1, 0.06, 1.0, wM, -0.1, 2.13, 3.45);
   // южная стена с дверью: шторы
-  texBox(H, -0.2, 0, 5.0, 6.1, wy + 0.1, 5.2, mat.concreteDark, 2);
-  plane(H, 6.0, 2.8, mat.curtain, 3.0, 1.4, 4.97, '-z', [6, 1]);
+  texBox(H, -0.2, 0, HD, HW + 0.25, wy + 0.1, HD + 0.2, mat.concreteDark, 2);
+  plane(H, HW, wy, mat.curtain, HW / 2, wy / 2, HD - 0.03, '-z', [HW, 1]);
   // восточная стена (граффити). Тело стены:
   const doorZ0 = 3.0, doorZ1 = 3.9;
-  texBox(H, 5.9, 0, 0, 6.1, wy + 0.1, doorZ0, mat.black, 1);
-  texBox(H, 5.9, 0, doorZ1, 6.1, wy + 0.1, 5, mat.black, 1);
-  texBox(H, 5.9, 2.1, doorZ0, 6.1, wy + 0.1, doorZ1, mat.black, 1);
+  texBox(H, HW, 0, 0, HW + 0.25, wy + 0.1, doorZ0, mat.black, 1);
+  texBox(H, HW, 0, doorZ1, HW + 0.25, wy + 0.1, HD, mat.black, 1);
+  texBox(H, HW, 2.1, doorZ0, HW + 0.25, wy + 0.1, doorZ1, mat.black, 1);
   // холст
-  const muralC = TX.cv(2048, 1152);
-  const doorRect = { x: doorZ0 / 5 * 2048, y: 1152 - 2.1 / 2.8 * 1152, w: (doorZ1 - doorZ0) / 5 * 2048, h: 2.1 / 2.8 * 1152 };
+  const muralC = TX.cv(2048, 1180);
+  const doorRect = { x: doorZ0 / HD * 2048, y: 1180 - 2.1 / wy * 1180, w: (doorZ1 - doorZ0) / HD * 2048, h: 2.1 / wy * 1180 };
   const muralT = TX.toTex(muralC);
   const redrawMural = () => { ART.drawMural(muralC, doorRect); muralT.needsUpdate = true; };
   redrawMural();
   const muralM = M(0xffffff, { map: muralT, roughness: 0.9, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: muralT, emissiveIntensity: 0.18 });
-  const muralPl = plane(H, 5, 2.8, muralM, 5.888, 1.4, 2.5, '-x');
+  const muralPl = plane(H, HD, wy, muralM, HW - 0.012, wy / 2, HD / 2, '-x');
   // дверь
   const dsC = TX.cv(384, 896); ART.drawDoorStencil(dsC);
   const dsT = TX.toTex(dsC);
   const dsM = M(0xffffff, { map: dsT, roughness: 0.6 });
   const redrawDoor = () => { ART.drawDoorStencil(dsC); dsT.needsUpdate = true; };
-  const mdoor = addDoor(H, { axis: 'x', hx: 5.97, hz: doorZ1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: [wM, dsM, wM, wM, wM, wM], cx: 5.97, cz: 3.45 });
+  const mdoor = addDoor(H, { axis: 'x', hx: HW + 0.07, hz: doorZ1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: [wM, dsM, wM, wM, wM, wM], cx: HW + 0.07, cz: 3.45 });
   // зелёная рамка двери
-  B(H, 0.22, 2.12, 0.06, M(0x0f8a3a), 6.0, 1.06, doorZ0 - 0.03); B(H, 0.22, 2.12, 0.06, M(0x0f8a3a), 6.0, 1.06, doorZ1 + 0.03); B(H, 0.22, 0.06, 1.0, M(0x0f8a3a), 6.0, 2.13, 3.45);
+  B(H, 0.3, 2.12, 0.06, M(0x0f8a3a), HW + 0.12, 1.06, doorZ0 - 0.03); B(H, 0.3, 2.12, 0.06, M(0x0f8a3a), HW + 0.12, 1.06, doorZ1 + 0.03); B(H, 0.3, 0.06, 1.0, M(0x0f8a3a), HW + 0.12, 2.13, 3.45);
   // конусы
   const coneG = new THREE.ConeGeometry(0.13, 0.5, 14);
-  [[5.55, 4.45], [5.75, 4.1]].forEach(([cx, cz], i) => {
+  [[3.4, 4.45], [3.58, 4.1]].forEach(([cx, cz], i) => {
     const m = new THREE.Mesh(coneG, M(0xff6a1a, { roughness: 0.6 })); m.position.set(cx, 0.25, cz); H.add(m);
     CYL(H, 0.115, 0.125, 0.07, M(0xf3f3f0), cx, 0.26, cz, 14); CYL(H, 0.09, 0.1, 0.07, M(0xf3f3f0), cx, 0.37, cz, 14);
     B(H, 0.34, 0.03, 0.34, M(0x222), cx, 0.015, cz);
@@ -501,12 +619,76 @@ export function buildWorld(opts = {}) {
     B(g, 0.05, 0.62, 0.025, M(0x2a1a10), 0, 0.98, 0); B(g, 0.07, 0.14, 0.02, M(0x151515), 0, 1.35, 0);
     return g;
   }
-  guitar(H, 5.78, 2.15, 0, 0xf3efe6, 'ac', 0.22);
-  const eg = guitar(H, 5.72, 2.5, 0, 0x0e5f45, 'el', 0.16);
-  eg.rotation.y = -0.2;
+  // ---------- гитары: Cort в стиле Les Paul (зелёный флейм) и Stratocaster-копия ----------
+  const spl = (pts) => { const sp = new THREE.Shape(); sp.moveTo(pts[0][0], pts[0][1]); sp.splineThru(pts.slice(1).concat([pts[0]]).map(p => new THREE.Vector2(p[0], p[1]))); return sp; };
+  const LP_PTS = [[-0.07, 0.47], [-0.115, 0.44], [-0.135, 0.38], [-0.12, 0.31], [-0.105, 0.26], [-0.14, 0.2], [-0.165, 0.1], [-0.16, 0.01], [-0.1, -0.045], [0, -0.055], [0.1, -0.045], [0.16, 0.01], [0.165, 0.1], [0.145, 0.2], [0.125, 0.27], [0.1, 0.31], [0.095, 0.36], [0.075, 0.44], [0.04, 0.47]];
+  const ST_PTS = [[-0.05, 0.47], [-0.085, 0.5], [-0.12, 0.47], [-0.115, 0.4], [-0.1, 0.33], [-0.105, 0.27], [-0.14, 0.22], [-0.165, 0.12], [-0.16, 0.02], [-0.1, -0.045], [0, -0.055], [0.1, -0.045], [0.16, 0.02], [0.165, 0.12], [0.14, 0.2], [0.1, 0.26], [0.115, 0.34], [0.13, 0.42], [0.115, 0.48], [0.07, 0.49], [0.04, 0.47]];
+  function flameMap(a, b, seed) {
+    const c = TX.cv(128, 256), x = c.getContext('2d'), r = TX.rng(seed);
+    const g = x.createLinearGradient(0, 0, 128, 256); g.addColorStop(0, a); g.addColorStop(1, b);
+    x.fillStyle = g; x.fillRect(0, 0, 128, 256);
+    for (let i = 0; i < 46; i++) { x.strokeStyle = `rgba(${r() < 0.5 ? '200,255,230' : '10,60,50'},${0.06 + r() * 0.14})`; x.lineWidth = 2 + r() * 5; x.beginPath(); const y0 = r() * 256; x.moveTo(0, y0); x.bezierCurveTo(40, y0 + (r() - 0.5) * 60, 90, y0 + (r() - 0.5) * 60, 128, y0 + (r() - 0.5) * 50); x.stroke(); }
+    const t = TX.toTex(c); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.repeat.set(1 / 0.36, 1 / 0.56); t.offset.set(0.5, 0.1); return t;
+  }
+  const gtrBody = (pts, topMat, sideMat, depth) => {
+    const geo = new THREE.ExtrudeGeometry(spl(pts), { depth, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 1, curveSegments: low ? 6 : 10 });
+    const me = new THREE.Mesh(geo, [topMat, sideMat]); me.position.z = -depth / 2; return me;
+  };
+  const chromeM = M(0xcfd3d8, { roughness: 0.25, metalness: 0.95 }), goldM = M(0xd9b24a, { roughness: 0.3, metalness: 0.9 });
+  function neckAndHead(g, neckCol, fingerCol, headCol, strat) {
+    B(g, 0.046, 0.55, 0.026, M(neckCol, { roughness: 0.5 }), 0, 0.47 + 0.275, -0.002);
+    B(g, 0.042, 0.52, 0.006, M(fingerCol, { roughness: 0.55 }), 0, 0.47 + 0.27, 0.014);
+    for (const f of [0.1, 0.16, 0.21, 0.255, 0.295, 0.33, 0.36, 0.385]) B(g, 0.043, 0.0016, 0.008, chromeM, 0, 0.47 + f * 1.3 - 0.02, 0.016);
+    [0.15, 0.27, 0.36, 0.45].forEach(d => SPH(g, 0.005, M(0xefe9d0), 0, 0.47 + d, 0.019));
+    const hy = 0.47 + 0.55 + 0.08;
+    B(g, strat ? 0.062 : 0.06, 0.17, 0.02, M(headCol, { roughness: 0.4 }), 0, hy, -0.002);
+    for (let i = 0; i < 6; i++) {
+      const side = strat ? 1 : (i < 3 ? -1 : 1), k = strat ? i : i % 3;
+      CYL(g, 0.007, 0.007, 0.02, chromeM, side * 0.036, hy - 0.06 + k * (strat ? 0.026 : 0.045), 0.0, 8, 0, Math.PI / 2);
+    }
+    B(g, 0.046, 0.008, 0.014, M(0xefe9d0), 0, 0.47 + 0.55 + 0.002, 0.012);
+  }
+  function guitarLP(parent, x, z, ry, tilt = -0.14) {
+    const root = new THREE.Group(); root.position.set(x, 0.06, z); root.rotation.y = ry; parent.add(root);
+    const g = new THREE.Group(); g.rotation.x = tilt; root.add(g);
+    const top = new THREE.MeshStandardMaterial({ map: flameMap('#0e8f7a', '#05402f', 71), roughness: 0.22, metalness: 0.15 });
+    g.add(gtrBody(LP_PTS, top, M(0x0a0a0c, { roughness: 0.3 }), 0.05));
+    neckAndHead(g, 0x6a3a1c, 0x2a160c, 0x15100d, false);
+    const pu = M(0xe9dfc2, { roughness: 0.5 });
+    [0.4, 0.22].forEach((py) => { B(g, 0.082, 0.04, 0.016, pu, 0, py, 0.03); for (let k = 0; k < 6; k++) { SPH(g, 0.004, chromeM, -0.032 + k * 0.0128, py - 0.009, 0.039); SPH(g, 0.004, chromeM, -0.032 + k * 0.0128, py + 0.009, 0.039); } });
+    B(g, 0.1, 0.012, 0.012, chromeM, 0, 0.115, 0.032); B(g, 0.1, 0.014, 0.014, chromeM, 0, 0.05, 0.032);
+    const amber = M(0xe89a1a, { roughness: 0.3 });
+    [[0.075, 0.03], [0.1, 0.085], [0.07, 0.15], [0.11, 0.2]].forEach(([kx, ky]) => { CYL(g, 0.014, 0.012, 0.022, amber, kx, ky, 0.04, 12, Math.PI / 2); });
+    B(g, 0.03, 0.01, 0.01, goldM, -0.095, 0.3, 0.03);
+    return root;
+  }
+  function guitarStrat(parent, x, z, ry, tilt = -0.14) {
+    const root = new THREE.Group(); root.position.set(x, 0.06, z); root.rotation.y = ry; parent.add(root);
+    const g = new THREE.Group(); g.rotation.x = tilt; root.add(g);
+    const body = M(0x19b9ad, { roughness: 0.2, metalness: 0.2 });
+    g.add(gtrBody(ST_PTS, body, body, 0.045));
+    const pg = spl(ST_PTS.map(p => [p[0] * 0.8, (p[1] - 0.2) * 0.78 + 0.2]));
+    const pgm = new THREE.Mesh(new THREE.ShapeGeometry(pg), M(0xf3f0e6, { roughness: 0.4 })); pgm.position.z = 0.0275; g.add(pgm);
+    neckAndHead(g, 0xd9b36a, 0xc79a52, 0xd9b36a, true);
+    const wh = M(0xf5f2e8, { roughness: 0.4 });
+    [0.4, 0.3, 0.2].forEach((py) => { B(g, 0.085, 0.022, 0.014, wh, 0, py, 0.036); for (let k = 0; k < 6; k++) SPH(g, 0.0035, chromeM, -0.032 + k * 0.0128, py, 0.044); });
+    B(g, 0.11, 0.07, 0.014, chromeM, 0, 0.1, 0.034); B(g, 0.1, 0.012, 0.016, chromeM, 0, 0.14, 0.04);
+    [[0.04, 0.17], [0.075, 0.115], [0.095, 0.065]].forEach(([kx, ky]) => CYL(g, 0.012, 0.011, 0.02, wh, kx + 0.01, ky - 0.02, 0.04, 10, Math.PI / 2));
+    CYL(g, 0.012, 0.012, 0.012, chromeM, -0.06, 0.02, 0.03, 10, Math.PI / 2);
+    return root;
+  }
+  function gStand(parent, x, z, ry) {
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; parent.add(g);
+    const bm = mat.black;
+    for (let i = 0; i < 3; i++) { const a = i * 2.094 + 0.5; B(g, 0.02, 0.02, 0.3, bm, Math.cos(a) * 0.1, 0.012, Math.sin(a) * 0.1, -a + Math.PI / 2); }
+    CYL(g, 0.012, 0.012, 0.5, bm, 0, 0.26, 0, 8);
+    B(g, 0.22, 0.02, 0.02, bm, 0, 0.5, 0); B(g, 0.02, 0.18, 0.02, bm, 0, 0.58, -0.07);
+    return g;
+  }
+  { gStand(H, 3.5, 2.45, -Math.PI / 2); guitarLP(H, 3.52, 2.45, -Math.PI / 2, -0.1); }
 
   // --- стеллаж ---
-  const sh = new THREE.Group(); H.add(sh);
+  const sh = new THREE.Group(); sh.position.x = -1.69; H.add(sh);   // стеллаж 3,2 м вдоль северной стены
   const shMat = M(0x666c73, { roughness: 0.35, metalness: 0.9 });
   [[1.9, 0.12], [5.1, 0.12], [1.9, 0.62], [5.1, 0.62]].forEach(([px, pz]) => B(sh, 0.05, 2.15, 0.05, shMat, px, 1.075, pz));
   const levels = [0.15, 0.78, 1.38, 1.98];
@@ -537,10 +719,10 @@ export function buildWorld(opts = {}) {
     glowSprite(g, 0x70ff90, w * 1.6, -0.02 * w, w * 0.45, w * 0.5, 0.18);
     return g;
   }
-  crt(H, 1.4, 0.0, 0.55, 0.56, crtT[0]);
-  crt(H, 1.4, 0.48, 0.55, 0.5, crtT[1]);
-  crt(H, 4.55, 1.4, 0.42, 0.34, crtT[0]);
-  B(H, 0.6, 0.02, 0.6, M(0x222), 1.4, 0.01, 0.55);
+  crt(H, 0.5, 0.0, 1.05, 0.56, crtT[0], 0.5);
+  crt(H, 0.5, 0.48, 1.05, 0.5, crtT[1], 0.4);
+  crt(sh, 4.55, 1.4, 0.42, 0.34, crtT[0]);
+  B(H, 0.6, 0.02, 0.6, M(0x222), 0.5, 0.01, 1.05, 0.5);
   // техника на полках
   // турнтейбл
   B(sh, 0.5, 0.1, 0.38, M(0xc9c4b4, { roughness: 0.5 }), 3.4, 0.85, 0.37);
@@ -571,9 +753,13 @@ export function buildWorld(opts = {}) {
   [-0.15, 0.15].forEach(sx => { CYL(bb, 0.06, 0.06, 0.01, M(0x151515), sx, 0, 0.08, 16, Math.PI / 2); });
   B(bb, 0.1, 0.06, 0.012, M(0x222), 0, 0.03, 0.078);
   // скейтборд красный
-  { const gl = guitar(sh, 3.9, 0.37, 0, 0xa3281f, 'el', 0); gl.position.y = 2.1; gl.rotation.set(0, 0, Math.PI / 2); gl.rotation.y = 0.05; }
-  guitar(H, 1.78, 0.62, 0.2, 0x1a3a66, 'ac', 0.08);
-  guitar(H, 5.28, 0.62, -0.1, 0xd9a24a, 'ac', -0.08);
+  { // скейтборд (красная дека с графикой) стоит на верхней полке
+    const sk = new THREE.Group(); sk.position.set(3.9, 2.32, 0.4); sk.rotation.set(0, 0.04, Math.PI / 2 - 0.15); sh.add(sk);
+    const deck = M(0xc9381f, { roughness: 0.4 });
+    B(sk, 0.2, 0.012, 0.8, deck, 0, 0, 0); B(sk, 0.2, 0.012, 0.1, deck, 0, 0.012, 0.42, 0, -0.35); B(sk, 0.2, 0.012, 0.1, deck, 0, 0.012, -0.42, 0, 0.35);
+    B(sk, 0.14, 0.013, 0.5, M(0xf1c40f, { roughness: 0.5 }), 0, 0.0005, 0);
+    [[0.09, 0.26], [-0.09, 0.26], [0.09, -0.26], [-0.09, -0.26]].forEach(([wx, wz]) => CYL(sk, 0.03, 0.03, 0.04, M(0xf3f3ef), wx, -0.03, wz, 10, 0, Math.PI / 2));
+  }
   // синтезатор
   B(sh, 0.72, 0.05, 0.26, M(0x15171a, { roughness: 0.5 }), 4.55, 0.2, 0.37);
   B(sh, 0.66, 0.012, 0.1, M(0xf2efe6, { roughness: 0.5 }), 4.55, 0.23, 0.42);
@@ -585,49 +771,85 @@ export function buildWorld(opts = {}) {
   B(sh, 0.3, 0.14, 0.2, M(0x333), 2.2, 0.22, 0.37); B(sh, 0.25, 0.1, 0.25, M(0x6c4a2e), 3.0, 0.2, 0.37);
   B(sh, 0.36, 0.15, 0.22, M(0xb9b3a0), 3.7, 0.24, 0.37);
   // потолочные рельсы
-  [1.3, 3.2].forEach(z => B(H, 6, 0.04, 0.04, mat.darkSteel, 3, 2.72, z));
-  [0.7, 5.3].forEach(x => B(H, 0.04, 0.04, 5, mat.darkSteel, x, 2.72, 2.5));
+  [1.3, 3.2].forEach(z => B(H, HW, 0.04, 0.04, mat.darkSteel, HW / 2, 2.88, z));
+  [0.7, 3.06].forEach(x => B(H, 0.04, 0.04, HD, mat.darkSteel, x, 2.88, HD / 2));
   // потолочные софитчики
-  SPH(H, 0.07, emi(0xffffff, 1.6), 3.4, 2.72, 1.25); glowSprite(H, 0xffffff, 1.0, 3.4, 2.68, 1.25, 0.6);
-  // --- стол ---
+  SPH(H, 0.07, emi(0xffffff, 1.6), 1.9, 2.84, 1.3); glowSprite(H, 0xffffff, 1.0, 1.9, 2.8, 1.3, 0.6);
+  // --- стол: цельная плита с «живым» краем на чёрных ножках (по фото и Cinema 4D) ---
   const tbl = new THREE.Group(); H.add(tbl);
   const dark = M(0x1c120b, { roughness: 0.6 });
-  const topM = new THREE.MeshStandardMaterial({ map: T.tableWood, roughness: 0.55, color: 0x8f7d6c, emissive: 0x2a1608, emissiveMap: T.tableWood, emissiveIntensity: 0.1 });
+  const topM = new THREE.MeshStandardMaterial({ map: T.tableWood, roughness: 0.5, color: 0x8f7d6c, emissive: 0x2a1608, emissiveMap: T.tableWood, emissiveIntensity: 0.12 });
   {
-    const g = new THREE.BoxGeometry(1.0, 0.07, 2.2);
+    const tw = 0.9, tl = 1.7, tx = HW / 2, tz = 1.99;
+    const g = new THREE.BoxGeometry(tw, 0.06, tl);
     const tt = new THREE.Mesh(g, [dark, dark, topM, dark, dark, dark]);
-    tt.position.set(3.0, 0.76, 2.05); tbl.add(tt);
-    // подрисовать UV верха: ширина по x, длина по z; текстура 170x640 (длинная вдоль v)
+    tt.position.set(tx, 0.76, tz); tbl.add(tt);
+    B(tbl, 0.04, 0.05, 0.5, dark, tx - tw / 2 - 0.012, 0.76, tz - 0.3); B(tbl, 0.04, 0.05, 0.4, dark, tx + tw / 2 + 0.012, 0.76, tz + 0.35);
+    [[-0.34, -0.7], [0.34, -0.7], [-0.34, 0.7], [0.34, 0.7]].forEach(([lx, lz]) => { B(tbl, 0.05, 0.73, 0.05, mat.black, tx + lx, 0.365, tz + lz); });
+    B(tbl, 0.7, 0.04, 0.05, mat.black, tx, 0.7, tz - 0.7); B(tbl, 0.7, 0.04, 0.05, mat.black, tx, 0.7, tz + 0.7);
   }
-  [[2.6, 1.05], [3.4, 1.05], [2.6, 3.05], [3.4, 3.05]].forEach(([lx, lz]) => B(tbl, 0.05, 0.72, 0.05, mat.black, lx, 0.36, lz));
-  // микрофоны на журавлях
-  [[2.6, 1.0, 0], [3.0, 1.0, 0], [3.4, 1.0, 0]].forEach(([mx, mz, lean]) => {
-    B(tbl, 0.07, 0.07, 0.06, mat.black, mx, 0.8, mz);
-    B(tbl, 0.025, 0.55, 0.025, mat.black, mx, 1.1, mz);
-    B(tbl, 0.025, 0.025, 0.4, mat.black, mx, 1.36, mz + 0.18, 0, 0, 0);
-    CYL(tbl, 0.035, 0.035, 0.16, M(0x2a2c30, { roughness: 0.4, metalness: 0.6 }), mx, 1.34, mz + 0.34, 12, Math.PI / 2);
-    CYL(tbl, 0.045, 0.045, 0.07, M(0xd9c24a, { roughness: 0.4, metalness: 0.8 }), mx, 1.34, mz + 0.4, 12, Math.PI / 2);
-  });
+  // микрофон AT2020 в «пауке» + сетчатый поп-фильтр на чёрном журавле, струбцина на краю стола
+  const meshC = TX.cv(32, 32); { const x = meshC.getContext('2d'); x.fillStyle = '#0d0d0f'; x.fillRect(0, 0, 32, 32); x.strokeStyle = '#3a3a3f'; x.lineWidth = 1; for (let i = 0; i < 32; i += 4) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 32); x.moveTo(0, i); x.lineTo(32, i); x.stroke(); } }
+  const meshT = TX.toTex(meshC); meshT.repeat.set(3, 2);
+  const popM = new THREE.MeshStandardMaterial({ map: meshT, roughness: 0.8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+  function boomMic(clampX, clampZ, tx, ty, tz) {
+    const g = new THREE.Group(); g.position.set(clampX, 0.79, clampZ); tbl.add(g);
+    const bk = M(0x0d0d10, { roughness: 0.5, metalness: 0.3 });
+    B(g, 0.07, 0.085, 0.06, bk, 0, -0.02, 0);
+    CYL(g, 0.014, 0.014, 0.22, bk, 0, 0.14, 0, 8);
+    SPH(g, 0.028, bk, 0, 0.26, 0);
+    const dx = tx - clampX, dz = tz - clampZ, len = Math.hypot(dx, dz);
+    const arm = new THREE.Group(); arm.position.set(0, 0.26, 0); arm.rotation.y = Math.atan2(dx, dz); g.add(arm);
+    const rise = ty - 0.79 - 0.26, ang = Math.atan2(rise, len - 0.04), L = Math.hypot(rise, len - 0.04);
+    const seg = B(arm, 0.022, 0.022, L, bk, 0, rise / 2, (len - 0.04) / 2); seg.rotation.x = -ang;
+    SPH(arm, 0.022, bk, 0, rise, len - 0.04);
+    const mic = new THREE.Group(); mic.position.set(0, rise, len); mic.rotation.set(Math.PI / 2 - 0.35, 0, 0); arm.add(mic);
+    CYL(mic, 0.0245, 0.0245, 0.15, bk, 0, 0, 0, 14);
+    CYL(mic, 0.0262, 0.0262, 0.04, M(0x2b2b30, { roughness: 0.35, metalness: 0.8 }), 0, 0.095, 0, 14);
+    CYL(mic, 0.0268, 0.0268, 0.006, chromeM, 0, 0.06, 0, 14);
+    for (const yy of [-0.03, 0.05]) { const tr = new THREE.Mesh(new THREE.TorusGeometry(0.043, 0.0035, 6, 18), bk); tr.rotation.x = Math.PI / 2; tr.position.y = yy; mic.add(tr); }
+    [[0.04, 0], [-0.04, 0], [0, 0.04], [0, -0.04]].forEach(([qx, qz]) => { B(mic, 0.003, 0.09, 0.003, bk, qx, 0.01, qz); });
+    CYL(mic, 0.012, 0.012, 0.05, chromeM, 0, -0.1, 0, 8);
+    const pf = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.13, 18, 1, true, -Math.PI / 2, Math.PI), popM);
+    pf.position.set(0, 0.07, 0.03); mic.add(pf);
+    return g;
+  }
+  boomMic(1.46, 2.45, 1.12, 1.18, 1.8);
+  boomMic(2.3, 2.45, 2.64, 1.18, 1.8);
+  boomMic(1.88, 1.18, 1.88, 1.16, 1.5);
   // кресла
   function chair(x, z, ry) {
     const c = new THREE.Group(); c.position.set(x, 0, z); c.rotation.y = ry; H.add(c);
-    const vm = new THREE.MeshStandardMaterial({ color: 0x59616b, roughness: 1, side: THREE.DoubleSide });
+    const vm = new THREE.MeshStandardMaterial({ color: 0x1b1c21, roughness: 0.85, side: THREE.DoubleSide });
     CYL(c, 0.27, 0.25, 0.1, vm, 0, 0.46, 0, 20);
     const back = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.42, 20, 1, true, Math.PI * 0.38, Math.PI * 1.24), vm);
     back.position.set(0, 0.76, 0); c.add(back);
     B(c, 0.05, 0.4, 0.05, mat.black, 0, 0.23, 0); B(c, 0.4, 0.03, 0.04, mat.black, 0, 0.03, 0); B(c, 0.04, 0.03, 0.4, mat.black, 0, 0.03, 0);
     [[-0.25, -0.25], [0.25, -0.25], [-0.25, 0.25], [0.25, 0.25]].forEach(([lx, lz]) => B(c, 0.02, 0.43, 0.02, mat.black, lx * 0.8, 0.21, lz * 0.8));
   }
-  chair(2.0, 1.75, Math.PI / 2 - 0.35); chair(4.0, 1.75, -Math.PI / 2 + 0.35);
+  chair(1.1, 1.99, Math.PI / 2 - 0.25); chair(2.66, 1.99, -Math.PI / 2 + 0.25);
   // чёрный кожаный диван между дверями (южная стена)
   { const bs = M(0x0f0f12, { roughness: 0.32, metalness: 0.15 });
-    const bsofa = new THREE.Group(); bsofa.position.set(1.95, 0, 4.6); H.add(bsofa);
+    const bsofa = new THREE.Group(); bsofa.position.set(HW / 2, 0, HD - 0.55); H.add(bsofa);
     B(bsofa, 1.9, 0.38, 0.8, bs, 0, 0.3, 0); B(bsofa, 1.9, 0.5, 0.18, bs, 0, 0.72, 0.33);
     B(bsofa, 0.18, 0.3, 0.82, bs, -0.95, 0.55, 0); B(bsofa, 0.18, 0.3, 0.82, bs, 0.95, 0.55, 0);
     B(bsofa, 0.84, 0.14, 0.64, bs, -0.42, 0.55, -0.03); B(bsofa, 0.84, 0.14, 0.64, bs, 0.42, 0.55, -0.03);
     [[-0.85, -0.3], [0.85, -0.3], [-0.85, 0.3], [0.85, 0.3]].forEach(([a, b]) => B(bsofa, 0.04, 0.1, 0.04, mat.steel, a, 0.05, b)); }
+  // маркерная доска над диваном (на южной стене), на ней остаётся рисунок
+  const wbG = new THREE.Group(); wbG.position.set(HW / 2, 1.75, HD - 0.07); H.add(wbG);
+  B(wbG, 2.0, 1.2, 0.03, M(0xb9bdc4, { roughness: 0.35, metalness: 0.8 }), 0, 0, 0);
+  const wbCanvas = TX.cv(1024, 576); { const x = wbCanvas.getContext('2d'); x.fillStyle = '#f4f5f7'; x.fillRect(0, 0, 1024, 576); }
+  const wbTex = TX.toTex(wbCanvas); wbTex.wrapS = wbTex.wrapT = THREE.ClampToEdgeWrapping;
+  const wbMesh = plane(wbG, 1.92, 1.12, new THREE.MeshStandardMaterial({ map: wbTex, roughness: 0.25, emissive: 0xffffff, emissiveMap: wbTex, emissiveIntensity: 0.14 }), 0, 0, -0.018, '-z');
+  wbMesh.userData.board = true; wbMesh.userData.noPaint = true;
+  B(wbG, 1.0, 0.025, 0.07, M(0xb9bdc4, { roughness: 0.4, metalness: 0.7 }), 0, -0.62, -0.03);
+  [[-0.2, 0xe53935], [0.0, 0x1e88e5], [0.2, 0x111111]].forEach(([mx, mc]) => B(wbG, 0.12, 0.02, 0.02, M(mc), mx, -0.595, -0.045));
+  // напольная колонка (чёрный корпус с деревянной крышкой) у восточной стены
+  { const sp = new THREE.Group(); sp.position.set(3.45, 0, 4.7); sp.rotation.y = -Math.PI / 2 - 0.1; H.add(sp);
+    B(sp, 0.42, 0.78, 0.34, M(0x0c0c0e, { roughness: 0.7 }), 0, 0.39, 0); B(sp, 0.44, 0.03, 0.36, M(0x7a4a28, { roughness: 0.5 }), 0, 0.795, 0);
+    [[0.52, 0.12], [0.2, 0.15]].forEach(([yy, rr]) => { CYL(sp, rr, rr, 0.02, M(0x1a1a1d, { roughness: 0.5 }), 0, yy, 0.175, 22, Math.PI / 2); CYL(sp, rr * 0.35, rr * 0.35, 0.03, M(0x2a2a2e), 0, yy, 0.18, 12, Math.PI / 2); }); }
   // чемодан на столике
-  const sc = new THREE.Group(); sc.position.set(5.45, 0, 1.4); H.add(sc);
+  const sc = new THREE.Group(); sc.position.set(3.32, 0, 1.6); H.add(sc);
   [[-0.25, -0.2], [0.25, -0.2], [-0.25, 0.2], [0.25, 0.2]].forEach(([lx, lz]) => B(sc, 0.025, 0.55, 0.025, mat.black, lx, 0.275, lz));
   B(sc, 0.62, 0.03, 0.46, M(0x7a5a38, { roughness: 0.6 }), 0, 0.56, 0);
   const plaidM = M(0xffffff, { map: T.plaid, roughness: 0.8 });
@@ -664,7 +886,7 @@ export function buildWorld(opts = {}) {
     }
     return g;
   }
-  palm(H, 5.55, 0.5, 1.5, 0); palm(H, 5.4, 4.5, 1.4, 1); palm(H, 0.5, 0.5, 1.2, 1); palm(H, 0.45, 4.5, 1.3, 0);
+  palm(H, 3.4, 0.98, 1.9, 0); palm(H, 0.55, 1.8, 1.3, 1); palm(H, 0.42, 4.72, 1.3, 0);
   // две «подставки» у пальмы справа
   // софтбоксы (8-угольные)
   const sbMat = [M(0x0c0c0e, { roughness: 0.9 }), M(0x0c0c0e), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: T.softbox, emissiveIntensity: 0.95, map: T.softbox })];
@@ -682,10 +904,10 @@ export function buildWorld(opts = {}) {
     glowSprite(g, 0xcfe0ff, r * 3, 0, 0, 0.3, 0.2);
     return g;
   }
-  softbox(0.95, 2.4, 3.3, new THREE.Vector3(3, 0.9, 2.8));
-  softbox(5.05, 2.4, 1.7, new THREE.Vector3(3, 0.9, 2.8));
+  softbox(0.97, 2.47, 1.96, new THREE.Vector3(1.88, 0.9, 1.99), 0.58);
+  softbox(2.79, 2.47, 1.96, new THREE.Vector3(1.88, 0.9, 1.99), 0.58);
   // LED панель над стеллажом
-  const panel = new THREE.Group(); panel.position.set(3.4, 2.4, 1.05); panel.rotation.x = 0.35; H.add(panel);
+  const panel = new THREE.Group(); panel.position.set(1.9, 2.5, 0.85); panel.rotation.x = 0.35; H.add(panel);
   B(panel, 1.3, 0.2, 0.05, M(0x15161a), 0, 0, 0);
   plane(panel, 1.22, 0.14, new THREE.MeshStandardMaterial({ color: 0, emissive: 0xffffff, emissiveMap: T.softbox, emissiveIntensity: 1.5 }), 0, 0, 0.03, '+z', [3, 1]);
   glowSprite(panel, 0xe8f0ff, 2.2, 0, 0, 0.4, 0.3);
@@ -700,29 +922,28 @@ export function buildWorld(opts = {}) {
     for (let i = 0; i < 40; i++) { x.strokeStyle = 'rgba(30,90,30,.9)'; x.lineWidth = 1.5; x.beginPath(); const px = r() * 512; x.moveTo(px, 0); x.lineTo(px + (r() - 0.5) * 20, 30 + r() * 90); x.stroke(); }
     return TX.toTex(c);
   })();
-  plane(H, 5.0, 0.9, new THREE.MeshStandardMaterial({ map: ivyPlane, transparent: true, alphaTest: 0.35, roughness: 0.9, side: THREE.DoubleSide, emissive: 0x0f3a14, emissiveIntensity: 0.6, emissiveMap: ivyPlane }), 0.05, 2.3, 2.5, '+x');
+  plane(H, HD, 0.9, new THREE.MeshStandardMaterial({ map: ivyPlane, transparent: true, alphaTest: 0.35, roughness: 0.9, side: THREE.DoubleSide, emissive: 0x0f3a14, emissiveIntensity: 0.6, emissiveMap: ivyPlane }), 0.05, 2.3, HD / 2, '+x');
   // неоновый «REC» над дверью (маленький красный индикатор)
-  SPH(H, 0.05, emi(0xff2a2a, 1.8), 5.8, 2.35, 3.45); glowSprite(H, 0xff2020, 0.7, 5.8, 2.35, 3.45, 0.6);
+  SPH(H, 0.05, emi(0xff2a2a, 1.8), HW - 0.2, 2.35, 3.45); glowSprite(H, 0xff2020, 0.7, HW - 0.2, 2.35, 3.45, 0.6);
 
   // ======================================================
   //  СТУДИЯ ЗВУКА
   // ======================================================
   const U = G.studio;
-  U.position.x = -3;   // единая комната звукозаписи: x 6.1..9.0, z -1..5 (3 x 6 м)
+  U.position.x = -5.09; U.position.z = 0.14;   // комната записи 2,90 x 5,14: x 4.01..6.91, z 0..5.14
   const blackWall = M(0x08080b, { roughness: 1 });
-  texBox(U, 9.1, -0.1, -1, 12, 0, 5, mat.blueCarpet, 1.0);
-  texBox(U, 9.1, wy, -1, 12, wy + 0.1, 5, mat.ceil, 1);
-  texBox(U, 9.1, 0, -1.2, 12.2, wy + 0.1, -1, blackWall, 1);   // север
-  texBox(U, 12, 0, -1.2, 12.2, wy + 0.1, 5.2, blackWall, 1);   // восток
+  texBox(U, 9.1, -0.1, -0.14, 12, 0, 5, mat.blueCarpet, 1.0);
+  texBox(U, 9.1, wy, -0.14, 12, wy + 0.1, 5, mat.ceil, 1);
+  texBox(U, 9.1, 0, -0.34, 12.2, wy + 0.1, -0.14, blackWall, 1);   // север
+  texBox(U, 12, 0, -0.34, 12.2, wy + 0.1, 5.2, blackWall, 1);   // восток
   texBox(U, 9.1, 0, 5.0, 12.2, wy + 0.1, 5.2, blackWall, 1);   // юг
   // поролон на западной стене (звукоизоляция), на восточной и северной — панели
   plane(U, 1.0, 2.4, mat.foam, 9.12, 1.3, 4.45, '+x', [1.5, 3.6]);
-  texBox(U, 8.9, 0, -1.2, 9.1, wy + 0.1, 0, blackWall, 1);   // угол у стены зала
   plane(U, 1.0, 2.4, mat.foam, 9.12, 1.3, 2.4, '+x', [1.5, 3.6]);
   plane(U, 2.4, 1.6, mat.foam, 11.98, 1.3, 1.2, '-x', [3.5, 2.5]);
   plane(U, 2.4, 1.6, mat.foam, 11.98, 1.3, 3.8, '-x', [3.5, 2.5]);
-  plane(U, 1.6, 1.6, mat.foam, 10.5, 1.3, -0.98, '+z', [2.4, 2.4]);
-  plane(U, 2.6, 1.8, mat.foam, 10.5, 2.79, 3.5, '-y', [4, 3]);
+  plane(U, 1.6, 1.6, mat.foam, 10.5, 1.3, -0.16, '+z', [2.4, 2.4]);
+  plane(U, 2.6, 1.8, mat.foam, 10.5, wy - 0.01, 3.5, '-y', [4, 3]);
   // пульт-стол
   const desk = new THREE.Group(); U.add(desk);
   const deskM = M(0xffffff, { map: T.concreteDark, roughness: 0.55, color: 0x888d95 });
@@ -744,7 +965,7 @@ export function buildWorld(opts = {}) {
   B(desk, 0.05, 0.28, 0.08, mat.black, 9.3, 0.9, 1.2);
   glowSprite(desk, 0x5aa0ff, 2.2, 9.6, 1.1, 1.2, 0.22);
   // клавиатура, мышь, MIDI-пэд
-  B(desk, 0.18, 0.015, 0.5, mat.black, 9.65, 0.785, 1.15); B(desk, 0.14, 0.04, 0.2, M(0x1a1a22), 9.8, 0.795, 1.8);
+  B(desk, 0.18, 0.015, 0.5, mat.black, 9.65, 0.785, 1.15); B(desk, 0.14, 0.04, 0.2, M(0x1a1a22), 9.8, 0.795, 0.6);
   // мониторы студийные (жёлтые)
   [[9.4, 0.3], [9.4, 2.1]].forEach(([a, b]) => { B(desk, 0.24, 0.36, 0.28, mat.black, a, 1.0, b); CYL(desk, 0.085, 0.085, 0.02, M(0xd7a31a, { roughness: 0.5 }), a + 0.12, 1.0, b, 16, 0, Math.PI / 2); });
   // револьвер на столе (можно подобрать)
@@ -763,9 +984,16 @@ export function buildWorld(opts = {}) {
   for (let i = 0; i < 3; i++) { const a = i * 2.094; B(vox, 0.03, 0.03, 0.4, mat.black, Math.cos(a) * 0.17, 0.04, Math.sin(a) * 0.17, -a + Math.PI / 2); }
   CYL(vox, 0.018, 0.018, 1.45, mat.black, 0, 0.75, 0, 8);
   B(vox, 0.02, 0.02, 0.35, mat.black, 0.0, 1.5, -0.14);
-  const micM = M(0xc5c9cf, { roughness: 0.25, metalness: 0.95 });
-  CYL(vox, 0.032, 0.032, 0.18, micM, 0, 1.52, -0.3, 16);
-  CYL(vox, 0.045, 0.045, 0.02, mat.black, 0, 1.42, -0.3, 16); CYL(vox, 0.045, 0.045, 0.02, mat.black, 0, 1.62, -0.3, 16);
+  // INVOTONE CM400L: серебристый корпус, сетка-решётка, чёрный «паук»
+  const micM = M(0xb9bec6, { roughness: 0.3, metalness: 0.9 });
+  const grC = TX.cv(32, 32); { const x = grC.getContext('2d'); x.fillStyle = '#9ea4ad'; x.fillRect(0, 0, 32, 32); x.strokeStyle = '#d8dce2'; x.lineWidth = 1; for (let i = 0; i < 32; i += 3) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 32); x.moveTo(0, i); x.lineTo(32, i); x.stroke(); } }
+  const grT = TX.toTex(grC); grT.repeat.set(4, 2);
+  CYL(vox, 0.031, 0.031, 0.19, micM, 0, 1.47, -0.3, 18);
+  CYL(vox, 0.034, 0.034, 0.1, M(0xffffff, { map: grT, metalness: 0.8, roughness: 0.4 }), 0, 1.6, -0.3, 18);
+  SPH(vox, 0.034, M(0xffffff, { map: grT, metalness: 0.8, roughness: 0.4 }), 0, 1.65, -0.3);
+  CYL(vox, 0.034, 0.034, 0.008, M(0x2a55c8, { roughness: 0.3, metalness: 0.5 }), 0, 1.53, -0.3, 18);
+  for (const yy of [1.42, 1.56]) { const tr = new THREE.Mesh(new THREE.TorusGeometry(0.052, 0.004, 6, 20), mat.black); tr.rotation.x = Math.PI / 2; tr.position.set(0, yy, -0.3); vox.add(tr); }
+  [[0.05, 0], [-0.05, 0], [0, 0.05], [0, -0.05]].forEach(([qx, qz]) => B(vox, 0.004, 0.16, 0.004, mat.black, qx, 1.49, -0.3 + qz));
   // поп-фильтр
   const pop = new THREE.Mesh(new THREE.CircleGeometry(0.1, 24), new THREE.MeshStandardMaterial({ color: 0x111, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
   pop.position.set(0.0, 1.5, -0.17); vox.add(pop);
@@ -777,12 +1005,60 @@ export function buildWorld(opts = {}) {
   const hpm = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.012, 8, 20, Math.PI), mat.black); hpm.rotation.z = 0; hp.add(hpm);
   CYL(hp, 0.05, 0.05, 0.03, mat.black, -0.09, -0.02, 0, 12, 0, Math.PI / 2); CYL(hp, 0.05, 0.05, 0.03, mat.black, 0.09, -0.02, 0, 12, 0, Math.PI / 2);
   // гитара на стойке
-  guitar(U, 11.6, 2.2, -1.2, 0x23252b, 'el', 0.0);
+  gStand(U, 11.68, 2.35, -Math.PI / 2); guitarStrat(U, 11.7, 2.35, -Math.PI / 2, -0.1);   // бирюзовый Stratocaster
   // чёрная маска на стене
   SPH(U, 0.14, M(0x050505, { roughness: 0.4 }), 11.95, 1.9, 2.6, 0.3, 1.2, 0.8); glowSprite(U, 0x66aaff, 0.8, 11.9, 1.9, 2.6, 0.12);
+  // ---- белый диван у входа и стеклянный журнальный столик ----
+  { const wm = M(0xf2f0f4, { roughness: 0.32 });
+    const sofa = new THREE.Group(); sofa.position.set(10.1, 0, 4.58); U.add(sofa);
+    B(sofa, 1.9, 0.38, 0.8, wm, 0, 0.3, 0); B(sofa, 1.9, 0.5, 0.18, wm, 0, 0.72, 0.33);
+    B(sofa, 0.18, 0.3, 0.82, wm, -0.95, 0.55, 0); B(sofa, 0.18, 0.3, 0.82, wm, 0.95, 0.55, 0);
+    B(sofa, 0.84, 0.14, 0.64, wm, -0.42, 0.55, -0.03); B(sofa, 0.84, 0.14, 0.64, wm, 0.42, 0.55, -0.03);
+    [[-0.85, -0.3], [0.85, -0.3], [-0.85, 0.3], [0.85, 0.3]].forEach(([a, b]) => B(sofa, 0.04, 0.1, 0.04, mat.steel, a, 0.05, b));
+    B(sofa, 0.38, 0.38, 0.1, M(0xd0489a, { roughness: 0.6 }), -0.6, 0.72, 0.12, 0.2); B(sofa, 0.36, 0.36, 0.1, M(0x2b2d33, { roughness: 0.6 }), 0.62, 0.7, 0.12, -0.15);
+    const gt = new THREE.Group(); gt.position.set(10.0, 0, 3.85); U.add(gt);
+    B(gt, 0.9, 0.012, 0.45, new THREE.MeshStandardMaterial({ color: 0xcdeaff, transparent: true, opacity: 0.32, roughness: 0.04, metalness: 0.2, depthWrite: false }), 0, 0.42, 0);
+    B(gt, 0.92, 0.02, 0.47, mat.steel, 0, 0.405, 0);
+    [[-0.42, -0.2], [0.42, -0.2], [-0.42, 0.2], [0.42, 0.2]].forEach(([a, b]) => B(gt, 0.025, 0.4, 0.025, mat.steel, a, 0.2, b));
+    // цветы в стеклянной вазе
+    CYL(gt, 0.05, 0.04, 0.2, new THREE.MeshStandardMaterial({ color: 0xcfeaff, transparent: true, opacity: 0.35, roughness: 0.05 }), -0.2, 0.53, 0.0, 14);
+    [[0xff4f9a, 0.0, 0.0], [0xffd23a, 0.05, 0.03], [0xff7a3a, -0.04, 0.04], [0xf4f4f4, 0.03, -0.05], [0xc23cff, -0.05, -0.03]].forEach(([fc, fx, fz], i) => {
+      B(gt, 0.008, 0.2 + i * 0.02, 0.008, M(0x2f8a3a), -0.2 + fx, 0.7 + i * 0.01, fz);
+      SPH(gt, 0.04, M(fc, { roughness: 0.6 }), -0.2 + fx, 0.84 + i * 0.02, fz, 1, 0.7, 1);
+    });
+    B(gt, 0.26, 0.012, 0.18, M(0x1a1a22), 0.2, 0.436, 0.02, 0.3); B(gt, 0.26, 0.006, 0.18, M(0xe94a2a), 0.2, 0.446, 0.02, 0.3); }
+  // ---- стол с вертушками (дальний конец комнаты, у северной стены) ----
+  { const tt = new THREE.Group(); tt.position.set(11.0, 0, 0.14); U.add(tt);
+    const wd = M(0x2a1d15, { roughness: 0.55 });
+    B(tt, 1.6, 0.05, 0.55, wd, 0, 0.8, 0);
+    [[-0.74, -0.22], [0.74, -0.22], [-0.74, 0.22], [0.74, 0.22]].forEach(([a, b]) => B(tt, 0.05, 0.78, 0.05, mat.black, a, 0.39, b));
+    B(tt, 1.5, 0.03, 0.5, wd, 0, 0.3, 0);
+    for (let i = 0; i < 18; i++) B(tt, 0.012, 0.28, 0.3, M([0xd9d2c0, 0x1a1a1d, 0xb8352a, 0x2d4a8a][i % 4]), -0.7 + i * 0.04, 0.45, 0.02);
+    [[-0.45, 1], [0.45, -1]].forEach(([dx, side]) => {
+      B(tt, 0.44, 0.06, 0.4, M(0x22242a, { roughness: 0.4, metalness: 0.4 }), dx, 0.855, 0);
+      CYL(tt, 0.15, 0.15, 0.015, M(0x0c0c0e), dx - 0.03, 0.89, 0, 28); CYL(tt, 0.155, 0.155, 0.008, chromeM, dx - 0.03, 0.88, 0, 28); CYL(tt, 0.045, 0.045, 0.018, M(0xd9402a), dx - 0.03, 0.896, 0, 16);
+      B(tt, 0.012, 0.012, 0.26, chromeM, dx + 0.17 * side, 0.9, 0.04, 0.3 * side); CYL(tt, 0.02, 0.02, 0.03, chromeM, dx + 0.17 * side, 0.9, -0.12, 10);
+      B(tt, 0.02, 0.008, 0.2, M(0x888a90), dx + 0.19 * side, 0.89, 0.0);
+    });
+    B(tt, 0.34, 0.07, 0.36, mat.black, 0, 0.855, 0);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) CYL(tt, 0.012, 0.012, 0.014, M(0xc9cdd3, { metalness: 0.8, roughness: 0.3 }), -0.1 + c * 0.065, 0.895, -0.12 + r * 0.06, 8);
+    B(tt, 0.08, 0.006, 0.02, chromeM, 0, 0.893, 0.14);
+    B(tt, 0.26, 0.004, 0.012, emi(0x19f0ff, 1.5), 0, 0.892, 0.165);
+  }
+  // ---- MIDI-клавиатура (49 клавиш) на пульте звукорежиссёра ----
+  { const kc = TX.cv(64, 512); { const x = kc.getContext('2d'); x.fillStyle = '#f2f2f4'; x.fillRect(0, 0, 64, 512); x.strokeStyle = '#555'; x.lineWidth = 1;
+      for (let i = 0; i <= 29; i++) { const y = i * 512 / 29; x.beginPath(); x.moveTo(0, y); x.lineTo(64, y); x.stroke(); }
+      x.fillStyle = '#0b0b0d'; const blk = [1, 1, 0, 1, 1, 1, 0]; for (let i = 0; i < 28; i++) if (blk[i % 7]) x.fillRect(0, (i + 1) * 512 / 29 - 7, 38, 14); }
+    const kt = TX.toTex(kc);
+    const midi = new THREE.Group(); midi.position.set(9.78, 0.775, 1.62); desk.add(midi);
+    B(midi, 0.3, 0.035, 0.84, M(0x15161a, { roughness: 0.4 }), 0, 0.0175, 0);
+    const keys = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.76), new THREE.MeshBasicMaterial({ map: kt })); keys.rotation.set(-Math.PI / 2, 0, -Math.PI / 2); keys.position.set(0.045, 0.037, 0); midi.add(keys);
+    for (let k = 0; k < 4; k++) CYL(midi, 0.012, 0.012, 0.012, M(0xd9d9de), -0.1, 0.04, -0.3 + k * 0.1, 8);
+    for (let p = 0; p < 4; p++) B(midi, 0.04, 0.012, 0.04, emi([0xff2e97, 0x19f0ff, 0xffe36a, 0x7cff6b][p], 1.2), -0.1, 0.041, 0.1 + p * 0.06 - 0.0);
+  }
   // холодная подсветка (LED-ленты)
-  [-0.95, 4.95].forEach(z => B(U, 2.8, 0.04, 0.04, emi(0x3a66ff, 1.6), 10.6, 2.72, z));
-  B(U, 0.04, 0.04, 5.8, emi(0x3a66ff, 1.4), 11.9, 2.72, 2.0);
+  [-0.1, 4.95].forEach(z => B(U, 2.8, 0.04, 0.04, emi(0x3a66ff, 1.6), 10.6, wy - 0.08, z));
+  B(U, 0.04, 0.04, 5.0, emi(0x3a66ff, 1.4), 11.9, wy - 0.08, 2.4);
   glowSprite(U, 0x3a66ff, 5, 10.8, 2.5, 2.0, 0.12);
   // красная REC лампочка
   SPH(U, 0.05, emi(0xff2a2a, 1.8), 11.95, 2.3, 3.6); glowSprite(U, 0xff2020, 0.8, 11.9, 2.3, 3.6, 0.6);
@@ -790,7 +1066,7 @@ export function buildWorld(opts = {}) {
   // ======================================================
   //  СВЕТ
   // ======================================================
-  const amb = new THREE.HemisphereLight(0x2c3a66, 0x120a0a, 0.55);
+  const amb = new THREE.HemisphereLight(0x9a86c8, 0x3a2030, 0.55);
   scene.add(amb);
   const lights = [];
   for (let i = 0; i < 6; i++) {
@@ -802,7 +1078,7 @@ export function buildWorld(opts = {}) {
     lightState.zone = zone;
     lightState.target = LIGHTS[zone];
     lightState.fog = FOG[zone];
-    lightState.amb = { street: 0.8, entry: 0.3, hall: 0.3, studio: 0.85 }[zone];
+    lightState.amb = { street: 1.5, chai: 0.8, entry: 0.3, hall: 0.3, studio: 0.85 }[zone];
     if (snap) applyLights(1);
   }
   const tmpC = new THREE.Color();
@@ -822,7 +1098,8 @@ export function buildWorld(opts = {}) {
 
   // видимость групп по зоне
   const VIS = {
-    street: ['street', 'stairs', 'entry'],
+    chai: ['street', 'stairs', 'chai'],
+    street: ['street', 'stairs', 'entry', 'chai'],
     entry: ['street', 'stairs', 'entry', 'hall'],
     hall: ['entry', 'hall', 'studio'],
     studio: ['hall', 'studio']
@@ -837,17 +1114,19 @@ export function buildWorld(opts = {}) {
   // ======================================================
   const BOOK = (s) => `../index.html?service=${s}#book`;
   const hotspots = [
-    { id: 'crt', zone: 'hall', pos: [1.4, 0.75, 0.9], title: 'Старые телевизоры в кадре', text: 'На экранах идёт картинка с камер студии: зелёный фосфор, шум, таймкод REC. Такой фон оживляет кадр.', img: 'hall-wide-1', service: 'podcast-express' },
-    { id: 'suitcase', zone: 'hall', pos: [5.45, 0.85, 1.4], title: 'Чемодан', text: 'Чемодан «заряжен на деньги». Реквизит можно переставить под тему выпуска.', img: 'detail-suitcase', service: 'rent' },
-    { id: 'retro', zone: 'hall', pos: [3.4, 1.0, 0.45], title: 'Стеллаж с инструментами и техникой', text: 'Три гитары, синтезатор, проигрыватель, магнитофоны и книги. Всё настоящее, без бутафории — это ретро-эстетика в кадре.', img: 'detail-turntable', service: 'rent' },
-    { id: 'mural', zone: 'hall', pos: [5.9, 1.5, 1.4], title: 'Граффити-стена', text: 'Большой чёрно-белый рисунок на зелёной стене — фирменный фон студии. Рядом дверь в комнату звукозаписи.', img: 'hall-wide-2', service: 'rent' },
-    { id: 'light', zone: 'hall', pos: [1.1, 2.3, 3.1], title: 'Свет RGB', text: 'Цвет света подбираем под настроение выпуска. Два больших софтбокса и панель сверху дают мягкую картинку.', img: 'hall-wide-3', service: 'podcast-express' },
-    { id: 'table', zone: 'hall', pos: [3.0, 0.9, 2.0], title: 'Стол и три микрофона', text: 'Три микрофона на журавлях, три камеры 4K, запись в мультикам. Садись за стол — проверим звук.', img: 'hall-table', service: 'podcast-express' },
-    { id: 'sofa', zone: 'hall', pos: [1.95, 0.8, 4.4], title: 'Чёрный кожаный диван', text: 'Диван между входом и дверью в звукозапись. Можно посидеть, пока мы готовим свет и звук.', img: 'hall-both', service: 'rent' },
-    { id: 'console', zone: 'studio', pos: [6.55, 1.1, 1.2], title: 'Тот же фрагмент после сведения', text: 'Звукорежиссёр сидит в той же комнате, что и исполнитель, — без стеклянной стены между вами. Сравни с записью до обработки.', img: 'engineer-1', service: 'sound-vocal', audio: 'demo-after.mp3' },
-    { id: 'vocal', zone: 'studio', pos: [8.3, 1.45, 4.1], title: 'Голос до обработки', text: 'Комната небольшая — поэтому голос в ней плотный, а не гулкий. Послушай запись до обработки.', img: 'mic-neumann', service: 'sound-vocal', audio: 'demo-before.mp3' },
-    { id: 'wall', zone: 'studio', pos: [6.2, 1.4, 4.45], title: 'Звукоизолированная стена', text: 'Между залом и комнатой звукозаписи — звукоизоляция. Можно писать подкаст и голос одновременно, не мешая друг другу. Пакет «Трек + обложка + сниппет + Reels — 13 900 ₽».', img: 'vocal-2', service: 'pack' },
-    { id: 'revolver', zone: 'studio', pos: [6.72, 0.9, 0.62], title: 'Револьвер на столе', text: '', img: null, service: null, pickup: true },
+    { id: 'crt', zone: 'hall', pos: [0.5, 0.75, 1.05], title: 'Старые телевизоры в кадре', text: 'На экранах идёт картинка с камер студии: зелёный фосфор, шум, таймкод REC. Такой фон оживляет кадр.', img: 'hall-wide-1', service: 'podcast-express' },
+    { id: 'suitcase', zone: 'hall', pos: [3.32, 0.85, 1.6], title: 'Чемодан', text: 'Чемодан «заряжен на деньги». Реквизит можно переставить под тему выпуска.', img: 'detail-suitcase', service: 'rent' },
+    { id: 'retro', zone: 'hall', pos: [1.7, 1.0, 0.45], title: 'Стеллаж с инструментами и техникой', text: 'Три гитары, синтезатор, проигрыватель, магнитофоны и книги. Всё настоящее, без бутафории — это ретро-эстетика в кадре.', img: 'detail-turntable', service: 'rent' },
+    { id: 'mural', zone: 'hall', pos: [3.7, 1.5, 1.4], title: 'Граффити-стена', text: 'Большой чёрно-белый рисунок на зелёной стене — фирменный фон студии. Рядом дверь в комнату звукозаписи.', img: 'hall-wide-2', service: 'rent' },
+    { id: 'light', zone: 'hall', pos: [0.97, 2.3, 1.96], title: 'Свет RGB', text: 'Цвет света подбираем под настроение выпуска. Два больших софтбокса и панель сверху дают мягкую картинку.', img: 'hall-wide-3', service: 'podcast-express' },
+    { id: 'table', zone: 'hall', pos: [1.88, 0.9, 1.99], title: 'Стол и три микрофона', text: 'Три микрофона на журавлях, три камеры 4K, запись в мультикам. Садись за стол — проверим звук.', img: 'hall-table', service: 'podcast-express' },
+    { id: 'sofa', zone: 'hall', pos: [1.88, 0.8, 4.4], title: 'Чёрный кожаный диван', text: 'Диван между входом и дверью в звукозапись. Можно посидеть, пока мы готовим свет и звук.', img: 'hall-both', service: 'rent' },
+    { id: 'console', zone: 'studio', pos: [4.46, 1.1, 1.34], title: 'Тот же фрагмент после сведения', text: 'Звукорежиссёр сидит в той же комнате, что и исполнитель, — без стеклянной стены между вами. Сравни с записью до обработки.', img: 'engineer-1', service: 'sound-vocal', audio: 'demo-after.mp3' },
+    { id: 'vocal', zone: 'studio', pos: [6.21, 1.45, 4.24], title: 'Голос до обработки', text: 'Комната небольшая — поэтому голос в ней плотный, а не гулкий. Послушай запись до обработки.', img: 'mic-neumann', service: 'sound-vocal', audio: 'demo-before.mp3' },
+    { id: 'wall', zone: 'studio', pos: [4.15, 1.4, 4.0], title: 'Звукоизолированная стена', text: 'Между залом и комнатой звукозаписи — звукоизоляция. Можно писать подкаст и голос одновременно, не мешая друг другу. Пакет «Трек + обложка + сниппет + Reels — 13 900 ₽».', img: 'vocal-2', service: 'pack' },
+    { id: 'revolver', zone: 'studio', pos: [4.63, 0.9, 0.76], title: 'Револьвер на столе', text: '', img: null, service: null, pickup: true },
+    { id: 'board', zone: 'hall', pos: [1.88, 1.75, 4.9], title: 'Доска для рисунков', text: 'Нарисуй баллончиком на белой доске над диваном. Рисунок остаётся здесь, и его увидят другие гости.', img: null, service: null },
+    { id: 'turn', zone: 'studio', pos: [6.1, 1.0, 0.45], title: 'Вертушки и микшер', text: 'Отдельный стол с двумя проигрывателями и микшером. Можно записать сэмплы с винила.', img: 'detail-turntable', service: 'sound-vocal' },
     { id: 'dj', zone: 'entry', pos: [-2.3, 1.5, 2.3], title: 'Школа диджеев — идёт ремонт', text: 'Здесь только начали ремонт, дверь закрыта. Тебе — направо, в студию.', img: null, service: null },
     { id: 'sign', zone: 'street', pos: [6.6, 6.1, 5.8], title: 'REVOLVER PODCAST · REVOLVER SOUND', text: 'Студии на Фрунзе, 49: видеоподкасты и запись голоса. Вход по лестнице вниз, потом направо.', img: 'hall-both', service: 'pack' }
   ].map(h => Object.assign(h, { pos: new THREE.Vector3(...h.pos), href: h.service ? BOOK(h.service) : null }));
@@ -889,11 +1168,11 @@ export function buildWorld(opts = {}) {
       if (sdev[1].t > 0.12) { sdev[1].t = 0; ART.crtFrame(crtC[1], t + 5, 2, (t * 77) | 0); if (glitch > 0) glitchFx(crtC[1]); crtT[1].needsUpdate = true; }
     }
     // машины
-    if (zone === 'street' || zone === 'entry') {
+    if (zone === 'street' || zone === 'entry' || zone === 'chai') {
       for (const c of cars) {
         const u = c.userData;
         u.x += u.dir * u.speed * dt;
-        if (u.x > 60) u.x = -60; if (u.x < -60) u.x = 60;
+        if (u.x > 100) u.x = -100; if (u.x < -100) u.x = 100;
         c.position.x = u.x;
       }
       arrow.position.y = 4.35 + Math.sin(t * 3) * 0.08; arrow2.position.y = arrow.position.y;
@@ -903,6 +1182,7 @@ export function buildWorld(opts = {}) {
   scene.updateMatrixWorld(true);
   return {
     scene, groups: G, hotspots, update, setZoneLights, setVisibility, redrawMural, redrawDoor, redrawSign: () => { ART.drawSign(signC); signT.needsUpdate = true; },
-    doors, lights, amb, glitch: (v) => { glitch = v; }, hideRevolverProp: () => { revProp.visible = false; }
+    doors, lights, amb, glitch: (v) => { glitch = v; }, hideRevolverProp: () => { revProp.visible = false; },
+    board: { canvas: wbCanvas, texture: wbTex }
   };
 }

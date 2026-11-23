@@ -1,0 +1,8 @@
+name = "revolver-board"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# 1) wrangler kv namespace create BOARD   -> вставьте полученный id ниже
+[[kv_namespaces]]
+binding = "BOARD"
+id = "ВСТАВЬТЕ_ID_KV"

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { buildWorld, groundY, WALK, OBST, PLAYER_R, EYE, TELEPORTS, ZONE_NAMES, zoneAt } from './world.js';
+import { buildWorld, groundY, WALK, OBST, PLAYER_R, EYE, TELEPORTS, ZONE_NAMES, zoneAt, setLevel, inChai } from './world.js';
 import { loadFonts } from './art.js';
 import { setAniso } from './tex.js';
+import { initBoard } from './board.js';
 import { createWeapons } from './weapons.js';
 
 const $ = (s) => document.querySelector(s);
@@ -54,6 +55,7 @@ async function init() {
   setProgress(90);
   world.redrawMural(); world.redrawDoor(); world.redrawSign();
   weapons = createWeapons({ renderer, camera, scene: world.scene, getWorld: () => world, audio, state });
+  initBoard(world.board, weapons);
   buildMarkers();
   drawMapBase();
   applyTeleport(1, true);
@@ -78,13 +80,14 @@ addEventListener('orientationchange', () => setTimeout(() => renderer && resize(
 
 // ------------------------------------------------------------------
 // столкновения
+const lvOK = (tag) => !tag || ((tag === 'U') === (state.y > 1.5));   // чайхана (y≈3) лежит над залом и тамбуром (y=0)
 function inWalk(x, z) {
-  for (const r of WALK) if (x >= r[0] && x <= r[1] && z >= r[2] && z <= r[3]) return true;
+  for (const r of WALK) if (lvOK(r[4]) && x >= r[0] && x <= r[1] && z >= r[2] && z <= r[3]) return true;
   return false;
 }
 function blocked(x, z) {
   if (!inWalk(x, z)) return true;
-  for (const o of OBST) if (x > o[0] - PLAYER_R && x < o[1] + PLAYER_R && z > o[2] - PLAYER_R && z < o[3] + PLAYER_R) return true;
+  for (const o of OBST) if (lvOK(o[4]) && x > o[0] - PLAYER_R && x < o[1] + PLAYER_R && z > o[2] - PLAYER_R && z < o[3] + PLAYER_R) return true;
   return false;
 }
 function tryMove(nx, nz) {
@@ -343,8 +346,8 @@ let fading = false;
 function applyTeleport(n, instant) {
   const t = TELEPORTS[n];
   state.x = t.x; state.z = t.z; state.yaw = t.yaw; state.pitch = t.pitch;
-  state.y = groundY(t.x, t.z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE;
-  setZone(zoneAt(t.x, t.z), true);
+  setLevel(t.lv || 0); state.y = groundY(t.x, t.z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE;
+  setZone(zoneAt(t.x, t.z, state.y), true);
   state.zoneBtn = n; markZoneBtn();
 }
 function teleport(n) {
@@ -358,7 +361,7 @@ function teleport(n) {
 }
 document.querySelectorAll('#zones button').forEach(b => b.addEventListener('click', () => { teleport(+b.dataset.z); b.blur(); }));
 function markZoneBtn() {
-  const map = { street: 1, entry: 1, hall: 2, studio: 3 };
+  const map = { street: 1, entry: 1, hall: 2, studio: 3, chai: 4 };
   document.querySelectorAll('#zones button').forEach(b => b.classList.toggle('on', +b.dataset.z === map[state.zone]));
 }
 
@@ -392,7 +395,7 @@ $('#go').addEventListener('click', () => {
   if (!isTouch) { lockPointer(); }
   const fs = qs.get('fs') === '1';
   if (fs && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => { });
-  // без звука по умолчанию
+  setSound(true);   // звук включается по нажатию «Зайти» (браузеру нужен жест); кнопка 🔊 выключает
 });
 
 // ------------------------------------------------------------------
@@ -458,12 +461,46 @@ const audio = {
     } else if (audio._g) audio._g.gain.setTargetAtTime(0, actx.currentTime, 0.03);
   }
 };
-$('#snd').addEventListener('click', () => {
-  state.sound = !state.sound;
-  $('#snd').textContent = state.sound ? '🔊' : '🔇';
-  if (state.sound) { ensureAudio(); if (actx && actx.state === 'suspended') actx.resume(); }
-  if (humGain) humGain.gain.value = state.sound ? 0.06 : 0;
-});
+// лоуфай играет из колонок в студии: чем ближе к ним, тем громче и чище; через стены и на улице — глухо
+const SPK = { x: 4.4, y: 1.0, z: 1.34 };
+const OCC = { studio: 0, hall: 0.55, entry: 0.78, street: 0.94, chai: 1 };
+let lofi = null, lofiGain = null, lofiLP = null, lofiPan = null;
+function startLofi() {
+  if (lofi || !actx) return;
+  try {
+    lofi = new Audio('audio/lofi.mp3'); lofi.loop = true;
+    const src = actx.createMediaElementSource(lofi);
+    lofiLP = actx.createBiquadFilter(); lofiLP.type = 'lowpass'; lofiLP.frequency.value = 400; lofiLP.Q.value = 0.5;
+    lofiGain = actx.createGain(); lofiGain.gain.value = 0;
+    src.connect(lofiLP);
+    if (actx.createStereoPanner) { lofiPan = actx.createStereoPanner(); lofiLP.connect(lofiPan); lofiPan.connect(lofiGain); } else lofiLP.connect(lofiGain);
+    lofiGain.connect(actx.destination);
+    lofi.play().catch(() => { });
+  } catch (e) { lofi = null; }
+}
+function updateLofi() {
+  if (!lofi || !actx) return;
+  const dx = state.x - SPK.x, dz = state.z - SPK.z, dy = state.y + EYE - SPK.y;
+  const d = Math.hypot(dx, dy, dz), occ = OCC[state.zone] ?? 0.9;
+  const near = 1 / (1 + Math.pow(d / 2.2, 2));
+  const g = state.sound ? (0.05 + 0.95 * near) * (1 - 0.82 * occ) : 0;
+  const f = Math.max(260, 17000 * Math.exp(-0.16 * d) * (1 - 0.88 * occ));
+  const t = actx.currentTime;
+  lofiGain.gain.setTargetAtTime(g * 0.9, t, 0.12); lofiLP.frequency.setTargetAtTime(f, t, 0.12);
+  if (lofiPan) {
+    const rx = Math.cos(state.yaw), rz = -Math.sin(state.yaw);
+    const sp = (-dx * rx - dz * rz) / Math.max(d, 0.5);
+    lofiPan.pan.setTargetAtTime(Math.max(-0.7, Math.min(0.7, sp * 0.7)) * (1 - occ), t, 0.1);
+  }
+  window.__lofi = { d: +d.toFixed(2), g: +g.toFixed(3), f: Math.round(f), zone: state.zone };
+}
+function setSound(on) {
+  state.sound = on;
+  $('#snd').textContent = on ? '🔊' : '🔇';
+  if (on) { ensureAudio(); if (actx && actx.state === 'suspended') actx.resume(); startLofi(); if (lofi && lofi.paused) lofi.play().catch(() => { }); }
+  if (humGain) humGain.gain.value = on ? 0.03 : 0;
+}
+$('#snd').addEventListener('click', () => setSound(!state.sound));
 
 // ------------------------------------------------------------------
 // мини-карта
@@ -484,10 +521,10 @@ function drawMapBase() {
   rect(-2.0, 5.6, 2.8, 7.1, 'rgba(120,120,130,.6)', '#8a8f9a');       // лестница
   rect(-3.4, 5.6, -2.0, 7.1, 'rgba(120,120,130,.45)', '#8a8f9a');     // площадка
   rect(-3.4, 2.2, -0.2, 5.4, 'rgba(150,60,200,.55)', '#c070ff');      // тамбур
-  rect(0, 0, 6, 5, 'rgba(40,150,70,.55)', '#35e06b');                  // зал
-  rect(6, -1, 9, 5, 'rgba(60,100,220,.55)', '#6a95ff');               // студия
+  rect(0, 0, 3.76, 5.14, 'rgba(40,150,70,.55)', '#35e06b');            // зал
+  rect(4.01, 0, 6.91, 5.14, 'rgba(60,100,220,.55)', '#6a95ff');        // студия
   c.fillStyle = '#fff'; c.font = '600 15px Manrope, Arial, sans-serif'; c.textAlign = 'center';
-  [['ул.', 5.8, 11], ['зал', 3, 2.7], ['звук', 7.5, 2.0], ['тамб.', -1.8, 3.8]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
+  [['ул.', 5.8, 11], ['зал', 1.9, 2.7], ['звук', 5.45, 2.0], ['тамб.', -1.8, 3.8]].forEach(([t, x, z]) => { const [a, b] = mp(x, z); c.fillText(t, a, b); });
 }
 function drawMap() {
   mmx.drawImage(mapBase, 0, 0);
@@ -533,20 +570,22 @@ function loop(now) {
     }
   }
   if (!(state.started && !state.paused && !state.cardOpen && (input.keys.f || input.keys.b || input.keys.l || input.keys.r || input.mx || input.mz))) curMag = 0;
+  setLevel(state.y);
   const gnd = groundY(state.x, state.z);
   if (state.grounded) { if (gnd < state.y - 0.3) { state.grounded = false; state.vy = 0; } else state.y = gnd; }
   if (!state.grounded) {
     state.vy -= 13 * dt; state.y += state.vy * dt;
-    const ceilAbs = (state.z >= 5.5 && state.x > -0.8) ? 99 : 2.8;
+    const ceilAbs = (state.y > 1.5 && inChai(state.x, state.z)) ? 6.6 : (state.z >= 5.5 && state.x > -0.8) ? 99 : 2.96;
     const maxY = ceilAbs - 0.12 - EYE;
     if (state.y > maxY) { state.y = maxY; if (state.vy > 0) state.vy = 0; }
     if (state.y <= gnd) { state.y = gnd; state.vy = 0; state.grounded = true; }
   }
   const tY = state.y + EYE;
   state.eyeY = state.grounded ? state.eyeY + (tY - state.eyeY) * Math.min(1, dt * 14) : tY;
-  const zn = zoneAt(state.x, state.z);
+  const zn = zoneAt(state.x, state.z, state.y);
   if (zn !== state.zone) setZone(zn, false);
   if (world) world.update(dt, state.x, state.z, state.zone);
+  updateLofi();
   camera.position.set(state.x, state.eyeY + Math.sin(state.bob) * 0.018, state.z);
   camera.rotation.set(state.pitch, state.yaw, 0);
   camera.updateMatrixWorld();
@@ -554,7 +593,7 @@ function loop(now) {
     updateFocus();
     if (weapons) weapons.update(dt, { speed: curMag, airborne: !state.grounded, vy: state.vy });
     renderer.clear(); renderer.info.reset();
-    renderer.render(world.scene, camera);
+    renderer.render(world.scene, window.__topCam || camera);
     if (weapons && state.started) weapons.render();
   }
   mapT += dt; if (mapT > 0.066) { mapT = 0; drawMap(); }
@@ -580,9 +619,32 @@ $('#q').addEventListener('change', () => {
 });
 
 const tourApi = {
+  // отладка: пройти по точкам с настоящими коллизиями, вернуть где остановились
+  sim: (pts) => {
+    const out = [];
+    for (const [tx, tz] of pts) {
+      let k = 0;
+      while (k++ < 2500) {
+        const dx = tx - state.x, dz = tz - state.z, d = Math.hypot(dx, dz);
+        if (d < 0.12) break;
+        const s = Math.min(0.06, d); tryMove(state.x + dx / d * s, state.z + dz / d * s);
+        setLevel(state.y); state.y = groundY(state.x, state.z);
+      }
+      out.push([tx, tz, +state.x.toFixed(2), +state.z.toFixed(2), +state.y.toFixed(2), k < 2500]);
+    }
+    setZone(zoneAt(state.x, state.z, state.y), true);
+    return out;
+  },
+  // отладка: вид сверху (ортографическая камера), все группы видимы
+  top: (cx, cz, half, y) => {
+    for (const n in world.groups) world.groups[n].visible = true;
+    const oc = new THREE.OrthographicCamera(-half * camera.aspect, half * camera.aspect, half, -half, 0.1, 200);
+    oc.position.set(cx, y || 60, cz); oc.up.set(0, 0, -1); oc.lookAt(cx, 0, cz); oc.updateMatrixWorld();
+    window.__topCam = oc;
+  },
   teleport: (n) => { applyTeleport(n); },
   teleportFade: teleport,
-  setView: (x, z, yaw, pitch) => { state.x = x; state.z = z; state.yaw = yaw; state.pitch = pitch; state.y = groundY(x, z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE; setZone(zoneAt(x, z), true); },
+  setView: (x, z, yaw, pitch, lv) => { state.x = x; state.z = z; state.yaw = yaw; state.pitch = pitch; setLevel(lv || 0); state.y = groundY(x, z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE; setZone(zoneAt(x, z, state.y), true); },
   start: () => $('#go').click(),
   state, input,
   get world() { return world; },

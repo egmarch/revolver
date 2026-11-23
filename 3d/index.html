@@ -3,96 +3,229 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>REVOLVER · 3D-прогулка по Фрунзе, 49 — Miami Nights</title>
-<meta name="description" content="Неоновый закат, пальмы и лоуфай из студии. Пройдись по Фрунзе, 49: спустись в REVOLVER, загляни в чайхану этажом выше.">
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#2a0a4e">
+<title>REVOLVER · 3D-тур по студиям — Фрунзе 49</title>
+<meta name="description" content="Интерактивный 3D-тур по студиям REVOLVER PODCAST и REVOLVER SOUND: зал для видеоподкастов и комната звукозаписи, Новосибирск, ул. Фрунзе 49.">
+<meta name="theme-color" content="#07080c">
+<link rel="icon" href="data:,">
 <style>
-@font-face{font-family:Unbounded;font-weight:200 900;src:url(../assets/fonts/unbounded-cyrillic.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:Unbounded;font-weight:200 900;src:url(../assets/fonts/unbounded-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:Manrope;font-weight:200 800;src:url(../assets/fonts/manrope-cyrillic.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:Manrope;font-weight:200 800;src:url(../assets/fonts/manrope-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-:root{--pink:#ff2e97;--cyan:#19f0ff;--violet:#9b5cff;--orange:#ff9a3c;--ink:#1a0a33}
+@font-face{font-family:"Unbounded";src:url("../assets/fonts/unbounded-cyrillic.woff2") format("woff2");font-display:swap;unicode-range:U+0400-04FF}
+@font-face{font-family:"Unbounded";src:url("../assets/fonts/unbounded-latin.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF}
+@font-face{font-family:"Manrope";src:url("../assets/fonts/manrope-cyrillic.woff2") format("woff2");font-display:swap;unicode-range:U+0400-04FF}
+@font-face{font-family:"Manrope";src:url("../assets/fonts/manrope-latin.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF}
+:root{--red:#ff3b30;--g:#35e06b;--bg:#07080c;--fg:#f2efe8;--mut:#a7a39a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:#2a0a4e;color:#fff;font-family:Manrope,system-ui,sans-serif;overscroll-behavior:none;position:fixed;width:100%}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Manrope,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
 #stage{position:fixed;inset:0}
-#stage canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
-button,a.btn{font:inherit;cursor:pointer}
+#stage canvas{display:block;width:100%;height:100%;outline:none}
+.hidden{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+
 /* заставка */
-#splash{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;
-  background:linear-gradient(180deg,#1b0a45 0%,#7a1a8f 38%,#ff2e97 66%,#ff9a3c 100%)}
-#splash .sun{position:absolute;left:50%;bottom:16%;width:min(60vw,320px);aspect-ratio:1;transform:translateX(-50%);border-radius:50%;
-  background:repeating-linear-gradient(180deg,#ffe36a 0 14%,#ff9a3c 14% 28%,transparent 28% 32%);opacity:.9;
-  -webkit-mask:linear-gradient(#000 55%,transparent);mask:linear-gradient(#000 55%,transparent)}
-#splash .box{position:relative;max-width:520px}
-#splash small{display:block;font-family:Unbounded,sans-serif;font-weight:600;letter-spacing:.3em;font-size:11px;color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
-#splash h1{margin:.4em 0 .15em;font-family:Unbounded,sans-serif;font-weight:800;font-size:clamp(30px,8vw,56px);line-height:1;letter-spacing:.02em;
-  color:#fff;text-shadow:0 0 6px #fff,0 0 22px var(--pink),0 0 48px var(--pink)}
-#splash h1 i{font-style:normal;color:var(--cyan);text-shadow:0 0 6px #fff,0 0 22px var(--cyan),0 0 44px var(--cyan)}
-#splash p{margin:.8em auto 1.4em;max-width:30em;font-size:15px;line-height:1.45;color:#fff;text-shadow:0 1px 8px rgba(40,0,60,.7)}
-#go{padding:15px 34px;border:0;border-radius:999px;background:#fff;color:var(--ink);font-family:Unbounded,sans-serif;font-weight:700;font-size:15px;
-  box-shadow:0 0 0 3px var(--pink),0 0 28px var(--pink)}
-#go:disabled{opacity:.6}
-#keys{margin-top:16px;font-size:12.5px;opacity:.9;text-shadow:0 1px 6px rgba(40,0,60,.8)}
-#bar{height:3px;max-width:240px;margin:14px auto 0;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}
-#bar i{display:block;height:100%;width:0;background:var(--cyan);transition:width .2s}
+#splash{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
+ background:radial-gradient(ellipse at 50% 30%,rgba(255,59,48,.18),transparent 60%),linear-gradient(180deg,rgba(7,8,12,.55),rgba(7,8,12,.94))}
+#splash .box{max-width:560px;width:100%;text-align:center}
+#splash .eyebrow{font-size:12px;letter-spacing:.28em;color:var(--mut);text-transform:uppercase}
+#splash h1{font-family:Unbounded,Impact,sans-serif;font-weight:800;font-size:clamp(30px,6.4vw,54px);line-height:1;margin:.35em 0 .25em;letter-spacing:-.02em;text-shadow:0 0 28px rgba(255,59,48,.55)}
+#splash h1 span{color:var(--red)}
+#splash p.lead{margin:0 0 18px;color:#d3cfc5;font-size:15px;line-height:1.5}
+#go{font-family:Unbounded,Impact,sans-serif;font-weight:700;font-size:16px;letter-spacing:.04em;padding:16px 34px;border-radius:999px;border:0;background:var(--red);color:#fff;box-shadow:0 0 0 0 rgba(255,59,48,.6);animation:pulse 2s infinite}
+#go[disabled]{opacity:.5;animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 18px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:0 0 18px;text-align:left}
+.keys div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;font-size:12.5px;color:#cfcbc2;line-height:1.35}
+.keys b{color:#fff;font-weight:700}
+.quality{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:var(--mut)}
+.quality select{background:#14161d;color:var(--fg);border:1px solid #2a2d38;border-radius:8px;padding:6px 8px;font:inherit}
+#loadbar{height:3px;background:rgba(255,255,255,.1);border-radius:3px;margin:14px auto 0;max-width:260px;overflow:hidden}
+#loadbar i{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
+#splash .back{display:block;margin-top:16px;font-size:13px;color:var(--mut)}
+
 /* HUD */
-#hud{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
-body.play #hud{display:block}
-body.play #splash{display:none}
-#zone{position:absolute;left:max(14px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));padding:9px 14px;border-radius:12px;
-  background:rgba(26,10,51,.62);border:1px solid rgba(255,46,151,.55);box-shadow:0 0 14px rgba(255,46,151,.35);
-  font-family:Unbounded,sans-serif;font-weight:600;font-size:12.5px;max-width:min(64vw,420px);backdrop-filter:blur(4px)}
-#zone span{display:block;margin-top:3px;font:500 11.5px Manrope,sans-serif;opacity:.8}
-#top{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));display:flex;gap:8px;pointer-events:auto}
-#top button,#top a{min-width:42px;height:38px;padding:0 13px;border-radius:10px;border:1px solid rgba(25,240,255,.6);background:rgba(26,10,51,.66);color:#fff;
-  font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-#top .book{border-color:var(--pink);box-shadow:0 0 12px rgba(255,46,151,.5)}
-#cross{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.55)}
-body.touch #cross{display:none}
-#help{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:7px 14px;border-radius:999px;background:rgba(26,10,51,.55);font-size:12px;white-space:nowrap}
-body.touch #help{display:none}
-#toast{position:absolute;left:50%;top:76px;transform:translate(-50%,-8px);max-width:90vw;padding:10px 16px;border-radius:12px;background:rgba(26,10,51,.82);
-  border:1px solid var(--cyan);text-align:center;font-size:13.5px;line-height:1.35;opacity:0;transition:opacity .35s,transform .35s}
-#toast.on{opacity:1;transform:translate(-50%,0)}
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none}
+#hud>*{pointer-events:auto}
+#zone{position:absolute;left:max(14px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));font-family:Unbounded,sans-serif;font-weight:600;font-size:13px;letter-spacing:.02em;padding:9px 14px;border-radius:12px;background:rgba(7,8,12,.62);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);max-width:min(62vw,420px);pointer-events:none}
+#zone small{display:block;font-family:Manrope,sans-serif;font-weight:500;color:var(--mut);font-size:11px;margin-top:2px;letter-spacing:0}
+#topright{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+#minimap{width:104px;height:108px;border-radius:12px;background:rgba(7,8,12,.62);border:1px solid rgba(255,255,255,.14)}
+.row{display:flex;gap:8px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;background:rgba(7,8,12,.66);border:1px solid rgba(255,255,255,.16);font-size:13px;text-decoration:none;backdrop-filter:blur(6px);color:var(--fg)}
+.pill:hover{border-color:var(--red)}
+#zones{position:absolute;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));display:flex;gap:6px}
+#zones button{min-width:42px;height:38px;padding:0 11px;border-radius:10px;background:rgba(7,8,12,.66);border:1px solid rgba(255,255,255,.16);font-size:12.5px;backdrop-filter:blur(6px);white-space:nowrap}
+#zones button b{color:var(--red);margin-right:5px}
+#zones button.on{border-color:var(--red);background:rgba(255,59,48,.22)}
+#help{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));font-size:11.5px;color:var(--mut);line-height:1.5;background:rgba(7,8,12,.45);padding:7px 10px;border-radius:10px;pointer-events:none}
+#help b{color:#fff}
+#cross{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;background:linear-gradient(#fff,#fff) 50% 0/2px 6px no-repeat,linear-gradient(#fff,#fff) 50% 100%/2px 6px no-repeat,linear-gradient(#fff,#fff) 0 50%/6px 2px no-repeat,linear-gradient(#fff,#fff) 100% 50%/6px 2px no-repeat;opacity:.75;pointer-events:none;transition:transform .15s}
+#cross.on{transform:scale(1.35);opacity:1}
+#wpn{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:3}
+#ammo{padding:8px 14px;border-radius:12px;background:rgba(7,8,12,.66);border:1px solid rgba(255,255,255,.16);text-align:right;line-height:1.1}
+#ammo b{display:block;font-family:Unbounded,sans-serif;font-size:22px}
+#ammo span{font-size:11px;color:var(--mut)}
+#palette{display:none;gap:6px}
+#palette button{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.35);padding:0}
+#palette button.on{border-color:#fff;transform:scale(1.2)}
+.tb{position:absolute;pointer-events:auto;touch-action:none;min-width:84px;height:46px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(7,8,12,.6);color:#fff;font-weight:700;font-size:14px}
+#cardAudio{display:flex;align-items:center;gap:12px;margin:0 0 14px;color:#d0ccc2;font-size:14px}
+#toast{position:absolute;left:50%;top:92px;transform:translateX(-50%);max-width:92vw;padding:12px 18px;border-radius:14px;background:rgba(7,8,12,.88);border:1px solid var(--g);text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;font-size:14px;line-height:1.4}
+#toast.on{opacity:1}
+#toast b{display:block;font-family:Unbounded,sans-serif;font-size:15px;margin-bottom:3px;color:var(--g)}
+#btnFire{background:var(--red);border-color:var(--red);right:max(160px,calc(env(safe-area-inset-right) + 160px));bottom:max(110px,calc(env(safe-area-inset-bottom) + 100px))}
+#btnJump{right:max(26px,env(safe-area-inset-right));bottom:max(215px,calc(env(safe-area-inset-bottom) + 205px))}
+#btnSwap{left:max(22px,env(safe-area-inset-left));bottom:max(215px,calc(env(safe-area-inset-bottom) + 205px))}
+#btnRel{min-width:46px;left:max(120px,calc(env(safe-area-inset-left) + 120px));bottom:max(215px,calc(env(safe-area-inset-bottom) + 205px))}
+body.touch #wpn{top:70px;left:max(14px,env(safe-area-inset-left));right:auto;bottom:auto;align-items:flex-start;flex-direction:column-reverse}
+@media (orientation:landscape){body.touch #wpn{top:10px;left:50%;transform:translateX(-50%);flex-direction:row;align-items:center}}
+body:not(.touch) .tb{display:none}
+#prompt{position:absolute;left:50%;top:calc(50% + 34px);transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(7,8,12,.78);border:1px solid var(--red);font-size:14px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+#prompt.on{opacity:1}
+#prompt kbd{background:var(--red);color:#fff;border-radius:5px;padding:1px 7px;font-weight:700;margin-right:6px;font-family:inherit}
+#markers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.mk{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:rgba(255,59,48,.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;pointer-events:auto;cursor:pointer;box-shadow:0 0 14px rgba(255,59,48,.7);animation:mk 2s infinite;will-change:transform,opacity}
+.mk.focus{background:var(--red);border-color:#fff}
+@keyframes mk{50%{box-shadow:0 0 0 9px rgba(255,59,48,0)}}
+
+/* карточка */
+#card{position:fixed;z-index:40;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;border-radius:18px;background:#0e1016;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 80px rgba(0,0,0,.7);touch-action:pan-y}
+#card img{display:block;width:100%;height:clamp(120px,32vh,260px);object-fit:cover;background:#15171f}
+#card .in{padding:16px 18px 18px}
+#card h2{font-family:Unbounded,sans-serif;font-size:18px;margin:0 0 8px;line-height:1.2}
+#card p{margin:0 0 14px;color:#d0ccc2;font-size:14.5px;line-height:1.5}
+#card .btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:transparent;text-decoration:none;font-weight:700;font-size:14px;color:var(--fg)}
+.btn.main{background:var(--red);border-color:var(--red);color:#fff}
+#shade{position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.45)}
+#fade{position:fixed;inset:0;z-index:30;background:#000;opacity:0;pointer-events:none;transition:opacity .28s}
+#fade.on{opacity:1}
+
+/* пауза */
+#pause{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(7,8,12,.78);padding:16px}
+#pause .box{text-align:center;max-width:420px}
+#pause h2{font-family:Unbounded,sans-serif;margin:0 0 6px}
+#pause .row{justify-content:center;margin-top:14px;flex-wrap:wrap}
+
 /* тач */
-#tl,#tr{position:fixed;bottom:0;top:22%;z-index:9;touch-action:none;display:none}
-#tl{left:0;width:46%}#tr{right:0;width:54%}
-body.touch.play #tl,body.touch.play #tr{display:block}
-#stick{position:absolute;width:120px;height:120px;margin:-60px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);display:none}
-#stick i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(255,46,151,.55);border:1px solid #fff}
+#touch{position:fixed;inset:0;z-index:12;pointer-events:none}
+.stick{position:absolute;bottom:max(70px,calc(env(safe-area-inset-bottom) + 58px));width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);pointer-events:auto;touch-action:none}
+.stick i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.5)}
+#stickL{left:max(22px,env(safe-area-inset-left))}
+#stickR{right:max(22px,env(safe-area-inset-right))}
+#actBtn{position:absolute;right:max(26px,env(safe-area-inset-right));bottom:calc(max(70px,env(safe-area-inset-bottom) + 58px) + 150px);min-width:96px;height:48px;border-radius:999px;border:0;background:var(--red);color:#fff;font-weight:800;font-size:15px;pointer-events:auto;opacity:0;transition:opacity .15s;touch-action:none}
+#actBtn.on{opacity:1}
+#rotate{position:fixed;left:50%;transform:translateX(-50%);z-index:13;background:rgba(7,8,12,.85);border:1px solid rgba(255,255,255,.2);padding:8px 14px;border-radius:999px;font-size:12.5px;pointer-events:none;display:none;white-space:nowrap}
+@media (orientation:portrait){body.touch.started #rotate{display:block}}
+#rotate{top:auto;bottom:calc(env(safe-area-inset-bottom) + 275px)}
+body.touch .keys div:not(.t){display:none}
+#zone,#topright,#zones,#help{z-index:3}
+#markers{z-index:1}
+body.touch #help{display:none}
+body.touch #minimap{width:80px;height:83px}
+body.touch #zones{bottom:max(10px,env(safe-area-inset-bottom))}
+body.touch #zones button{min-width:0;padding:0 9px;height:34px;font-size:11.5px}
+body.touch #zones button span{display:none}
+@media (max-width:720px){#zone{font-size:11.5px;padding:7px 10px}#minimap{width:80px;height:83px}#help{display:none}#zones button span{display:none}}
+@media (max-height:480px){.stick{width:110px;height:110px;bottom:56px}#minimap{display:none}#card img{height:110px}}
+#endcard{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 62px);transform:translate(-50%,20px);z-index:20;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:16px;background:rgba(7,8,12,.9);border:1px solid rgba(255,255,255,.18);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;max-width:calc(100vw - 24px);font-size:14px}
+#endcard.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+#endcard .btn{min-height:38px;padding:0 16px;font-size:13px;white-space:nowrap}
+#endcard button{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;font-size:18px;line-height:1}
+.btn.big{min-height:54px;padding:0 28px;font-size:16px}
+#pause .row .btn{margin:4px}
+#topright .row{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 28px)}
+@media (orientation:portrait){body.touch #endcard{bottom:auto;top:calc(env(safe-area-inset-top) + 262px)}body.touch #wpn{top:150px}}
+@media (orientation:landscape){body.touch #wpn{top:auto;bottom:calc(env(safe-area-inset-bottom) + 52px);left:50%;right:auto;transform:translateX(-50%);flex-direction:row;align-items:center}body.touch #endcard{bottom:auto;top:56px}}
+html{overflow:hidden;height:100%;position:fixed;width:100%}
+#actBtn{bottom:calc(env(safe-area-inset-bottom) + 262px)}
+#rotate{bottom:calc(env(safe-area-inset-bottom) + 350px)}
 </style>
 </head>
 <body>
 <div id="stage"></div>
 
-<div id="hud">
-  <div id="zone">Фрунзе, 49<span>Новосибирск</span></div>
-  <div id="top">
-    <button id="mute" aria-label="Звук">♪</button>
-    <a class="book" href="../index.html#book">Забронировать</a>
-    <a href="../index.html" aria-label="На сайт">✕</a>
+<div id="splash">
+  <div class="box">
+    <div class="eyebrow">Зайди внутрь до того, как приедешь</div>
+    <h1><span>REVOLVER</span><br>3D-тур по студиям</h1>
+    <p class="lead">Можно просто пройти и посмотреть. Или оставить тег на стене.</p>
+    <div class="keys">
+      <div><b>W A S D</b> / стрелки — ходьба<br><b>Shift</b> — бег, <b>Пробел</b> — прыжок</div>
+      <div><b>Мышь</b> — обзор, <b>ЛКМ</b> — рисовать<br><b>E</b> — осмотреть</div>
+      <div><b>C</b> — цвет краски<br><b>X</b> — стереть всё</div>
+      <div><b>1 2 3</b> — Улица, Зал, Студия звука<br><b>Esc</b> — меню</div>
+      <div class="t">Касание: левый стик — ходьба, правый — обзор, кнопки «Прыжок», «Рисовать», «Открыть»</div>
+    </div>
+    <button id="go" disabled>Загрузка…</button>
+    <div id="loadbar"><i></i></div>
+    <div><label class="quality">Качество:
+      <select id="q"><option value="auto">авто</option><option value="low">низкое</option></select></label></div>
+    <a class="back" href="../index.html">← Вернуться на сайт</a>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="zone"><span id="zoneName"></span><small id="zoneSub"></small></div>
+  <div id="topright">
+    <canvas id="minimap" width="208" height="216"></canvas>
+    <div class="row">
+      <button class="pill" id="snd" title="Звук">🔇</button>
+      <a class="pill" href="../index.html?service=pack#book" id="hours">Свободные часы</a>
+      <a class="pill" href="../index.html" id="exit">Выйти на сайт</a>
+    </div>
   </div>
   <div id="cross"></div>
-  <div id="help">WASD — ходить · мышь — смотреть · Shift — бежать · Esc — отпустить курсор</div>
+  <div id="prompt"><kbd>E</kbd><span></span></div>
+  <div id="markers"></div>
+  <div id="zones">
+    <button data-z="1"><b>1</b><span>Улица</span></button>
+    <button data-z="2"><b>2</b><span>Зал</span></button>
+    <button data-z="3"><b>3</b><span>Студия звука</span></button>
+    <button data-z="4"><b>4</b><span>Чайхана</span></button>
+  </div>
+  <div id="help"><b>WASD</b> ходьба · <b>Пробел</b> прыжок · <b>ЛКМ</b> рисовать · <b>C</b> цвет · <b>X</b> стереть · <b>E</b> осмотреть · <b>1–3</b> зоны</div>
+  <div id="wpn"><div id="palette"></div><div id="ammo"><b>Спрей</b><span>Баллончик</span></div></div>
   <div id="toast"></div>
 </div>
-<div id="tl"><div id="stick"><i></i></div></div>
-<div id="tr"></div>
 
-<div id="splash">
-  <div class="sun"></div>
-  <div class="box">
-    <small>ЛЕТО · НЕОН · ЛОУФАЙ</small>
-    <h1>REVOLVER<br><i>MIAMI NIGHTS</i></h1>
-    <p>Выходишь на Фрунзе, 49 в тёплый закат. Спустись по лестнице в студию — музыка в колонке будет громче, чем ближе подходишь. Этажом выше чайхана: заходи, там тоже можно походить.</p>
-    <button id="go" disabled>Загрузка…</button>
-    <div id="bar"><i></i></div>
-    <div id="keys">Со звуком. Лучше в наушниках.</div>
+<div id="touch" class="hidden">
+  <div class="stick" id="stickL"><i></i></div>
+  <div class="stick" id="stickR"><i></i></div>
+  <button id="actBtn">Открыть</button>
+  <button class="tb" id="btnJump">Прыжок</button>
+  <button class="tb" id="btnFire">Рисовать</button>
+  <button class="tb hidden" id="btnSwap">Сменить</button>
+  <button class="tb hidden" id="btnRel">R</button>
+</div>
+<div id="rotate">Для удобства поверните телефон горизонтально</div>
+
+<div id="shade" class="hidden"></div>
+<div id="card" class="hidden" role="dialog" aria-modal="true">
+  <img id="cardImg" alt="">
+  <div class="in">
+    <h2 id="cardTitle"></h2>
+    <p id="cardText"></p>
+    <div id="cardAudio" class="hidden"><button class="btn main" id="playBtn" style="min-width:56px">▶</button><span id="audioMsg"></span></div>
+    <div class="btns">
+      <a class="btn main" id="cardBook" href="../index.html#book">Узнать свободные часы</a>
+      <button class="btn" id="cardClose">Закрыть</button>
+    </div>
   </div>
 </div>
 
-<audio id="lofi" src="audio/lofi.mp3" loop preload="auto" playsinline></audio>
-<script type="module" src="game.js"></script>
+<div id="pause" class="hidden">
+  <div class="box">
+    <h2>Пауза</h2>
+    <div style="color:#a7a39a;font-size:14px;line-height:1.6">Нажми «Продолжить», чтобы вернуться.<br>Ходьба — WASD, <b>Пробел</b> — прыжок, <b>ЛКМ</b> — рисовать<br><b>C</b> — цвет, <b>X</b> — стереть, <b>E</b> — осмотреть</div>
+    <div class="row">
+      <a class="btn main big" href="../index.html?service=pack#book">Узнать свободные часы</a>
+      <button class="btn" id="resume">Продолжить</button>
+      <a class="btn" href="../index.html">Выйти на сайт</a>
+    </div>
+  </div>
+</div>
+<div id="endcard"><span>Понравилось?</span><a class="btn main" href="../index.html?service=pack#book">Узнать свободные часы</a><button id="endClose" aria-label="Закрыть">×</button></div>
+<div id="fade"></div>
+<noscript><p style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#07080c;margin:0">Для 3D-тура нужен JavaScript. <a href="../index.html">На сайт</a></p></noscript>
+<script src="tour.js"></script>
 </body>
 </html>

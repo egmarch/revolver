@@ -234,7 +234,7 @@ export function createWeapons(env) {
       if (!h.face) continue;
       _n.copy(h.face.normal).transformDirection(h.object.matrixWorld);
       if (_n.dot(ray.ray.direction) > 0) _n.negate();
-      return { point: h.point.clone(), normal: _n.clone(), object: h.object };
+      return { point: h.point.clone(), normal: _n.clone(), object: h.object, uv: h.uv ? h.uv.clone() : null };
     }
     return null;
   }
@@ -289,6 +289,7 @@ export function createWeapons(env) {
   };
   function sprayHit(origin, dir) {
     const h = pick(origin, dir);
+    if (h && h.object.userData.board && h.uv) { if (api.boardPaint) api.boardPaint(h.uv, COLORS[S.color]); return h; }   // белая доска: рисунок сохраняется
     if (!h || h.object.userData.noPaint) return null;
     const jit = new THREE.Vector3();
     const size = 0.16 + Math.random() * 0.06;
