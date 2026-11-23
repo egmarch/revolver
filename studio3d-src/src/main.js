@@ -59,7 +59,7 @@ async function init() {
   initBoard(world.board, weapons);
   // Паша-звукорежиссёр сидит за пультом; брызги и выстрелы выводят его из себя
   pasha = createPasha(world.scene, {
-    x: 5.71, z: 1.3, yaw: Math.PI, low,
+    x: 5.71, z: 1.3, yaw: Math.PI, low, glbUrl: 'models/high/pasha.glb',
     onSay: (n, t) => toast(n, t),
     onPunch: () => punchFx(),
     onRestart: () => { location.reload(); }
@@ -171,7 +171,7 @@ addEventListener('wheel', (e) => {
   weapons.switchWeapon();
 }, { passive: true });
 function trig(d) { if (!weapons) return; if (d && (!state.started || state.paused || state.cardOpen)) return; weapons.setTrigger(d); }
-function jump() { if (!state.started || state.paused || state.cardOpen || !state.grounded) return; state.vy = 4.3; state.grounded = false; }
+function jump() { if (!state.started || state.paused || state.cardOpen || !state.grounded) return; state.vy = 5.0; state.grounded = false; }
 const tb = (id, down, up) => { const el = $(id); el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); try { el.setPointerCapture(e.pointerId); } catch (er) { } down(); }); if (up) ['pointerup', 'pointercancel'].forEach(ev => el.addEventListener(ev, up)); };
 tb('#btnJump', jump); tb('#btnFire', () => trig(true), () => trig(false)); tb('#btnSwap', () => weapons && weapons.switchWeapon()); tb('#btnRel', () => weapons && weapons.reload());
 addEventListener('pointermove', (e) => {

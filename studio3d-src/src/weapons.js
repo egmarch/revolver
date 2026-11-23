@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { cv, rng, toTex } from './tex.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 export const COLORS = ['#c9f23b', '#ff4b2e', '#c23cff', '#ffffff', '#111111', '#19f0ff', '#ff2e97', '#ff9a3c'];
 const MAX_DECALS = 150, MAX_PAINT = 4000;
@@ -87,27 +89,71 @@ export function createWeapons(env) {
   const cyl = (g, rt, rb, h, m, x, y, z, rx = 0, rz = 0, seg = 16) => { const me = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), m); me.position.set(x, y, z); me.rotation.set(rx, 0, rz); g.add(me); return me; };
   const bx = (g, w, h, d, m, x, y, z, rx = 0, ry = 0, rz = 0) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); me.position.set(x, y, z); me.rotation.set(rx, ry, rz); g.add(me); return me; };
 
-  // револьвер .357
+  // ---------- руки: настоящая кисть с пальцами (ладонь, 3 сустава на палец, ногти) ----------
+  const skinM = new THREE.MeshStandardMaterial({ color: 0xd49a76, roughness: 0.6, metalness: 0 });
+  const nailM = M(0xf2dccf, { metalness: 0, roughness: 0.28 });
+  const fleeceC = cv(64, 64); { const x = fleeceC.getContext('2d'), r = rng(31); x.fillStyle = '#1d2330'; x.fillRect(0, 0, 64, 64); for (let i = 0; i < 300; i++) { x.fillStyle = `rgba(${60 + r() * 50},${70 + r() * 50},${95 + r() * 60},${0.12 + r() * 0.22})`; x.beginPath(); x.arc(r() * 64, r() * 64, 0.8 + r() * 1.6, 0, 7); x.fill(); } }
+  const sleeveM = new THREE.MeshStandardMaterial({ map: toTex(fleeceC), roughness: 1, metalness: 0 });
+  const V3 = (p) => new THREE.Vector3(p[0], p[1], p[2]);
+  function limb(g, a, b, r0, r1, m) {
+    const A = V3(a), Bv = V3(b), d = Bv.clone().sub(A), len = d.length();
+    const me = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 14), m);
+    me.position.copy(A).addScaledVector(d, 0.5); me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); g.add(me);
+    const s = new THREE.Mesh(new THREE.SphereGeometry(r0, 14, 10), m); s.position.copy(A); g.add(s);
+    return me;
+  }
+  function finger(g, pts, r) {
+    for (let i = 0; i < pts.length - 1; i++) limb(g, pts[i], pts[i + 1], r * (1 - i * 0.07), r * (1 - (i + 1) * 0.07), skinM);
+    const e = pts[pts.length - 1], p = pts[pts.length - 2], tip = new THREE.Mesh(new THREE.SphereGeometry(r * 0.9, 14, 10), skinM); tip.position.set(e[0], e[1], e[2]); g.add(tip);
+    const nail = new THREE.Mesh(new THREE.BoxGeometry(r * 1.1, r * 0.35, r * 1.2), nailM); nail.position.set(e[0], e[1] + r * 0.55, e[2]); g.add(nail);
+  }
+  const arc = (cx, cz, rx, rz, y, degs) => degs.map(d => { const a = d * Math.PI / 180; return [cx + rx * Math.cos(a), y, cz - rz * Math.sin(a)]; });
+  function palm(g, x, y, z, rx, ry, rz, len = 0.055, r = 0.026) {
+    const p = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 16), skinM); p.position.set(x, y, z); p.rotation.set(rx, ry, rz); p.scale.set(0.62, 1, 1); g.add(p); return p;
+  }
+  function sleeve(g, from, to, r0 = 0.032, r1 = 0.04) {
+    limb(g, from, to, r0, r1, sleeveM);
+    const d = V3(to).sub(V3(from)).normalize(), cuff = new THREE.Mesh(new THREE.TorusGeometry(r0 * 0.98, 0.0075, 8, 20), sleeveM);
+    cuff.position.copy(V3(from)); cuff.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), d); g.add(cuff);
+  }
+
+  // револьвер .357 Magnum: рамка с силуэтом, ребристый ствол, барабан с проточками, курок, спуск, деревянная рукоять
   const rev = new THREE.Group();
   const frame = new THREE.Group(); rev.add(frame);
-  bx(frame, 0.04, 0.075, 0.13, steel, 0, 0.0, 0.03);
-  cyl(frame, 0.0125, 0.0125, 0.24, steel, 0, 0.022, -0.17, Math.PI / 2, 0);
-  bx(frame, 0.012, 0.012, 0.22, dark, 0, 0.045, -0.16);
-  bx(frame, 0.008, 0.016, 0.01, dark, 0, 0.055, -0.27);
-  cyl(frame, 0.009, 0.009, 0.19, steel, 0, -0.003, -0.16, Math.PI / 2, 0);
+  const blued = M(0x434a56, { metalness: 0.3, roughness: 0.42 }), polished = M(0xb4bcc8, { metalness: 0.45, roughness: 0.3 });
+  const gripC = cv(128, 128); { const x = gripC.getContext('2d'), r = rng(8); x.fillStyle = '#6b3d22'; x.fillRect(0, 0, 128, 128); x.strokeStyle = 'rgba(40,20,8,.55)'; x.lineWidth = 2; for (let i = -128; i < 256; i += 8) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + 128, 128); x.moveTo(i + 128, 0); x.lineTo(i, 128); x.stroke(); } for (let i = 0; i < 80; i++) { x.fillStyle = `rgba(255,200,140,${r() * 0.1})`; x.fillRect(r() * 128, r() * 128, 2, 2); } }
+  const woodG = M(0xffffff, { map: toTex(gripC), metalness: 0, roughness: 0.55 });
+  const prof = (pts, depth, m, x0 = 0) => { const s = new THREE.Shape(); s.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(p => s.lineTo(p[0], p[1])); const geo = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelSize: 0.0025, bevelThickness: 0.0025, bevelSegments: 2 }); geo.rotateY(-Math.PI / 2); geo.translate(depth / 2 + x0, 0, 0); const me = new THREE.Mesh(geo, m); return me; };
+  // профиль рамки в плоскости (z вдоль ствола с минусом вперёд, y вверх)
+  frame.add(prof([[-0.085, 0.034], [-0.03, 0.04], [0.045, 0.048], [0.085, 0.044], [0.095, 0.03], [0.09, 0.01], [0.062, -0.012], [0.035, -0.03], [0.0, -0.03], [-0.03, -0.022], [-0.07, -0.016], [-0.085, 0.0]], 0.03, blued));
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.0135, 0.2, 24), blued); barrel.rotation.x = Math.PI / 2; barrel.position.set(0, 0.022, -0.185); frame.add(barrel);
+  const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.0138, 0.0138, 0.012, 24), polished); muzzle.rotation.x = Math.PI / 2; muzzle.position.set(0, 0.022, -0.286); frame.add(muzzle);
+  const bore = new THREE.Mesh(new THREE.CircleGeometry(0.0072, 16), M(0x020202, { metalness: 0, roughness: 1 })); bore.position.set(0, 0.022, -0.2924); bore.rotation.y = Math.PI; frame.add(bore);
+  bx(frame, 0.012, 0.007, 0.205, blued, 0, 0.0425, -0.185);                                                       // вентилируемая планка
+  bx(frame, 0.004, 0.011, 0.012, blued, 0, 0.052, -0.274);                                                        // мушка
+  limb(frame, [0, 0.004, -0.17], [0, 0.004, -0.08], 0.0085, 0.0085, blued);                                       // кожух шомпола
+  limb(frame, [0, -0.002, -0.08], [0, -0.002, -0.025], 0.0092, 0.0092, blued);
   const drum = new THREE.Group(); drum.position.set(0, 0.018, -0.045); frame.add(drum);
-  cyl(drum, 0.034, 0.034, 0.065, steel, 0, 0, 0, Math.PI / 2, 0, 20);
+  cyl(drum, 0.034, 0.034, 0.066, polished, 0, 0, 0, Math.PI / 2, 0, 32);
   for (let i = 0; i < 6; i++) {
     const a = i * Math.PI / 3;
-    cyl(drum, 0.0085, 0.0085, 0.01, M(0x050505, { metalness: 0 }), Math.cos(a) * 0.021, Math.sin(a) * 0.021, 0.033, Math.PI / 2, 0, 10);
-    cyl(drum, 0.0065, 0.0065, 0.01, M(0xc89a3a, { metalness: 0.8, roughness: 0.3 }), Math.cos(a) * 0.021, Math.sin(a) * 0.021, 0.035, Math.PI / 2, 0, 10);
+    cyl(drum, 0.0085, 0.0085, 0.01, M(0x050505, { metalness: 0 }), Math.cos(a) * 0.021, Math.sin(a) * 0.021, 0.0335, Math.PI / 2, 0, 14);
+    cyl(drum, 0.0065, 0.0065, 0.01, M(0xc89a3a, { metalness: 0.8, roughness: 0.3 }), Math.cos(a) * 0.021, Math.sin(a) * 0.021, 0.0345, Math.PI / 2, 0, 14);
+    const fl = new THREE.Mesh(new THREE.CylinderGeometry(0.0062, 0.0062, 0.05, 10), blued); fl.rotation.x = Math.PI / 2; fl.position.set(Math.cos(a + 0.52) * 0.0345, Math.sin(a + 0.52) * 0.0345, -0.002); drum.add(fl);   // проточки барабана
   }
-  const hammer = bx(frame, 0.01, 0.04, 0.02, dark, 0, 0.055, 0.1, 0.5);
-  bx(rev, 0.036, 0.1, 0.05, wood, 0, -0.07, 0.1, 0.35);
-  const guard = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.004, 6, 14, Math.PI * 1.3), steel); guard.position.set(0, -0.04, 0.04); guard.rotation.set(0, Math.PI / 2, Math.PI * 1.1); rev.add(guard);
-  bx(rev, 0.008, 0.022, 0.008, dark, 0, -0.02, 0.05);
-  bx(rev, 0.052, 0.05, 0.065, skin, 0.002, -0.07, 0.115, 0.35);   // кисть
-  cyl(rev, 0.032, 0.036, 0.3, cloth, 0.0, -0.13, 0.27, 1.25, 0, 14); // рукав
+  const hammer = new THREE.Group(); hammer.position.set(0, 0.055, 0.092); frame.add(hammer);
+  limb(hammer, [0, 0, 0], [0, 0.026, 0.026], 0.0075, 0.0095, blued); bx(hammer, 0.01, 0.006, 0.014, polished, 0, 0.028, 0.03);
+  bx(frame, 0.007, 0.03, 0.006, blued, 0, -0.012, 0.035, -0.35);                                                   // спусковой крючок
+  const guard = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.0045, 8, 24, Math.PI * 1.15), blued); guard.position.set(0, -0.02, 0.025); guard.rotation.set(0, Math.PI / 2, Math.PI * 1.04); frame.add(guard);
+  const grip = prof([[0.045, -0.025], [0.1, -0.012], [0.118, -0.14], [0.072, -0.168], [0.05, -0.13]], 0.034, woodG); frame.add(grip);
+  [-1, 1].forEach(s => { const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.004, 10), polished); sc.rotation.z = Math.PI / 2; sc.position.set(s * 0.0185, -0.06, 0.078); frame.add(sc); });
+  // рука: пальцы обхватывают рукоять спереди, указательный на спуске, большой на левой стороне рамки
+  const hand = new THREE.Group(); rev.add(hand);
+  palm(hand, 0.016, -0.075, 0.12, -0.35, 0, 0.0, 0.07, 0.03);
+  [[-0.05, 0.088, 0.0185, 0.026], [-0.075, 0.094, 0.0185, 0.026], [-0.1, 0.1, 0.0185, 0.025]].forEach(([y, cz, rx, rz], i) => finger(hand, arc(0.0, cz, rx + 0.01, rz + 0.009, y, [-35, 5, 55, 100, 135]), 0.0092 - i * 0.0004));
+  finger(hand, [[0.021, -0.036, 0.112], [0.025, -0.03, 0.075], [0.02, -0.026, 0.045], [0.013, -0.02, 0.028]], 0.0093);
+  finger(hand, [[-0.012, -0.065, 0.128], [-0.027, -0.04, 0.1], [-0.029, -0.01, 0.07], [-0.026, 0.01, 0.045]], 0.0105);
+  sleeve(rev, [0.03, -0.095, 0.16], [0.11, -0.19, 0.42]);
   const flash = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   flash.position.set(0, 0.022, -0.3); flash.visible = false; rev.add(flash);
   // баллончик с краской: алюминиевый корпус с цветной этикеткой, купол-плечо, цветной колпак с форсункой
@@ -136,8 +182,12 @@ export function createWeapons(env) {
   lath([[0.0215, 0], [0.0215, 0.02], [0.0205, 0.02], [0.0205, 0]], capMat, 0.108);                                                     // цветное кольцо на колпаке
   bx(can, 0.016, 0.01, 0.024, M(0xf2f2f4, { roughness: 0.4, metalness: 0.1 }), 0, 0.151, -0.014);                                     // кнопка-форсунка
   cyl(can, 0.0034, 0.0034, 0.012, dark, 0, 0.151, -0.03, Math.PI / 2, 0, 8);
-  bx(can, 0.05, 0.05, 0.06, skin, 0.0, -0.01, 0.04);
-  cyl(can, 0.032, 0.036, 0.3, cloth, 0.0, -0.12, 0.2, 1.2, 0, 14);
+  // рука: три пальца обхватывают корпус, указательный лежит на форсунке, большой упирается слева сзади
+  palm(can, 0.062, 0.0, 0.034, 0, 0, 0.0, 0.075, 0.03);
+  [0.027, 0.0, -0.027].forEach((y, i) => finger(can, arc(0, 0, 0.042 + (i ? 0.0 : 0), 0.042, y, [-6, 32, 68, 105, 140]), 0.0092 - i * 0.0005));
+  finger(can, [[0.058, 0.052, 0.03], [0.05, 0.1, 0.012], [0.032, 0.14, -0.005], [0.01, 0.157, -0.02]], 0.0092);
+  finger(can, arc(0, 0, 0.044, 0.044, 0.012, [-70, -112, -150, -185]).map(p => [p[0], p[1] - 0.012, p[2]]), 0.0104);
+  sleeve(can, [0.075, -0.03, 0.065], [0.16, -0.17, 0.36]);
   const mist = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, opacity: 0.6, depthWrite: false, color: 0xc9f23b }));
   mist.position.set(0, 0.151, -0.1); mist.visible = false; can.add(mist);
 
@@ -150,6 +200,7 @@ export function createWeapons(env) {
   // ---------- состояние ----------
   const S = { weapon: 1, hasRev: false, ammo: 6, reload: -1, rec: 0, flash: 0, cd: 0, swap: 1, swapTo: 0, trigger: false, color: 0, sprayT: 0, hold: 0, bobT: 0, sx: 0, sy: 0, lastYaw: 0, lastPitch: 0, lastP: null, dripLen: 0, dripT: 0, spraying: false };
   api.S = S;
+  api._dbg = { vm, rev, can, hand, BASE };
 
   // ---------- декали ----------
   const holeTex = [toTex(holeCanvas(1)), toTex(holeCanvas(2)), toTex(holeCanvas(3))];
@@ -411,6 +462,13 @@ export function createWeapons(env) {
     renderer.clearDepth(); renderer.render(vmScene, vmCam);
   };
   api.paint = paint; api.vm = vm; api.vmScene = vmScene; api.vmCam = vmCam;
+  // револьвер с рукой из GLB (Higgsfield + Blender); если файла нет или он не загрузился, остаётся процедурный
+  { const gl = new GLTFLoader(); gl.setMeshoptDecoder(MeshoptDecoder);
+    gl.load('models/high/viewmodel_revolver.glb', (g) => {
+      rev.children.slice().forEach(ch => { if (ch !== flash) ch.visible = false; });
+      g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.18 : 0; mt.metalness = Math.min(mt.metalness || 0, 0.35); } } });
+      rev.add(g.scene);
+    }, undefined, () => { }); }
   api.randomColor();   // у каждого входа баллончик другого цвета
   return api;
 }

@@ -3,6 +3,8 @@
 // и бьёт по лицу, после чего игра перезапускается.
 import * as THREE from 'three';
 import { cv, rng, toTex } from './tex.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -70,6 +72,41 @@ export function createPasha(parent, o) {
   const lL = mkLeg(-1), lR = mkLeg(1);
   root.traverse(ob => { if (ob.isMesh) { ob.userData.npc = true; ob.userData.noPaint = true; } });
 
+  // --- GLB-модель Паши (Higgsfield/Meshy) управляется теми же числами, что и процедурная фигурка ---
+  let glbSync = null;
+  const NAMES = { hips: 'Hips', sp: 'Spine', head: 'Head', lua: 'LeftArm', lfa: 'LeftForeArm', rua: 'RightArm', rfa: 'RightForeArm', lth: 'LeftUpLeg', lsh: 'LeftLeg', lft: 'LeftFoot', lto: 'LeftToeBase', rth: 'RightUpLeg', rsh: 'RightLeg', rft: 'RightFoot', rto: 'RightToeBase' };
+  if (o.glbUrl) {
+    const ld = new GLTFLoader(); ld.setMeshoptDecoder(MeshoptDecoder);
+    ld.load(o.glbUrl, (g) => {
+      const gr = new THREE.Group(); gr.add(g.scene); root.add(gr); root.updateMatrixWorld(true);
+      const Bn = {}; for (const k in NAMES) Bn[k] = g.scene.getObjectByName(NAMES[k]);
+      if (!Bn.hips || !Bn.lth) return;
+      g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; m.userData.npc = true; m.userData.noPaint = true; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.28 : 0; } } });
+      const qr = new THREE.Quaternion(), qp = new THREE.Quaternion(), qd = new THREE.Quaternion(), qa = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3();
+      const rootQ0 = root.getWorldQuaternion(new THREE.Quaternion()).invert();
+      const rest = {}; for (const k in Bn) rest[k] = { rel: rootQ0.clone().multiply(Bn[k].getWorldQuaternion(new THREE.Quaternion())), q: Bn[k].quaternion.clone(), p: Bn[k].position.clone() };
+      const hipsRoot0 = root.worldToLocal(Bn.hips.getWorldPosition(new THREE.Vector3()));
+      const Rx = (a, b = 0) => new THREE.Quaternion().setFromEuler(e.set(a, b, 0, 'YXZ'));
+      const setAbs = (k, dq) => { const bn = Bn[k]; root.getWorldQuaternion(qr); bn.parent.getWorldQuaternion(qp); qd.copy(qr).multiply(dq).multiply(rest[k].rel); bn.quaternion.copy(qp.invert().multiply(qd)); bn.updateMatrixWorld(true); };
+      g.scene.updateMatrixWorld(true);
+      pelvis.visible = false;           // процедурную фигурку прячем, остаётся только для расчёта поз
+      const ID = new THREE.Quaternion(), HIPS_Y = 0.95;
+      glbSync = () => {
+        for (const k in Bn) { Bn[k].quaternion.copy(rest[k].q); Bn[k].position.copy(rest[k].p); }
+        root.updateMatrixWorld(true);
+        v.copy(hipsRoot0); v.y += pelvis.position.y - HIPS_Y + (o.hipsAdjust || 0); v.z += (o.hipsZ || 0);
+        Bn.hips.position.copy(Bn.hips.parent.worldToLocal(root.localToWorld(v))); Bn.hips.updateMatrixWorld(true);
+        setAbs('sp', Rx(spine.rotation.x, spine.rotation.y));
+        setAbs('head', Rx(spine.rotation.x * 0.6 + head.rotation.x, head.rotation.y + spine.rotation.y));
+        setAbs('lua', Rx(aL.sh.rotation.x)); setAbs('lfa', Rx(aL.sh.rotation.x + aL.el.rotation.x));
+        setAbs('rua', Rx(aR.sh.rotation.x)); setAbs('rfa', Rx(aR.sh.rotation.x + aR.el.rotation.x));
+        setAbs('lth', Rx(lL.hip.rotation.x)); setAbs('lsh', Rx(lL.hip.rotation.x + lL.kn.rotation.x)); setAbs('lft', ID); setAbs('lto', ID);
+        setAbs('rth', Rx(lR.hip.rotation.x)); setAbs('rsh', Rx(lR.hip.rotation.x + lR.kn.rotation.x)); setAbs('rft', ID); setAbs('rto', ID);
+      };
+      glbSync();
+    }, undefined, () => { });
+  }
+
   // --- позы ---
   const SIT = { py: 0.54, thx: -1.45, shx: 1.5, tor: 0.12, uax: -0.55, fax: -1.0, hx: -0.12 };
   const STAND = { py: 0.95, thx: 0, shx: 0, tor: 0, uax: 0.04, fax: -0.12, hx: 0 };
@@ -90,6 +127,7 @@ export function createPasha(parent, o) {
     let uaR = lerp(STAND.uax, SIT.uax, sitW) + S.walk * Math.sin(S.t * 7.5) * 0.5 * (1 - sitW) - type, faR = faL;
     if (S.st === 'punch') { const k = clamp(S.punchT / 0.3, 0, 1), back = S.punchT > 0.3 ? clamp(1 - (S.punchT - 0.3) / 0.35, 0, 1) : 1; uaR = lerp(0.6, -1.55, k) * back + uaR * (1 - back); faR = lerp(-1.0, -0.12, k) * back + faR * (1 - back); uaL = -0.9; faL = -1.3; spine.rotation.y = lerp(0, -0.35, k) * back; } else spine.rotation.y = 0;
     aL.sh.rotation.set(uaL, 0, 0.06); aL.el.rotation.x = faL; aR.sh.rotation.set(uaR, 0, -0.06); aR.el.rotation.x = faR;
+    if (glbSync) glbSync();
   }
   apply(1, 0);
 
