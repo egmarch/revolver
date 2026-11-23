@@ -81,7 +81,7 @@ export function createPasha(parent, o) {
       const gr = new THREE.Group(); gr.add(g.scene); root.add(gr); root.updateMatrixWorld(true);
       const Bn = {}; for (const k in NAMES) Bn[k] = g.scene.getObjectByName(NAMES[k]);
       if (!Bn.hips || !Bn.lth) return;
-      g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; m.userData.npc = true; m.userData.noPaint = true; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.28 : 0; } } });
+      g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; m.userData.npc = true; m.userData.noPaint = true; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.1 : 0; mt.roughness = 1; mt.metalness = 0; } } });
       const qr = new THREE.Quaternion(), qp = new THREE.Quaternion(), qd = new THREE.Quaternion(), qa = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3();
       const rootQ0 = root.getWorldQuaternion(new THREE.Quaternion()).invert();
       const rest = {}; for (const k in Bn) rest[k] = { rel: rootQ0.clone().multiply(Bn[k].getWorldQuaternion(new THREE.Quaternion())), q: Bn[k].quaternion.clone(), p: Bn[k].position.clone() };

@@ -98,23 +98,23 @@ export function createWeapons(env) {
   function limb(g, a, b, r0, r1, m) {
     const A = V3(a), Bv = V3(b), d = Bv.clone().sub(A), len = d.length();
     const me = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 14), m);
-    me.position.copy(A).addScaledVector(d, 0.5); me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); g.add(me);
-    const s = new THREE.Mesh(new THREE.SphereGeometry(r0, 14, 10), m); s.position.copy(A); g.add(s);
+    me.position.copy(A).addScaledVector(d, 0.5); me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); me.userData.hand = true; g.add(me);
+    const s = new THREE.Mesh(new THREE.SphereGeometry(r0, 14, 10), m); s.position.copy(A); s.userData.hand = true; g.add(s);
     return me;
   }
   function finger(g, pts, r) {
     for (let i = 0; i < pts.length - 1; i++) limb(g, pts[i], pts[i + 1], r * (1 - i * 0.07), r * (1 - (i + 1) * 0.07), skinM);
-    const e = pts[pts.length - 1], p = pts[pts.length - 2], tip = new THREE.Mesh(new THREE.SphereGeometry(r * 0.9, 14, 10), skinM); tip.position.set(e[0], e[1], e[2]); g.add(tip);
-    const nail = new THREE.Mesh(new THREE.BoxGeometry(r * 1.1, r * 0.35, r * 1.2), nailM); nail.position.set(e[0], e[1] + r * 0.55, e[2]); g.add(nail);
+    const e = pts[pts.length - 1], p = pts[pts.length - 2], tip = new THREE.Mesh(new THREE.SphereGeometry(r * 0.9, 14, 10), skinM); tip.position.set(e[0], e[1], e[2]); tip.userData.hand = true; g.add(tip);
+    const nail = new THREE.Mesh(new THREE.BoxGeometry(r * 1.1, r * 0.35, r * 1.2), nailM); nail.position.set(e[0], e[1] + r * 0.55, e[2]); nail.userData.hand = true; g.add(nail);
   }
   const arc = (cx, cz, rx, rz, y, degs) => degs.map(d => { const a = d * Math.PI / 180; return [cx + rx * Math.cos(a), y, cz - rz * Math.sin(a)]; });
   function palm(g, x, y, z, rx, ry, rz, len = 0.055, r = 0.026) {
-    const p = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 16), skinM); p.position.set(x, y, z); p.rotation.set(rx, ry, rz); p.scale.set(0.62, 1, 1); g.add(p); return p;
+    const p = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 16), skinM); p.position.set(x, y, z); p.rotation.set(rx, ry, rz); p.scale.set(0.62, 1, 1); p.userData.hand = true; g.add(p); return p;
   }
   function sleeve(g, from, to, r0 = 0.032, r1 = 0.04) {
     limb(g, from, to, r0, r1, sleeveM);
     const d = V3(to).sub(V3(from)).normalize(), cuff = new THREE.Mesh(new THREE.TorusGeometry(r0 * 0.98, 0.0075, 8, 20), sleeveM);
-    cuff.position.copy(V3(from)); cuff.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), d); g.add(cuff);
+    cuff.position.copy(V3(from)); cuff.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), d); cuff.userData.hand = true; g.add(cuff);
   }
 
   // револьвер .357 Magnum: рамка с силуэтом, ребристый ствол, барабан с проточками, курок, спуск, деревянная рукоять
@@ -462,12 +462,19 @@ export function createWeapons(env) {
     renderer.clearDepth(); renderer.render(vmScene, vmCam);
   };
   api.paint = paint; api.vm = vm; api.vmScene = vmScene; api.vmCam = vmCam;
+  // рука с рукавом для баллончика из GLB (Higgsfield + Blender); корпус баллончика остаётся свой, с меняющимся цветом
+  { const gc = new GLTFLoader(); gc.setMeshoptDecoder(MeshoptDecoder);
+    gc.load('models/high/viewmodel_can_hand.glb', (g) => {
+      can.children.slice().forEach(ch => { if (ch.userData.hand) ch.visible = false; });
+      g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.18 : 0; mt.metalness = 0; mt.roughness = 0.85; } } });
+      can.add(g.scene);
+    }, undefined, () => { }); }
   // револьвер с рукой из GLB (Higgsfield + Blender); если файла нет или он не загрузился, остаётся процедурный
   { const gl = new GLTFLoader(); gl.setMeshoptDecoder(MeshoptDecoder);
     gl.load('models/high/viewmodel_revolver.glb', (g) => {
       rev.children.slice().forEach(ch => { if (ch !== flash) ch.visible = false; });
       g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.18 : 0; mt.metalness = Math.min(mt.metalness || 0, 0.35); } } });
-      rev.add(g.scene);
+      g.scene.scale.setScalar(1.22); g.scene.rotation.x = 0.1; g.scene.position.set(-0.04, 0.11, 0.0); rev.add(g.scene); flash.position.set(-0.03, 0.2, -0.3);
     }, undefined, () => { }); }
   api.randomColor();   // у каждого входа баллончик другого цвета
   return api;
