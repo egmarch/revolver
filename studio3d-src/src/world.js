@@ -609,9 +609,9 @@ export function buildWorld(opts = {}) {
   texBox(H, -0.2, 0, wDz1, 0, wy + 0.1, HD, wmW, 1);
   texBox(H, -0.2, 2.1, wDz0, 0, wy + 0.1, wDz1, wmW, 1);
   plane(H, 3.0, wy, mat.carpetRed, 0.012, wy / 2, 1.5, '+x', [3.33, 3.11]);
-  plane(H, HD - 3.9, wy, mat.carpetRed, 0.012, wy / 2, (3.9 + HD) / 2, '+x', [HD - 3.9 + 0.12, 3.11]);
-  plane(H, 0.9, 0.7, mat.carpetRed, 0.012, 2.45, 3.45, '+x', [1.0, 0.78]);
-  addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: [mat.carpetRed, mat.carpetRed, wM, wM, wM, wM], cx: -0.1, cz: 3.45 });   // дверь обита тем же ковром
+  plane(H, HD - 3.9, wy, mat.foam, 0.012, wy / 2, (3.9 + HD) / 2, '+x', [(HD - 3.9) * 1.5, wy * 1.5]);
+  plane(H, 0.9, wy - 2.1, mat.foam, 0.012, (2.1 + wy) / 2, 3.45, '+x', [1.35, (wy - 2.1) * 1.5]);
+  addDoor(H, { axis: 'x', hx: -0.1, hz: wDz1, w: 0.9, h: 2.1, t: 0.05, open: -Math.PI / 2 * 0.95, mats: wM, cx: -0.1, cz: 3.45 });
   B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz0 - 0.03); B(H, 0.1, 2.1, 0.06, wM, -0.1, 1.05, wDz1 + 0.03); B(H, 0.1, 0.06, 1.0, wM, -0.1, 2.13, 3.45);
   // южная стена с дверью: шторы
   texBox(H, -0.2, 0, HD, HW + 0.25, wy + 0.1, HD + 0.2, mat.concreteDark, 2);
@@ -1180,7 +1180,8 @@ export function buildWorld(opts = {}) {
     { id: 'mural', zone: 'hall', pos: [3.7, 1.5, 1.4], title: 'Граффити-стена', text: 'Большой чёрно-белый рисунок на зелёной стене — фирменный фон студии. Рядом дверь в комнату звукозаписи.', img: 'hall-wide-2', service: 'rent' },
     { id: 'light', zone: 'hall', pos: [0.97, 2.3, 1.96], title: 'Свет RGB', text: 'Цвет света подбираем под настроение выпуска. Два больших софтбокса и панель сверху дают мягкую картинку.', img: 'hall-wide-3', service: 'podcast-express' },
     { id: 'table', zone: 'hall', pos: [1.88, 0.9, 1.99], title: 'Стол и три микрофона', text: 'Три микрофона на журавлях, три камеры 4K, запись в мультикам. Садись за стол — проверим звук.', img: 'hall-table', service: 'podcast-express' },
-    { id: 'sofa', zone: 'hall', pos: [1.88, 0.8, 4.4], title: 'Чёрный кожаный диван', text: 'Диван между входом и дверью в звукозапись. Можно посидеть, пока мы готовим свет и звук.', img: 'hall-both', service: 'rent' },
+    { id: 'sofa', zone: 'hall', pos: [1.88, 0.8, 4.4], title: 'Чёрный кожаный диван', text: 'Диван между входом и дверью в звукозапись. Можно посидеть, пока мы готовим свет и звук.', img: 'hall-both', service: 'rent', sit: { x: 1.88, z: 4.5, yaw: 0, ox: 1.88, oz: 3.8 } },
+    { id: 'sofa2', zone: 'studio', pos: [5.01, 0.8, 4.6], title: 'Белый диван', text: '', img: null, service: null, sit: { x: 5.01, z: 4.62, yaw: 0, ox: 5.75, oz: 3.9 } },
     { id: 'console', zone: 'studio', pos: [5.51, 1.1, 0.25], title: 'Тот же фрагмент после сведения', text: 'Звукорежиссёр сидит в той же комнате, что и исполнитель, — без стеклянной стены между вами. Сравни с записью до обработки.', img: 'engineer-1', service: 'sound-vocal', audio: 'demo-after.mp3' },
     { id: 'vocal', zone: 'studio', pos: [6.21, 1.45, 4.24], title: 'Голос до обработки', text: 'Комната небольшая — поэтому голос в ней плотный, а не гулкий. Послушай запись до обработки.', img: 'mic-neumann', service: 'sound-vocal', audio: 'demo-before.mp3' },
     { id: 'wall', zone: 'studio', pos: [4.15, 1.4, 4.0], title: 'Звукоизолированная стена', text: 'Между залом и комнатой звукозаписи — звукоизоляция. Можно писать подкаст и голос одновременно, не мешая друг другу. Пакет «Трек + обложка + сниппет + Reels — 13 900 ₽».', img: 'vocal-2', service: 'pack' },

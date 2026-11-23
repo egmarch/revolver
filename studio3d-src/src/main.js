@@ -183,7 +183,7 @@ addEventListener('wheel', (e) => {
   weapons.switchWeapon();
 }, { passive: true });
 function trig(d) { if (!weapons) return; if (d && (!state.started || state.paused || state.cardOpen)) return; weapons.setTrigger(d); }
-function jump() { if (!state.started || state.paused || state.cardOpen || !state.grounded) return; state.vy = 5.0; state.grounded = false; }
+function jump() { if (state.sitting && state.started && !state.paused && !state.cardOpen) { standUp(); return; } if (!state.started || state.paused || state.cardOpen || !state.grounded) return; state.vy = 5.0; state.grounded = false; }
 const tb = (id, down, up) => { const el = $(id); el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); try { el.setPointerCapture(e.pointerId); } catch (er) { } down(); }); if (up) ['pointerup', 'pointercancel'].forEach(ev => el.addEventListener(ev, up)); };
 tb('#btnJump', jump); tb('#btnFire', () => trig(true), () => trig(false)); tb('#btnSwap', () => weapons && weapons.switchWeapon()); tb('#btnRel', () => weapons && weapons.reload());
 addEventListener('pointermove', (e) => {
@@ -274,7 +274,7 @@ function updateFocus() {
   const pr_ = $('#prompt'), cr = $('#cross'), ab = $('#actBtn');
   if (focus) {
     pr_.classList.add('on'); cr.classList.add('on');
-    pr_.lastElementChild.textContent = (focus.pickup ? ' Взять: ' : ' Осмотреть: ') + focus.title;
+    pr_.lastElementChild.textContent = (focus.pickup ? ' Взять: ' : focus.sit ? ' Сесть: ' : ' Осмотреть: ') + focus.title;
     pr_.firstElementChild.textContent = isTouch ? '●' : 'E';
     ab.classList.add('on');
   } else { pr_.classList.remove('on'); cr.classList.remove('on'); ab.classList.remove('on'); }
@@ -339,6 +339,7 @@ function interact() {
 let openedAt = 0;
 function openCard(h) {
   if (h.pickup) { pickRevolver(); return; }
+  if (h.sit) { sitDown(h.sit); return; }
   if (weapons) weapons.setTrigger(false);
   state.cardOpen = true; openedAt = performance.now();
   if (document.pointerLockElement) document.exitPointerLock();
@@ -375,7 +376,10 @@ stageEl.addEventListener('click', (e) => {
 // ------------------------------------------------------------------
 // телепорт
 let fading = false;
+function sitDown(s) { state.sitting = s; state.x = s.x; state.z = s.z; state.yaw = s.yaw; state.pitch = 0; toast('Сел на диван', 'Двигайся или нажми Пробел, чтобы встать'); }
+function standUp() { const s = state.sitting; if (!s) return; state.sitting = null; state.x = s.ox; state.z = s.oz; }
 function applyTeleport(n, instant) {
+  state.sitting = null;
   const t = TELEPORTS[n];
   state.x = t.x; state.z = t.z; state.yaw = t.yaw; state.pitch = t.pitch;
   setLevel(t.lv || 0); state.y = groundY(t.x, t.z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE;
@@ -590,7 +594,7 @@ function loop(now) {
     if (input.keys.f) fz -= 1; if (input.keys.b) fz += 1; if (input.keys.l) fx -= 1; if (input.keys.r) fx += 1;
     fx += input.mx; fz += input.mz;
     const mag = Math.min(1, Math.hypot(fx, fz)); curMag = mag * (input.run ? 1.5 : 1);
-    if (mag > 0.05) {
+    if (state.sitting) { if (mag > 0.05) standUp(); } else if (mag > 0.05) {
       const sp = (input.run ? 4.4 : 2.5) * mag * dt;
       const nl = Math.hypot(fx, fz); fx /= nl; fz /= nl;
       const s = Math.sin(state.yaw), c = Math.cos(state.yaw);
@@ -614,7 +618,7 @@ function loop(now) {
     if (state.y > maxY) { state.y = maxY; if (state.vy > 0) state.vy = 0; }
     if (state.y <= gnd) { state.y = gnd; state.vy = 0; state.grounded = true; }
   }
-  const tY = state.y + EYE;
+  const tY = state.y + EYE - (state.sitting ? 0.5 : 0);
   state.eyeY = state.grounded ? state.eyeY + (tY - state.eyeY) * Math.min(1, dt * 14) : tY;
   const zn = zoneAt(state.x, state.z, state.y);
   if (zn !== state.zone) setZone(zn, false);
@@ -683,7 +687,7 @@ const tourApi = {
   },
   teleport: (n) => { applyTeleport(n); },
   teleportFade: teleport,
-  setView: (x, z, yaw, pitch, lv) => { state.x = x; state.z = z; state.yaw = yaw; state.pitch = pitch; setLevel(lv || 0); state.y = groundY(x, z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE; setZone(zoneAt(x, z, state.y), true); },
+  setView: (x, z, yaw, pitch, lv) => { state.sitting = null; state.x = x; state.z = z; state.yaw = yaw; state.pitch = pitch; setLevel(lv || 0); state.y = groundY(x, z); state.vy = 0; state.grounded = true; state.eyeY = state.y + EYE; setZone(zoneAt(x, z, state.y), true); },
   start: () => $('#go').click(),
   state, input,
   get world() { return world; },

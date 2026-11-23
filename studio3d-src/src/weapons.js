@@ -202,13 +202,42 @@ export function createWeapons(env) {
   idx.traverse(o => { o.userData.hand = false; });
   sleeve(can, [0.075, -0.03, 0.065], [0.16, -0.17, 0.36]);
   const mist = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: toTex(glowTex()), transparent: true, opacity: 0.6, depthWrite: false, color: 0xc9f23b }));
-  mist.position.set(0, 0.151, -0.1); mist.visible = false; can.add(mist);
+  mist.position.set(-0.029, 0.134, 0.01); mist.visible = false; can.add(mist);
+  // баллончик — одна картинка (img/vm_can.png); все прежние 3D-дети скрыты, кроме облака краски
+  can.children.forEach(c => { if (c !== mist) c.visible = false; });
+  const SPR = { H: 0.27, aspect: 517 / 768, x: 0.02, y: 0.014 };
+  const spC = cv(517, 768), spX = spC.getContext('2d'), spT = toTex(spC);
+  const canSpr = new THREE.Mesh(new THREE.PlaneGeometry(SPR.H * SPR.aspect, SPR.H), new THREE.MeshBasicMaterial({ map: spT, transparent: true, depthTest: false, depthWrite: false }));
+  canSpr.position.set(SPR.x, SPR.y, 0); canSpr.renderOrder = 5; can.add(canSpr);
+  let spOrig = null;
+  // перекраска белого корпуса: белые пиксели (низкая насыщенность, высокая яркость) умножаются на цвет
+  function tintCanSprite(hex) {
+    if (!spOrig) return;
+    const n = parseInt(hex.slice(1), 16), tr = (n >> 16 & 255) / 255, tg = (n >> 8 & 255) / 255, tb = (n & 255) / 255;
+    const src = spOrig.data, out = new ImageData(new Uint8ClampedArray(src), spOrig.width, spOrig.height), d = out.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (src[i + 3] === 0) continue;
+      const r = src[i] / 255, g = src[i + 1] / 255, b = src[i + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      const sat = mx > 0 ? (mx - mn) / mx : 0, lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (sat < 0.2 && lum > 0.5) { d[i] = src[i] * tr; d[i + 1] = src[i + 1] * tg; d[i + 2] = src[i + 2] * tb; }
+    }
+    spX.putImageData(out, 0, 0); spT.needsUpdate = true;
+  }
+  { const im = new Image();
+    im.onload = () => {
+      spC.width = im.width; spC.height = im.height; spX.drawImage(im, 0, 0);
+      spOrig = spX.getImageData(0, 0, im.width, im.height);
+      canSpr.geometry.dispose(); canSpr.geometry = new THREE.PlaneGeometry(SPR.H * im.width / im.height, SPR.H);
+      tintCanSprite(COLORS[S.color]);
+    };
+    im.src = 'img/vm_can.png'; }
 
   const vm = new THREE.Group(); vmScene.add(vm);
   vm.add(rev); vm.add(can); rev.visible = false;
   const BASE = { rev: new THREE.Vector3(0.1, -0.095, -0.3), can: new THREE.Vector3(0.1, -0.1, -0.3) };
-  rev.scale.setScalar(0.85); can.scale.setScalar(0.8);
-  can.rotation.set(-0.35, 0.1, 0); rev.rotation.set(0, 0.06, 0);
+  rev.scale.setScalar(0.85); can.scale.setScalar(1);
+  can.rotation.set(0, 0, 0); rev.rotation.set(0, 0.06, 0);
 
   // ---------- состояние ----------
   const S = { weapon: 1, hasRev: false, ammo: 6, reload: -1, rec: 0, flash: 0, cd: 0, swap: 1, swapTo: 0, trigger: false, color: 0, sprayT: 0, hold: 0, bobT: 0, sx: 0, sy: 0, lastYaw: 0, lastPitch: 0, lastP: null, dripLen: 0, dripT: 0, spraying: false };
@@ -358,7 +387,7 @@ export function createWeapons(env) {
     if (t === S.weapon && S.swap >= 1) return;
     S.swapTo = t; S.swap = 0; S.reload = -1; S.trigger = false; audio.spray(false);
   };
-  api.cycleColor = (i) => { S.color = i === undefined ? (S.color + 1) % COLORS.length : i; capMat.color.set(COLORS[S.color]); mist.material.color.set(COLORS[S.color]); paintCanLabel(COLORS[S.color]); updateHud(); };
+  api.cycleColor = (i) => { S.color = i === undefined ? (S.color + 1) % COLORS.length : i; capMat.color.set(COLORS[S.color]); mist.material.color.set(COLORS[S.color]); paintCanLabel(COLORS[S.color]); tintCanSprite(COLORS[S.color]); updateHud(); };
   api.randomColor = () => { const pool = COLORS.map((c, i) => i).filter(i => COLORS[i] !== '#ffffff'); api.cycleColor(pool[Math.floor(Math.random() * pool.length)]); };
   api.setTrigger = (d) => {
     S.trigger = d;
@@ -446,7 +475,7 @@ export function createWeapons(env) {
     flash.visible = S.flash > 0; flash.rotation.z = Math.random() * 6; flashLight.intensity = S.flash > 0 ? 3 : 0;
     hammer.rotation.x = 0.5 - (S.cd > 0.12 ? 0.5 : 0);
     // баллончик: палец жмёт на форсунку
-    { const press = S.weapon === 1 && S.trigger && S.swap >= 1 ? 1 : 0; S.press = (S.press || 0) + (press - (S.press || 0)) * Math.min(1, dt * 22); idx.position.set(0, 0, 0); idx.rotation.set(0, 0, 0); idx.position.copy(idxJ[0]).multiplyScalar(-1); idx.rotation.z = 0.0; { const pv = idxJ[0]; idx.position.set(pv.x, pv.y, pv.z); idx.rotation.z = 0.2 * S.press; idx.position.sub(new THREE.Vector3(pv.x, pv.y, pv.z).applyEuler(idx.rotation)); } nozzle.position.y = 0.151 - 0.0045 * S.press; }
+    { const press = S.weapon === 1 && S.trigger && S.swap >= 1 ? 1 : 0; S.press = (S.press || 0) + (press - (S.press || 0)) * Math.min(1, dt * 22); canSpr.position.y = SPR.y - 0.006 * S.press; mist.position.y = 0.134 - 0.006 * S.press; }
     mist.visible = false;
     if (S.weapon === 1 && S.trigger && S.swap >= 1) {
       mist.visible = true; mist.rotation.z = Math.random() * 6; vm.position.x += (Math.random() - 0.5) * 0.002;
@@ -476,17 +505,6 @@ export function createWeapons(env) {
     renderer.clearDepth(); renderer.render(vmScene, vmCam);
   };
   api.paint = paint; api.vm = vm; api.vmScene = vmScene; api.vmCam = vmCam;
-  // рука с рукавом для баллончика из GLB (Higgsfield + Blender); корпус баллончика остаётся свой, с меняющимся цветом
-  { const gc = new GLTFLoader(); gc.setMeshoptDecoder(MeshoptDecoder);
-    gc.load('models/high/viewmodel_can_hand.glb', (g) => {
-      can.children.slice().forEach(ch => { if (ch.userData.hand) ch.visible = false; });
-      g.scene.traverse((m) => { if (m.isMesh) { m.frustumCulled = false; const mt = m.material; if (mt) { mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map || null; mt.emissiveIntensity = mt.map ? 0.18 : 0; mt.metalness = 0; mt.roughness = 0.85; } } });
-      g.scene.traverse((m) => { if (m.isMesh && m.material) { const mt = m.material; mt.onBeforeCompile = (sh) => {
-        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvOP = position;');
-        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vOP;').replace('void main() {', 'void main() {\n  if (vOP.x > 0.02 && vOP.y > 0.106) discard;');
-      }; mt.needsUpdate = true; } });
-      can.add(g.scene);
-    }, undefined, () => { }); }
   // револьвер с рукой из GLB (Higgsfield + Blender); если файла нет или он не загрузился, остаётся процедурный
   { const gl = new GLTFLoader(); gl.setMeshoptDecoder(MeshoptDecoder);
     gl.load('models/high/viewmodel_revolver.glb', (g) => {
